@@ -53,6 +53,14 @@ type Payment = {
   notes: string | null;
 };
 
+type Contract = {
+  id: string;
+  status: string;
+  sent_at: string | null;
+  signed_at: string | null;
+  signature_data: string | null;
+};
+
 const STATUS_STEPS = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
 
 const SHOOT_STATUS_LABELS: Record<string, string> = {
@@ -84,6 +92,7 @@ export default async function JobDetailPage({ params, searchParams }: {
     { data: availableAddonsRaw },
     { data: shootsRaw },
     { data: paymentsRaw },
+    { data: contractRaw },
   ] = await Promise.all([
     supabase
       .from('job_addons')
@@ -106,12 +115,18 @@ export default async function JobDetailPage({ params, searchParams }: {
       .select('id, type, amount, method, status, paid_at, notes')
       .eq('job_id', params.id)
       .order('created_at', { ascending: true }),
+    supabase
+      .from('contracts')
+      .select('id, status, sent_at, signed_at, signature_data')
+      .eq('job_id', params.id)
+      .maybeSingle(),
   ]);
 
-  const jobAddons = (jobAddonsRaw ?? []) as unknown as JobAddon[];
+  const jobAddons       = (jobAddonsRaw       ?? []) as unknown as JobAddon[];
   const availableAddons = (availableAddonsRaw ?? []) as AvailableAddon[];
-  const shoots = (shootsRaw ?? []) as Shoot[];
-  const payments = (paymentsRaw ?? []) as Payment[];
+  const shoots          = (shootsRaw          ?? []) as Shoot[];
+  const payments        = (paymentsRaw        ?? []) as Payment[];
+  const contract        = contractRaw as Contract | null;
 
   const client = job.clients as { id: string; full_name: string } | null;
   const pkg = job.packages as { name: string; base_price: number; shoots_included: number } | null;
@@ -144,6 +159,38 @@ export default async function JobDetailPage({ params, searchParams }: {
       {/* Status progression */}
       <Section title="Status">
         <JobStatusForm jobId={job.id} current={job.status} steps={STATUS_STEPS} updateStatusAction={updateJobStatus} />
+      </Section>
+
+      {/* Contract */}
+      <Section title="Contract">
+        {contract ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1 }}>
+              <ContractBadge status={contract.status} />
+              {contract.sent_at && (
+                <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 10 }}>
+                  Sent {new Date(contract.sent_at).toLocaleDateString('en-LK')}
+                </span>
+              )}
+              {contract.signed_at && (
+                <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 6 }}>
+                  · Signed {new Date(contract.signed_at).toLocaleDateString('en-LK')}
+                  {contract.signature_data ? ` by ${contract.signature_data}` : ''}
+                </span>
+              )}
+            </div>
+            <a href={`/jobs/${job.id}/contract`} style={{ fontSize: 13, color: '#2563eb', fontWeight: 500 }}>
+              {contract.status === 'draft' ? 'Edit contract →' : 'View contract →'}
+            </a>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: 13, color: '#9ca3af' }}>No contract yet.</p>
+            <a href={`/jobs/${job.id}/contract`} style={{ fontSize: 13, color: '#2563eb', fontWeight: 500 }}>
+              Create contract →
+            </a>
+          </div>
+        )}
       </Section>
 
       {/* Job details */}
@@ -337,6 +384,21 @@ export default async function JobDetailPage({ params, searchParams }: {
           </form>
         </details>
       </Section>
+
+      {/* Flipbook */}
+      <Section title="Flipbook delivery">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ fontSize: 13, color: '#6b7280' }}>
+            Upload and share a PDF flipbook with your client.
+          </p>
+          <a
+            href={`/jobs/${job.id}/flipbook`}
+            style={{ fontSize: 13, color: '#2563eb', fontWeight: 500 }}
+          >
+            Manage flipbook →
+          </a>
+        </div>
+      </Section>
     </div>
   );
 }
@@ -351,6 +413,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       </h2>
       {children}
     </div>
+  );
+}
+
+function ContractBadge({ status }: { status: string }) {
+  const COLORS: Record<string, { bg: string; color: string }> = {
+    draft:  { bg: '#f3f4f6', color: '#6b7280' },
+    sent:   { bg: '#fef3c7', color: '#92400e' },
+    signed: { bg: '#dcfce7', color: '#166534' },
+    void:   { bg: '#fef2f2', color: '#991b1b' },
+  };
+  const { bg, color } = COLORS[status] ?? COLORS.draft;
+  return (
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 10, background: bg, color, textTransform: 'capitalize' }}>
+      {status}
+    </span>
   );
 }
 

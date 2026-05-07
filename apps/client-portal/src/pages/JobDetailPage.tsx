@@ -15,6 +15,7 @@ type Contract = { id: string; status: string; signed_at: string | null };
 type Shoot = { id: string; shoot_type: string | null; scheduled_at: string | null; venue: string | null; status: string };
 type Payment = { id: string; type: string; amount: number; method: string; status: string; paid_at: string | null };
 type Gallery = { id: string; title: string; status: string; selection_deadline: string | null };
+type Flipbook = { id: string; share_token: string; published_at: string | null };
 
 const SHOOT_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   scheduled: { bg: '#dbeafe', color: '#1e40af' },
@@ -41,6 +42,7 @@ export default function JobDetailPage() {
   const [shoots, setShoots] = useState<Shoot[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
+  const [flipbook, setFlipbook] = useState<Flipbook | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,12 +75,19 @@ export default function JobDetailPage() {
         .eq('job_id', jobId)
         .neq('status', 'hidden')
         .order('created_at', { ascending: true }),
-    ]).then(([jobRes, contractRes, shootsRes, paymentsRes, galleriesRes]) => {
+      supabase
+        .from('flipbooks')
+        .select('id, share_token, published_at')
+        .eq('job_id', jobId)
+        .not('published_at', 'is', null)
+        .maybeSingle(),
+    ]).then(([jobRes, contractRes, shootsRes, paymentsRes, galleriesRes, flipbookRes]) => {
       setJob(jobRes.data as unknown as Job | null);
       setContract(contractRes.data as Contract | null);
       setShoots((shootsRes.data ?? []) as Shoot[]);
       setPayments((paymentsRes.data ?? []) as Payment[]);
       setGalleries((galleriesRes.data ?? []) as Gallery[]);
+      setFlipbook(flipbookRes.data as Flipbook | null);
       setLoading(false);
     });
   }, [jobId]);
@@ -238,6 +247,34 @@ export default function JobDetailPage() {
           </div>
         )}
       </Section>
+
+      {/* Flipbook */}
+      {flipbook && (
+        <Section title="Flipbook">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+            <p style={{ fontSize: 13, color: '#6b7280' }}>
+              Your photo flipbook is ready to view.
+            </p>
+            <a
+              href={`${import.meta.env.VITE_APP_URL ?? ''}/flipbook/${flipbook.share_token}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#fff',
+                background: '#2563eb',
+                padding: '6px 14px',
+                borderRadius: 6,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              View flipbook ↗
+            </a>
+          </div>
+        </Section>
+      )}
     </div>
   );
 }
