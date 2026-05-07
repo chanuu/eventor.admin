@@ -61,12 +61,12 @@ export async function createJob(formData: FormData) {
   redirect(`/jobs/${id}`);
 }
 
-export async function updateJob(id: string, studioId: string, formData: FormData): Promise<void> {
+export async function updateJob(id: string, studioId: string, formData: FormData): Promise<{ error?: string }> {
   const ctx = await requireStaff();
-  if (!ctx || ctx.studio_id !== studioId) return;
+  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.' };
 
   const supabase = createClient();
-  await supabase
+  const { error } = await supabase
     .from('jobs')
     .update({
       title: (formData.get('title') as string).trim(),
@@ -77,7 +77,8 @@ export async function updateJob(id: string, studioId: string, formData: FormData
     .eq('studio_id', ctx.studio_id);
 
   revalidatePath(`/jobs/${id}`);
-  redirect(`/jobs/${id}?saved=1`);
+  if (error) return { error: error.message };
+  return {};
 }
 
 export async function updateJobStatus(id: string, status: string): Promise<void> {

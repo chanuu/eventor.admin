@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { StaffRole } from '@eventor/types';
 import { createClient } from '@/lib/supabase/server';
 import { signOut } from '@/app/(auth)/login/actions';
+import QueryProvider from '@/components/QueryProvider';
 
 type StaffRow = { full_name: string; role: StaffRole; studio_id: string };
 type StudioRow = { name: string };
@@ -67,7 +68,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Main */}
       <main style={{ flex: 1, padding: 32, overflowY: 'auto' }}>
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </main>
     </div>
   );

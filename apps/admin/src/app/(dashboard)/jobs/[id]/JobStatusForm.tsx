@@ -1,7 +1,5 @@
 'use client';
 
-import { useTransition } from 'react';
-
 const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   lead:       { bg: '#f3f4f6', color: '#6b7280', border: '#e5e7eb' },
   quoted:     { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
@@ -14,32 +12,23 @@ const STATUS_COLORS: Record<string, { bg: string; color: string; border: string 
 };
 
 export default function JobStatusForm({
-  jobId,
   current,
   steps,
-  updateStatusAction,
+  isPending,
+  onStatusChange,
 }: {
-  jobId: string;
   current: string;
   steps: string[];
-  updateStatusAction: (id: string, status: string) => Promise<void>;
+  isPending: boolean;
+  onStatusChange: (status: string) => void;
 }) {
-  const [isPending, startTransition] = useTransition();
-
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const newStatus = e.target.value;
-    startTransition(() => {
-      updateStatusAction(jobId, newStatus);
-    });
-  }
-
   const { bg, color, border } = STATUS_COLORS[current] ?? STATUS_COLORS.lead;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <select
         value={current}
-        onChange={handleChange}
+        onChange={(e) => onStatusChange(e.target.value)}
         disabled={isPending}
         style={{
           height: 36,
