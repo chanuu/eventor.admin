@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install *)",
+      "Bash(pnpm build *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Chanaka Chathuranga\\\\source\\\\repos\\\\eventor.admin\\\\eventor.admin\\\\apps\\\\admin\\\\next.config.ts\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Chanaka Chathuranga\\\\source\\\\repos\\\\eventor.admin\\\\eventor.admin\\\\apps\\\\landing\\\\next.config.ts\" -Force)"
+    ]
+  }
+}
