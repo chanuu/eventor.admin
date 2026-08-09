@@ -47,28 +47,27 @@ export default async function EditPackagePage({ params, searchParams }: {
   const createAddonAction = createAddon.bind(null, pkg.id, pkg.studio_id);
 
   return (
-    <div style={{ maxWidth: 640 }}>
-      <div style={{ marginBottom: 24 }}>
-        <a href="/packages" style={{ fontSize: 13, color: '#6b7280' }}>← Packages</a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 600 }}>{pkg.name}</h1>
-          {!pkg.is_active && (
-            <span style={{ fontSize: 11, background: '#f3f4f6', color: '#9ca3af', padding: '2px 8px', borderRadius: 10, fontWeight: 500 }}>
-              Inactive
-            </span>
-          )}
-        </div>
-        {searchParams.saved && (
-          <p style={{ fontSize: 13, color: '#16a34a', marginTop: 4 }}>Changes saved.</p>
+    <div className="max-w-2xl">
+      <h1 className="page-title flex items-center gap-2.5">
+        {pkg.name}
+        {!pkg.is_active && (
+          <span className="text-[11px] font-medium bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Inactive</span>
         )}
-      </div>
+      </h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <a href="/packages" className="hover:text-[#2D6A4F]">Packages</a> / <span className="text-[#2D6A4F]">Edit</span>
+      </p>
 
-      {/* Package edit form */}
-      <section style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 24 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Package details</h2>
-        <form action={updateAction} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {searchParams.saved && (
+        <p className="text-sm text-emerald-600 mb-4">Changes saved.</p>
+      )}
+
+      {/* Package details */}
+      <div className="bg-white rounded-2xl shadow-card p-6 mb-4">
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Package details</h2>
+        <form action={updateAction} className="flex flex-col gap-4">
           <Field label="Package name" required>
-            <input name="name" required defaultValue={pkg.name} style={inputStyle} />
+            <input name="name" required defaultValue={pkg.name} className="input" />
           </Field>
 
           <Field label="Description">
@@ -76,80 +75,69 @@ export default async function EditPackagePage({ params, searchParams }: {
               name="description"
               rows={2}
               defaultValue={pkg.description ?? ''}
-              style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+              className="input h-auto py-2 resize-y"
             />
           </Field>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Base price (LKR)" required>
-              <input name="base_price" type="number" min="0" step="500" required defaultValue={pkg.base_price} style={inputStyle} />
+              <input name="base_price" type="number" min="0" step="500" required defaultValue={pkg.base_price} className="input" />
             </Field>
             <Field label="Shoots included">
-              <input name="shoots_included" type="number" min="1" defaultValue={pkg.shoots_included} style={inputStyle} />
+              <input name="shoots_included" type="number" min="1" defaultValue={pkg.shoots_included} className="input" />
             </Field>
           </div>
 
           <div>
-            <button type="submit" style={primaryBtn}>Save changes</button>
+            <button type="submit" className="btn-primary">Save changes</button>
           </div>
         </form>
-      </section>
+      </div>
 
       {/* Add-ons */}
-      <section style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Add-ons</h2>
+      <div className="bg-white rounded-2xl shadow-card p-6">
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Add-ons</h2>
 
         {addons.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+          <div className="flex flex-col gap-2 mb-5">
             {addons.map((addon) => {
               const toggleAction = toggleAddonActive.bind(null, addon.id, pkg.id, !addon.is_active);
               const deleteAction = deleteAddon.bind(null, addon.id, pkg.id);
               return (
                 <div
                   key={addon.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 14px',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: 6,
-                    opacity: addon.is_active ? 1 : 0.6,
-                  }}
+                  className={`flex items-center gap-3 px-4 py-3 border border-gray-100 rounded-xl ${addon.is_active ? '' : 'opacity-60'}`}
                 >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 14, fontWeight: 500 }}>{addon.name}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-800">{addon.name}</span>
                       {!addon.is_active && (
-                        <span style={{ fontSize: 11, background: '#f3f4f6', color: '#9ca3af', padding: '1px 6px', borderRadius: 8 }}>
-                          Inactive
-                        </span>
+                        <span className="text-[11px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Inactive</span>
                       )}
                     </div>
                     {addon.description && (
-                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{addon.description}</div>
+                      <p className="text-xs text-gray-400 mt-0.5">{addon.description}</p>
                     )}
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
                     + LKR {addon.price.toLocaleString()}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <a
                       href={`/packages/${pkg.id}/addons/${addon.id}/edit`}
-                      style={{ fontSize: 12, color: '#2563eb' }}
+                      className="text-xs text-[#2D6A4F] hover:underline"
                     >
                       Edit
                     </a>
-                    <form action={toggleAction} style={{ display: 'inline' }}>
-                      <button type="submit" style={ghostBtn}>
+                    <form action={toggleAction} className="inline">
+                      <button type="submit" className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-0.5 hover:bg-gray-50 cursor-pointer bg-transparent">
                         {addon.is_active ? 'Deactivate' : 'Activate'}
                       </button>
                     </form>
-                    <form action={deleteAction} style={{ display: 'inline' }}>
+                    <form action={deleteAction} className="inline">
                       <button
                         type="submit"
-                        style={{ ...ghostBtn, color: '#dc2626', borderColor: '#fca5a5' }}
-                        onClick={() => {}} // handled server-side
+                        className="text-xs text-red-500 border border-red-200 rounded px-2 py-0.5 hover:bg-red-50 cursor-pointer bg-transparent"
                       >
                         Delete
                       </button>
@@ -161,42 +149,37 @@ export default async function EditPackagePage({ params, searchParams }: {
           </div>
         )}
 
-        <div style={{ borderTop: addons.length > 0 ? '1px solid #f3f4f6' : 'none', paddingTop: addons.length > 0 ? 20 : 0 }}>
-          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>Add new add-on</p>
-          <form action={createAddonAction} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10 }}>
+        <div className={addons.length > 0 ? 'border-t border-gray-100 pt-5' : ''}>
+          <p className="text-sm font-medium text-gray-700 mb-3">Add new add-on</p>
+          <form action={createAddonAction} className="flex flex-col gap-3">
+            <div className="grid grid-cols-[1fr_140px] gap-3">
               <Field label="Name" required>
-                <input name="name" required style={inputStyle} placeholder="Extra hour coverage" />
+                <input name="name" required className="input" placeholder="Extra hour coverage" />
               </Field>
               <Field label="Price (LKR)" required>
-                <input name="price" type="number" min="0" step="500" required style={{ ...inputStyle, width: 130 }} placeholder="15000" />
+                <input name="price" type="number" min="0" step="500" required className="input" placeholder="15000" />
               </Field>
             </div>
             <Field label="Description">
-              <input name="description" style={inputStyle} placeholder="Optional description" />
+              <input name="description" className="input" placeholder="Optional description" />
             </Field>
             <div>
-              <button type="submit" style={secondaryBtn}>+ Add add-on</button>
+              <button type="submit" className="btn-secondary">+ Add add-on</button>
             </div>
           </form>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };
-const secondaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
-const ghostBtn: React.CSSProperties = { fontSize: 12, color: '#6b7280', background: 'none', border: '1px solid #d1d5db', borderRadius: 4, padding: '3px 8px', cursor: 'pointer' };

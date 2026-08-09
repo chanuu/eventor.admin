@@ -16,26 +16,23 @@ export default function NewClientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 520 }}>
-      <div style={{ marginBottom: 24 }}>
-        <a href="/clients" style={{ fontSize: 13, color: '#6b7280' }}>← Clients</a>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>New client</h1>
-      </div>
+    <div className="max-w-xl">
+      <h1 className="page-title">New Client</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <a href="/clients" className="hover:text-[#2D6A4F]">Clients</a> / <span className="text-[#2D6A4F]">New</span>
+      </p>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
-      >
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
         <Field label="Full name" required>
-          <input name="full_name" required style={inputStyle} placeholder="Priya & Sahan Fernando" />
+          <input name="full_name" required className="input" placeholder="Priya & Sahan Fernando" />
         </Field>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="grid grid-cols-2 gap-4">
           <Field label="Email">
-            <input name="email" type="email" style={inputStyle} placeholder="priya@example.com" />
+            <input name="email" type="email" className="input" placeholder="priya@example.com" />
           </Field>
           <Field label="Phone">
-            <input name="phone" style={inputStyle} placeholder="+94 77 123 4567" />
+            <input name="phone" className="input" placeholder="+94 77 123 4567" />
           </Field>
         </div>
 
@@ -43,18 +40,18 @@ export default function NewClientPage() {
           <textarea
             name="notes"
             rows={2}
-            style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+            className="input h-auto py-2 resize-y"
             placeholder="Any notes about this client…"
           />
         </Field>
 
-        {error && <p style={{ fontSize: 13, color: '#dc2626' }}>{error}</p>}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="submit" disabled={loading} style={primaryBtn}>
+        <div className="flex gap-2.5 pt-1">
+          <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Saving…' : 'Create client'}
           </button>
-          <a href="/clients" style={secondaryBtn}>Cancel</a>
+          <a href="/clients" className="btn-secondary">Cancel</a>
         </div>
       </form>
     </div>
@@ -63,15 +60,11 @@ export default function NewClientPage() {
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };
-const secondaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 14, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' };

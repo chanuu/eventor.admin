@@ -1,55 +1,38 @@
 'use client';
 
-const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  lead:       { bg: '#f3f4f6', color: '#6b7280', border: '#e5e7eb' },
-  quoted:     { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
-  contracted: { bg: '#dbeafe', color: '#1e40af', border: '#93c5fd' },
-  active:     { bg: '#dcfce7', color: '#166534', border: '#86efac' },
-  editing:    { bg: '#ede9fe', color: '#5b21b6', border: '#c4b5fd' },
-  proofing:   { bg: '#fce7f3', color: '#9d174d', border: '#f9a8d4' },
-  delivered:  { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
-  archived:   { bg: '#f3f4f6', color: '#9ca3af', border: '#d1d5db' },
+const STATUS_STYLES: Record<string, string> = {
+  lead:       'border-gray-300 bg-gray-50 text-gray-600',
+  quoted:     'border-amber-300 bg-amber-50 text-amber-700',
+  contracted: 'border-blue-300 bg-blue-50 text-blue-700',
+  active:     'border-green-300 bg-green-50 text-[#2D6A4F]',
+  editing:    'border-violet-300 bg-violet-50 text-violet-700',
+  proofing:   'border-pink-300 bg-pink-50 text-pink-700',
+  delivered:  'border-emerald-300 bg-emerald-50 text-emerald-700',
+  archived:   'border-gray-200 bg-gray-50 text-gray-400',
 };
 
 export default function JobStatusForm({
-  current,
-  steps,
-  isPending,
-  onStatusChange,
+  current, steps, isPending, onStatusChange,
 }: {
   current: string;
   steps: string[];
   isPending: boolean;
   onStatusChange: (status: string) => void;
 }) {
-  const { bg, color, border } = STATUS_COLORS[current] ?? STATUS_COLORS.lead;
-
+  const style = STATUS_STYLES[current] ?? STATUS_STYLES.lead;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="flex items-center gap-3">
       <select
         value={current}
         onChange={(e) => onStatusChange(e.target.value)}
         disabled={isPending}
-        style={{
-          height: 36,
-          borderRadius: 6,
-          border: `1px solid ${border}`,
-          padding: '0 12px',
-          fontSize: 14,
-          fontWeight: 600,
-          background: bg,
-          color,
-          cursor: 'pointer',
-          textTransform: 'capitalize',
-        }}
+        className={`h-9 rounded-lg border px-3 text-sm font-semibold capitalize cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] ${style}`}
       >
         {steps.map((s) => (
-          <option key={s} value={s} style={{ textTransform: 'capitalize' }}>
-            {s.charAt(0).toUpperCase() + s.slice(1)}
-          </option>
+          <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>
         ))}
       </select>
-      {isPending && <span style={{ fontSize: 12, color: '#9ca3af' }}>Saving…</span>}
+      {isPending && <span className="text-xs text-gray-400">Saving…</span>}
     </div>
   );
 }

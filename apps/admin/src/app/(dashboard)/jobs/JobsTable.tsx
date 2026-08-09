@@ -12,15 +12,15 @@ export type JobRow = {
   clients: { full_name: string } | null;
 };
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  lead:       { bg: '#f3f4f6', color: '#6b7280' },
-  quoted:     { bg: '#fef3c7', color: '#92400e' },
-  contracted: { bg: '#dbeafe', color: '#1e40af' },
-  active:     { bg: '#dcfce7', color: '#166534' },
-  editing:    { bg: '#ede9fe', color: '#5b21b6' },
-  proofing:   { bg: '#fce7f3', color: '#9d174d' },
-  delivered:  { bg: '#d1fae5', color: '#065f46' },
-  archived:   { bg: '#f3f4f6', color: '#9ca3af' },
+const STATUS_STYLES: Record<string, string> = {
+  lead:       'bg-gray-100 text-gray-600',
+  quoted:     'bg-amber-50 text-amber-700',
+  contracted: 'bg-blue-50 text-blue-700',
+  active:     'bg-green-50 text-[#2D6A4F]',
+  editing:    'bg-violet-50 text-violet-700',
+  proofing:   'bg-pink-50 text-pink-700',
+  delivered:  'bg-emerald-50 text-emerald-700',
+  archived:   'bg-gray-100 text-gray-400',
 };
 
 const COLUMNS: Column<JobRow>[] = [
@@ -31,10 +31,10 @@ const COLUMNS: Column<JobRow>[] = [
       const client = (job.clients as { full_name: string } | null)?.full_name ?? '—';
       return (
         <div>
-          <div style={{ fontWeight: 500, color: '#111827' }}>{job.title}</div>
-          <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>
+          <p className="font-medium text-gray-900">{job.title}</p>
+          <p className="text-xs text-gray-400 mt-0.5">
             {client}{job.event_type ? ` · ${job.event_type}` : ''}
-          </div>
+          </p>
         </div>
       );
     },
@@ -43,19 +43,11 @@ const COLUMNS: Column<JobRow>[] = [
     key: 'status',
     label: 'Status',
     width: '130px',
-    render: (job) => {
-      const { bg, color } = STATUS_COLORS[job.status] ?? STATUS_COLORS.lead;
-      return (
-        <span style={{
-          fontSize: 11, fontWeight: 600,
-          padding: '3px 10px', borderRadius: 10,
-          background: bg, color,
-          textTransform: 'capitalize', whiteSpace: 'nowrap',
-        }}>
-          {job.status}
-        </span>
-      );
-    },
+    render: (job) => (
+      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[job.status] ?? STATUS_STYLES.lead}`}>
+        {job.status}
+      </span>
+    ),
   },
   {
     key: 'total_price',
@@ -63,9 +55,29 @@ const COLUMNS: Column<JobRow>[] = [
     align: 'right',
     width: '150px',
     render: (job) => (
-      <span style={{ fontWeight: 600, color: '#111827' }}>
+      <span className="font-semibold text-gray-900">
         LKR {job.total_price.toLocaleString()}
       </span>
+    ),
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
+    align: 'center',
+    width: '90px',
+    render: (job) => (
+      <div className="flex items-center justify-center gap-2">
+        <a
+          href={`/jobs/${job.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-[#2D6A4F] hover:text-[#1B4332] transition-colors"
+          title="View"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </a>
+      </div>
     ),
   },
 ];

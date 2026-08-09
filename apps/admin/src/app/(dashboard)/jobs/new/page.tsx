@@ -16,11 +16,11 @@ export default async function NewJobPage() {
   const packages = (packagesRaw ?? []) as PackageOption[];
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <div style={{ marginBottom: 24 }}>
-        <a href="/jobs" style={{ fontSize: 13, color: '#6b7280' }}>← Jobs</a>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>New job</h1>
-      </div>
+    <div className="max-w-xl">
+      <h1 className="page-title">New Job</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <a href="/jobs" className="hover:text-[#2D6A4F]">Jobs</a> / <span className="text-[#2D6A4F]">New</span>
+      </p>
       <NewJobForm clients={clients} packages={packages} />
     </div>
   );

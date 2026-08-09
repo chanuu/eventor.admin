@@ -25,12 +25,9 @@ export default function NewJobForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
-    >
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
       <Field label="Client" required>
-        <select name="client_id" required style={inputStyle}>
+        <select name="client_id" required className="input">
           <option value="">Select a client…</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>{c.full_name}</option>
@@ -39,15 +36,15 @@ export default function NewJobForm({
       </Field>
 
       <Field label="Job title" required>
-        <input name="title" required style={inputStyle} placeholder="Priya & Sahan — Wedding" />
+        <input name="title" required className="input" placeholder="Priya & Sahan — Wedding" />
       </Field>
 
       <Field label="Event type">
-        <input name="event_type" style={inputStyle} placeholder="Wedding, Engagement, Corporate…" />
+        <input name="event_type" className="input" placeholder="Wedding, Engagement, Corporate…" />
       </Field>
 
       <Field label="Package">
-        <select name="package_id" style={inputStyle}>
+        <select name="package_id" className="input">
           <option value="">No package (set price later)</option>
           {packages.map((p) => (
             <option key={p.id} value={p.id}>
@@ -61,25 +58,25 @@ export default function NewJobForm({
         <textarea
           name="notes"
           rows={2}
-          style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+          className="input h-auto py-2 resize-y"
           placeholder="Any initial notes…"
         />
       </Field>
 
-      {error && <p style={{ fontSize: 13, color: '#dc2626' }}>{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {clients.length === 0 && (
-        <p style={{ fontSize: 13, color: '#f59e0b' }}>
+        <p className="text-sm text-amber-500">
           No clients yet.{' '}
-          <a href="/clients/new" style={{ color: '#2563eb' }}>Create a client first</a>
+          <a href="/clients/new" className="text-[#2D6A4F] hover:underline">Create a client first</a>
         </p>
       )}
 
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button type="submit" disabled={loading || clients.length === 0} style={primaryBtn}>
+      <div className="flex gap-2.5 pt-1">
+        <button type="submit" disabled={loading || clients.length === 0} className="btn-primary">
           {loading ? 'Creating…' : 'Create job'}
         </button>
-        <a href="/jobs" style={secondaryBtn}>Cancel</a>
+        <a href="/jobs" className="btn-secondary">Cancel</a>
       </div>
     </form>
   );
@@ -87,15 +84,11 @@ export default function NewJobForm({
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };
-const secondaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 14, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' };

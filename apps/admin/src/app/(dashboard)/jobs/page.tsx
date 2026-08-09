@@ -3,7 +3,6 @@ import Pagination from '@/components/Pagination';
 import JobsTable, { type JobRow } from './JobsTable';
 
 const PAGE_SIZE = 25;
-
 const STATUS_ORDER = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
 
 export default async function JobsPage({
@@ -34,54 +33,56 @@ export default async function JobsPage({
 
   const emptyMessage = searchParams.status
     ? `No jobs with status "${searchParams.status}".`
-    : (
-      <span>
-        No jobs yet.{' '}
-        <a href="/jobs/new" style={{ color: '#2563eb' }}>Create your first job</a>
-      </span>
-    );
+    : <span>No jobs yet. <a href="/jobs/new" className="text-[#2D6A4F] hover:underline">Create your first job</a></span>;
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600 }}>Jobs</h1>
-        <a
-          href="/jobs/new"
-          style={{ background: '#2563eb', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, textDecoration: 'none' }}
-        >
-          + New job
-        </a>
-      </div>
+      {/* Page heading */}
+      <h1 className="page-title">Jobs</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <span className="text-[#2D6A4F]">Jobs</span>
+      </p>
 
-      {/* Status filter tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        <FilterTab href="/jobs" label="All" active={!searchParams.status} />
-        {STATUS_ORDER.map((s) => (
-          <FilterTab
-            key={s}
-            href={`/jobs?status=${s}`}
-            label={s}
-            active={searchParams.status === s}
-          />
-        ))}
-      </div>
+      {/* Content panel */}
+      <div className="bg-white rounded-2xl shadow-card p-6">
 
-      {/* Row count */}
-      {totalCount > 0 && (
-        <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 12 }}>
-          {from + 1}–{Math.min(to + 1, totalCount)} of {totalCount} job{totalCount !== 1 ? 's' : ''}
+        {/* Toolbar */}
+        <div className="flex items-center gap-3 mb-5">
+          {/* Search */}
+          <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 h-10 flex-1 max-w-md">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Search here..." className="flex-1 bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none" />
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Status filters */}
+          <div className="flex gap-1.5 flex-wrap">
+            <FilterTab href="/jobs" label="All" active={!searchParams.status} />
+            {STATUS_ORDER.map((s) => (
+              <FilterTab key={s} href={`/jobs?status=${s}`} label={s} active={searchParams.status === s} />
+            ))}
+          </div>
+
+          {/* New job */}
+          <a href="/jobs/new" className="btn-primary ml-2 px-5 whitespace-nowrap">
+            + New Job
+          </a>
         </div>
-      )}
 
-      <JobsTable jobs={jobs} emptyMessage={emptyMessage} />
+        {/* Row count */}
+        {totalCount > 0 && (
+          <p className="text-xs text-gray-400 mb-3">
+            {from + 1}–{Math.min(to + 1, totalCount)} of {totalCount} job{totalCount !== 1 ? 's' : ''}
+          </p>
+        )}
 
-      <Pagination
-        page={page}
-        totalPages={totalPages}
-        pathname="/jobs"
-        params={paginationParams}
-      />
+        <JobsTable jobs={jobs} emptyMessage={emptyMessage} />
+
+        <Pagination page={page} totalPages={totalPages} pathname="/jobs" params={paginationParams} />
+      </div>
     </div>
   );
 }
@@ -90,13 +91,8 @@ function FilterTab({ href, label, active }: { href: string; label: string; activ
   return (
     <a
       href={href}
-      style={{
-        padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500,
-        background: active ? '#2563eb' : '#f3f4f6',
-        color: active ? '#fff' : '#374151',
-        textDecoration: 'none',
-        textTransform: 'capitalize',
-      }}
+      className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors
+        ${active ? 'bg-[#2D6A4F] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
     >
       {label}
     </a>

@@ -17,46 +17,42 @@ export default function NewPackagePage() {
   }
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <div style={{ marginBottom: 24 }}>
-        <a href="/packages" style={{ fontSize: 13, color: '#6b7280' }}>← Packages</a>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>New package</h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>You can add add-ons after creating the package.</p>
-      </div>
+    <div className="max-w-xl">
+      <h1 className="page-title">New Package</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <a href="/packages" className="hover:text-[#2D6A4F]">Packages</a> / <span className="text-[#2D6A4F]">New</span>
+      </p>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}
-      >
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
         <Field label="Package name" required>
-          <input name="name" required style={inputStyle} placeholder="Wedding Photography — Full Day" />
+          <input name="name" required className="input" placeholder="Wedding Photography — Full Day" />
         </Field>
 
         <Field label="Description">
           <textarea
             name="description"
             rows={2}
-            style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+            className="input h-auto py-2 resize-y"
             placeholder="What's included in this package…"
           />
         </Field>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="grid grid-cols-2 gap-4">
           <Field label="Base price (LKR)" required>
-            <input name="base_price" type="number" min="0" step="500" required style={inputStyle} placeholder="150000" />
+            <input name="base_price" type="number" min="0" step="500" required className="input" placeholder="150000" />
           </Field>
           <Field label="Shoots included">
-            <input name="shoots_included" type="number" min="1" defaultValue="1" style={inputStyle} />
+            <input name="shoots_included" type="number" min="1" defaultValue="1" className="input" />
           </Field>
         </div>
 
-        {error && <p style={{ fontSize: 13, color: '#dc2626' }}>{error}</p>}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="submit" disabled={loading} style={primaryBtn}>
+        <div className="flex gap-2.5 pt-1">
+          <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Creating…' : 'Create package'}
           </button>
-          <a href="/packages" style={secondaryBtn}>Cancel</a>
+          <a href="/packages" className="btn-secondary">Cancel</a>
         </div>
       </form>
     </div>
@@ -65,15 +61,11 @@ export default function NewPackagePage() {
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%' };
-const primaryBtn: React.CSSProperties = { height: 38, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 20px', fontSize: 14 };
-const secondaryBtn: React.CSSProperties = { height: 38, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 20px', fontSize: 14, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' };

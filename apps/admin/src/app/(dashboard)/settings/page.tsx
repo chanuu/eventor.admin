@@ -25,7 +25,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
   const staff = staffRaw as { studio_id: string; role: string } | null;
 
   if (!staff || staff.role !== 'admin') {
-    return <p style={{ color: '#dc2626', fontSize: 14 }}>Only admins can access settings.</p>;
+    return <p className="text-sm text-red-500">Only admins can access settings.</p>;
   }
 
   const { data: studioRaw } = await supabase
@@ -34,29 +34,27 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
     .eq('id', staff.studio_id)
     .single();
   const studio = studioRaw as Studio | null;
-  if (!studio) return <p style={{ color: '#dc2626', fontSize: 14 }}>Studio not found.</p>;
+  if (!studio) return <p className="text-sm text-red-500">Studio not found.</p>;
 
   const updateAction = updateStudioSettings.bind(null, studio.id);
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600 }}>Studio Settings</h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>
-          This information is used in client contracts.
-        </p>
-      </div>
+    <div className="max-w-xl">
+      <h1 className="page-title">Settings</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <span className="text-[#2D6A4F]">Settings</span>
+      </p>
 
       {searchParams.saved && (
-        <p style={{ fontSize: 13, color: '#16a34a', marginBottom: 16 }}>Settings saved.</p>
+        <p className="text-sm text-emerald-600 mb-4">Settings saved.</p>
       )}
 
-      {/* Contact details */}
-      <div style={card}>
-        <h2 style={heading}>Studio details</h2>
-        <form action={updateAction} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Studio details */}
+      <div className="bg-white rounded-2xl shadow-card p-6 mb-4">
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Studio details</h2>
+        <form action={updateAction} className="flex flex-col gap-4">
           <Field label="Studio name" required>
-            <input name="name" required defaultValue={studio.name} style={inputStyle} />
+            <input name="name" required defaultValue={studio.name} className="input" />
           </Field>
           <Field label="Address">
             <textarea
@@ -64,32 +62,32 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
               rows={2}
               defaultValue={studio.address ?? ''}
               placeholder="Street, City, Province, Sri Lanka"
-              style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+              className="input h-auto py-2 resize-y"
             />
           </Field>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Phone">
-              <input name="phone" defaultValue={studio.phone ?? ''} style={inputStyle} placeholder="+94 77 XXX XXXX" />
+              <input name="phone" defaultValue={studio.phone ?? ''} className="input" placeholder="+94 77 XXX XXXX" />
             </Field>
             <Field label="Email">
-              <input name="email" type="email" defaultValue={studio.email ?? ''} style={inputStyle} placeholder="studio@example.com" />
+              <input name="email" type="email" defaultValue={studio.email ?? ''} className="input" placeholder="studio@example.com" />
             </Field>
           </div>
           <div>
-            <button type="submit" style={primaryBtn}>Save settings</button>
+            <button type="submit" className="btn-primary">Save settings</button>
           </div>
         </form>
       </div>
 
       {/* Logo */}
-      <div style={card}>
-        <h2 style={heading}>Logo</h2>
+      <div className="bg-white rounded-2xl shadow-card p-6">
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Logo</h2>
         {studio.logo_url ? (
-          <div style={{ marginBottom: 14 }}>
-            <img src={studio.logo_url} alt="Studio logo" style={{ maxHeight: 64, maxWidth: 220, objectFit: 'contain' }} />
+          <div className="mb-4">
+            <img src={studio.logo_url} alt="Studio logo" className="max-h-16 max-w-[220px] object-contain" />
           </div>
         ) : (
-          <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 14 }}>No logo uploaded yet.</p>
+          <p className="text-sm text-gray-400 mb-4">No logo uploaded yet.</p>
         )}
         <LogoUploadForm studioId={studio.id} hasLogo={!!studio.logo_url} />
       </div>
@@ -99,16 +97,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const card:       React.CSSProperties = { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, marginBottom: 16 };
-const heading:    React.CSSProperties = { fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 };
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };

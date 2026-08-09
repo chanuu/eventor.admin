@@ -26,24 +26,20 @@ export default function LogoUploadForm({ studioId, hasLogo }: { studioId: string
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={{ fontSize: 13, fontWeight: 500 }}>
-          {hasLogo ? 'Replace logo' : 'Upload logo'} <span style={{ color: '#ef4444' }}>*</span>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-gray-700">
+          {hasLogo ? 'Replace logo' : 'Upload logo'} <span className="text-red-500">*</span>
         </label>
-        <input ref={inputRef} name="logo" type="file" accept="image/*" required style={{ fontSize: 13, color: '#374151' }} />
-        <p style={{ fontSize: 12, color: '#9ca3af' }}>PNG, JPG, or SVG — max 2 MB. Used on contracts.</p>
+        <input ref={inputRef} name="logo" type="file" accept="image/*" required className="text-sm text-gray-600" />
+        <p className="text-xs text-gray-400">PNG, JPG, or SVG — max 2 MB. Used on contracts.</p>
       </div>
 
-      {error   && <p style={{ fontSize: 13, color: '#dc2626' }}>{error}</p>}
-      {success && <p style={{ fontSize: 13, color: '#16a34a' }}>Logo uploaded. Refresh to see it.</p>}
+      {error   && <p className="text-sm text-red-500">{error}</p>}
+      {success && <p className="text-sm text-emerald-600">Logo uploaded. Refresh to see it.</p>}
 
       <div>
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ height: 34, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 13 }}
-        >
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Uploading…' : 'Upload'}
         </button>
       </div>
