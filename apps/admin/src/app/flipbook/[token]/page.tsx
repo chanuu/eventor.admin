@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isS3Url } from '@/lib/s3';
 
 type Flipbook = {
   id: string;
@@ -34,12 +35,19 @@ export default async function PublicFlipbookPage({ params }: { params: { token: 
     );
   }
 
-  // Generate signed URL so the PDF is accessible regardless of storage bucket policy
-  const { data: signedData, error: signErr } = await admin.storage
-    .from(STORAGE_BUCKET)
-    .createSignedUrl(flipbook.storage_path, SIGNED_URL_EXPIRY);
+  // Albums live in S3 and store their public URL directly; older rows still hold a
+  // Supabase storage path and need a signed URL.
+  let fileUrl: string | null = null;
+  if (isS3Url(flipbook.storage_path)) {
+    fileUrl = flipbook.storage_path;
+  } else {
+    const { data: signedData } = await admin.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(flipbook.storage_path, SIGNED_URL_EXPIRY);
+    fileUrl = signedData?.signedUrl ?? null;
+  }
 
-  if (signErr || !signedData?.signedUrl) {
+  if (!fileUrl) {
     return (
       <div style={centerStyle}>
         <div style={cardStyle}>
@@ -66,7 +74,7 @@ export default async function PublicFlipbookPage({ params }: { params: { token: 
       }}>
         <span style={{ color: '#f9fafb', fontWeight: 600, fontSize: 14 }}>{studioName}</span>
         <a
-          href={signedData.signedUrl}
+          href={fileUrl}
           download
           style={{ fontSize: 12, color: '#9ca3af', textDecoration: 'none' }}
         >
@@ -76,7 +84,7 @@ export default async function PublicFlipbookPage({ params }: { params: { token: 
 
       {/* PDF viewer */}
       <iframe
-        src={signedData.signedUrl}
+        src={fileUrl}
         style={{ flex: 1, border: 'none', width: '100%' }}
         title="Flipbook"
       />

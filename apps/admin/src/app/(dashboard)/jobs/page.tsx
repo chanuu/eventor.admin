@@ -33,14 +33,14 @@ export default async function JobsPage({
 
   const emptyMessage = searchParams.status
     ? `No jobs with status "${searchParams.status}".`
-    : <span>No jobs yet. <a href="/jobs/new" className="text-[#2D6A4F] hover:underline">Create your first job</a></span>;
+    : <span>No jobs yet. <a href="/jobs/new" className="text-[#0F3D2E] hover:underline">Create your first job</a></span>;
 
   return (
     <div>
       {/* Page heading */}
       <h1 className="page-title">Jobs</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <span className="text-[#2D6A4F]">Jobs</span>
+        Main Menu / <span className="text-[#0F3D2E]">Jobs</span>
       </p>
 
       {/* Content panel */}
@@ -92,7 +92,7 @@ function FilterTab({ href, label, active }: { href: string; label: string; activ
     <a
       href={href}
       className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors
-        ${active ? 'bg-[#2D6A4F] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+        ${active ? 'bg-[#0F3D2E] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
     >
       {label}
     </a>

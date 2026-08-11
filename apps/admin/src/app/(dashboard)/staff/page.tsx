@@ -12,7 +12,7 @@ type StaffRow = {
 };
 
 const ROLE_COLORS: Record<StaffRole, string> = {
-  admin: '#dbeafe',
+  admin: '#DCE9CE',
   editor: '#dcfce7',
   sales: '#fef9c3',
   coordinator: '#fce7f3',
@@ -37,7 +37,7 @@ export default async function StaffPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 20, fontWeight: 600 }}>Staff</h1>
         {isAdmin && (
-          <a href="/staff/invite" style={{ background: '#2563eb', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}>
+          <a href="/staff/invite" style={{ background: '#0F3D2E', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}>
             Invite staff
           </a>
         )}
@@ -88,7 +88,7 @@ export default async function StaffPage() {
             {list.length === 0 && (
               <tr>
                 <td colSpan={5} style={{ padding: 32, textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>
-                  No staff yet. <a href="/staff/invite" style={{ color: '#2563eb' }}>Invite someone</a>
+                  No staff yet. <a href="/staff/invite" style={{ color: '#0F3D2E' }}>Invite someone</a>
                 </td>
               </tr>
             )}

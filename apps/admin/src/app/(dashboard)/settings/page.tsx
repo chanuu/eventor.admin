@@ -42,7 +42,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
     <div className="max-w-xl">
       <h1 className="page-title">Settings</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <span className="text-[#2D6A4F]">Settings</span>
+        Main Menu / <span className="text-[#0F3D2E]">Settings</span>
       </p>
 
       {searchParams.saved && (

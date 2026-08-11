@@ -19,7 +19,7 @@ export default async function NewJobPage() {
     <div className="max-w-xl">
       <h1 className="page-title">New Job</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/jobs" className="hover:text-[#2D6A4F]">Jobs</a> / <span className="text-[#2D6A4F]">New</span>
+        Main Menu / <a href="/jobs" className="hover:text-[#0F3D2E]">Jobs</a> / <span className="text-[#0F3D2E]">New</span>
       </p>
       <NewJobForm clients={clients} packages={packages} />
     </div>

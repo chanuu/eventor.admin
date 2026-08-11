@@ -55,7 +55,7 @@ export default async function EditPackagePage({ params, searchParams }: {
         )}
       </h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/packages" className="hover:text-[#2D6A4F]">Packages</a> / <span className="text-[#2D6A4F]">Edit</span>
+        Main Menu / <a href="/packages" className="hover:text-[#0F3D2E]">Packages</a> / <span className="text-[#0F3D2E]">Edit</span>
       </p>
 
       {searchParams.saved && (
@@ -125,7 +125,7 @@ export default async function EditPackagePage({ params, searchParams }: {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <a
                       href={`/packages/${pkg.id}/addons/${addon.id}/edit`}
-                      className="text-xs text-[#2D6A4F] hover:underline"
+                      className="text-xs text-[#0F3D2E] hover:underline"
                     >
                       Edit
                     </a>

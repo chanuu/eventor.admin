@@ -4,7 +4,7 @@ import { useTransition } from 'react';
 import { updateShootStatus } from '../../../actions';
 
 const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  scheduled: { bg: '#dbeafe', color: '#1e40af', border: '#93c5fd' },
+  scheduled: { bg: '#DCE9CE', color: '#1e40af', border: '#A8BDB2' },
   shot:      { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
   editing:   { bg: '#ede9fe', color: '#5b21b6', border: '#c4b5fd' },
   done:      { bg: '#dcfce7', color: '#166534', border: '#86efac' },

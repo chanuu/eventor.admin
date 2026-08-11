@@ -108,7 +108,7 @@ export default async function DashboardPage() {
           <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
       ),
-      color: 'bg-emerald-50 text-[#2D6A4F]',
+      color: 'bg-emerald-50 text-[#0F3D2E]',
     },
     {
       label: 'Clients',
@@ -175,7 +175,7 @@ export default async function DashboardPage() {
               <h2 className="text-sm font-bold text-gray-800">Revenue Overview</h2>
               <p className="text-xs text-gray-400 mt-0.5">Collected payments — last 6 months</p>
             </div>
-            <span className="text-xs font-semibold bg-emerald-50 text-[#2D6A4F] px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold bg-emerald-50 text-[#0F3D2E] px-2.5 py-1 rounded-full">
               Rs.{totalRevenue.toLocaleString()} total
             </span>
           </div>
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl shadow-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-gray-800">Job Pipeline</h2>
-            <span className="text-xs font-semibold bg-[#A2CD34] text-white px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
               {jobCount ?? 0} Jobs
             </span>
           </div>
@@ -213,7 +213,7 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl shadow-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-gray-800">Upcoming Shoots</h2>
-            <span className="text-xs font-semibold bg-[#A2CD34] text-white px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
               {upcoming.length} Jobs
             </span>
           </div>
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                 <a
                   key={shoot.id}
                   href={`/jobs/${shoot.jobs?.id}`}
-                  className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-[#A2CD34] hover:bg-gray-50 transition-colors group"
+                  className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-[#8BC53F] hover:bg-gray-50 transition-colors group"
                 >
                   <div className="min-w-0">
                     <p className="text-xs text-gray-400">
@@ -237,7 +237,7 @@ export default async function DashboardPage() {
                     <p className="text-sm font-medium text-gray-800 truncate">{shoot.jobs?.title ?? 'Shoot'}</p>
                     {shoot.venue && <p className="text-xs text-gray-400">{shoot.venue}</p>}
                   </div>
-                  <span className="text-xs font-medium text-[#2D6A4F] border border-[#2D6A4F] px-3 py-1 rounded-lg group-hover:bg-[#2D6A4F] group-hover:text-white transition-colors shrink-0 ml-3">
+                  <span className="text-xs font-medium text-[#0F3D2E] border border-[#0F3D2E] px-3 py-1 rounded-lg group-hover:bg-[#0F3D2E] group-hover:text-white transition-colors shrink-0 ml-3">
                     view
                   </span>
                 </a>
@@ -252,7 +252,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-2xl shadow-card p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold text-gray-800">Pending Payments</h2>
-          <span className="text-xs font-semibold bg-[#A2CD34] text-white px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
             {payments.length} Records
           </span>
         </div>

@@ -11,6 +11,7 @@
     "clean": "rm -rf .next"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
     "@eventor/supabase": "workspace:*",
     "@eventor/types": "workspace:*",
     "@eventor/ui": "workspace:*",

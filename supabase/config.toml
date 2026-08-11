@@ -30,7 +30,7 @@ enabled = true
 port = 54323
 api_url = "http://127.0.0.1"
 
-[inbucket]
+[local_smtp]
 enabled = true
 port = 54324
 smtp_port = 54325
@@ -61,9 +61,22 @@ secure_password_change = false
 max_frequency = "1s"
 
 [auth.sms]
+# Clients sign in with mobile + OTP. Signup stays off: a client row must already
+# exist (created by the studio in admin) before the number can be used.
 enable_signup = false
 enable_confirmations = false
 max_frequency = "5s"
+
+# Local testing: fixed codes for these numbers, no SMS sent and the hook is not
+# called. Remove before production — a fixed code is a permanent login bypass.
+# [auth.sms.test_otp]
+# 94771234567 = "123456"
+
+[functions.send-sms-hook]
+# Supabase Auth calls hooks without a user JWT, so verification must be off or
+# every hook invocation returns 401. The request is authenticated instead by the
+# standardwebhooks signature checked inside the function.
+verify_jwt = false
 
 [edge_runtime]
 enabled = true

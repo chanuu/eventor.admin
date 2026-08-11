@@ -29,7 +29,7 @@ export default function Pagination({ page, totalPages, pathname, params = {} }: 
             href={href(p as number)}
             className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-colors
               ${p === page
-                ? 'bg-[#2D6A4F] text-white font-semibold'
+                ? 'bg-[#0F3D2E] text-white font-semibold'
                 : 'text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
           >
             {p}

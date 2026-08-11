@@ -73,7 +73,13 @@ const SETTINGS_NAV = [
   },
 ];
 
-export default function Sidebar() {
+const navItem = (active: boolean) =>
+  `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors
+   ${active ? 'bg-white text-primary' : 'text-[#cfe4d8] hover:bg-white/10'}`;
+
+export default function Sidebar({ studioName, staffName, role }: {
+  studioName: string; staffName: string; role: string;
+}) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -82,60 +88,62 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-16 shrink-0 bg-white border-r border-gray-100 flex flex-col items-center py-5 gap-1 h-screen sticky top-0">
-      {/* Logo */}
-      <a href="/dashboard" className="w-10 h-10 rounded-full bg-[#A2CD34] flex items-center justify-center mb-3 shrink-0">
-        <span className="text-white font-black text-lg leading-none">e</span>
+    <aside className="w-[246px] shrink-0 bg-primary text-white flex flex-col py-[22px] h-screen sticky top-0">
+      {/* Brand */}
+      <a href="/dashboard" className="flex items-center gap-2.5 px-[22px] pb-6">
+        <span className="w-8 h-8 rounded-[9px] bg-lime text-primary font-extrabold text-base flex items-center justify-center shrink-0">
+          {(studioName || 'E').charAt(0).toUpperCase()}
+        </span>
+        <span className="min-w-0">
+          <span className="block font-bold text-sm leading-tight truncate">{studioName || 'Eventor'}</span>
+          <span className="block text-[10.5px] text-[#8fae9d] tracking-wider">STUDIO ADMIN</span>
+        </span>
       </a>
 
-      {/* Main Menu section */}
-      <p className="section-label mb-2">Menu</p>
-
-      {MAIN_NAV.map(({ href, label, icon }) => (
-        <a
-          key={href}
-          href={href}
-          title={label}
-          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all
-            ${isActive(href)
-              ? 'bg-[#1B4332] text-white shadow-sm'
-              : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
-        >
-          {icon}
-        </a>
-      ))}
+      {/* Main nav */}
+      <nav className="flex flex-col gap-0.5 px-3">
+        {MAIN_NAV.map(({ href, label, icon }) => (
+          <a key={href} href={href} className={navItem(isActive(href))}>
+            <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
+            <span className="flex-1">{label}</span>
+          </a>
+        ))}
+      </nav>
 
       <div className="flex-1" />
 
-      {/* Settings section */}
-      <p className="section-label mb-2">Setup</p>
+      {/* Setup + account */}
+      <div className="px-3">
+        {SETTINGS_NAV.map(({ href, label, icon }) => (
+          <a key={href} href={href} className={navItem(isActive(href))}>
+            <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
+            <span className="flex-1">{label}</span>
+          </a>
+        ))}
+      </div>
 
-      {SETTINGS_NAV.map(({ href, label, icon }) => (
-        <a
-          key={href}
-          href={href}
-          title={label}
-          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all
-            ${isActive(href)
-              ? 'bg-[#1B4332] text-white shadow-sm'
-              : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
-        >
-          {icon}
-        </a>
-      ))}
-
-      {/* Logout */}
-      <form action={signOut} className="mt-1">
-        <button
-          type="submit"
-          title="Sign out"
-          className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-400 transition-all"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-        </button>
-      </form>
+      <div className="mt-4 px-[22px]">
+        <div className="border-t border-white/10 pt-4">
+          <p className="text-[11px] text-[#8fae9d] uppercase tracking-wider font-bold">Signed in as</p>
+          <div className="flex items-center gap-2.5 mt-2.5">
+            <span className="w-[34px] h-[34px] rounded-full bg-lime text-primary font-extrabold text-sm flex items-center justify-center shrink-0">
+              {staffName.charAt(0).toUpperCase()}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[12.5px] font-bold truncate">{staffName}</span>
+              <span className="block text-[11px] text-[#8fae9d] capitalize">{role}</span>
+            </span>
+          </div>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="mt-3 w-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors border-0 cursor-pointer"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
+      </div>
     </aside>
   );
 }

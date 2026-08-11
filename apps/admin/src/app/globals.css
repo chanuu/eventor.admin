@@ -5,11 +5,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #111827;
-  background: #F5F7FA;
+  color: #16241d;
+  background: #F6F8F5;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -18,32 +18,47 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
 
 @layer components {
   .input {
-    @apply w-full h-10 border border-gray-200 rounded-lg px-3 text-sm text-gray-800
+    @apply w-full h-10 border border-line-btn rounded-lg px-3 text-sm text-ink-strong
            bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary
-           placeholder-gray-400 transition-colors;
+           placeholder-ink-muted transition-colors;
   }
   .btn-primary {
-    @apply bg-[#2D6A4F] text-white rounded-lg px-5 h-10 text-sm font-semibold
-           hover:bg-[#235840] transition-colors cursor-pointer border-0 inline-flex items-center justify-center;
+    @apply bg-primary text-white rounded-lg px-5 h-10 text-[12.5px] font-bold
+           hover:bg-primary-dark transition-colors cursor-pointer border-0 inline-flex items-center justify-center;
   }
   .btn-secondary {
-    @apply bg-white text-gray-600 rounded-lg px-5 h-10 text-sm font-medium
-           border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer inline-flex items-center justify-center;
+    @apply bg-white text-ink-strong rounded-lg px-5 h-10 text-[12.5px] font-bold
+           border border-line-btn hover:bg-panel transition-colors cursor-pointer inline-flex items-center justify-center;
   }
   .btn-accent {
-    @apply bg-[#A2CD34] text-white rounded-lg px-5 h-10 text-sm font-semibold
-           hover:bg-[#8FB82E] transition-colors cursor-pointer border-0 inline-flex items-center justify-center;
+    @apply bg-lime text-primary rounded-lg px-5 h-10 text-[12.5px] font-bold
+           hover:brightness-95 transition-all cursor-pointer border-0 inline-flex items-center justify-center;
+  }
+  .btn-danger {
+    @apply bg-white text-red-600 rounded-lg px-5 h-10 text-[12.5px] font-bold
+           border border-red-200 hover:bg-red-50 transition-colors cursor-pointer inline-flex items-center justify-center;
   }
   .card {
-    @apply bg-white rounded-2xl shadow-card p-6;
+    @apply bg-white rounded-2xl border border-line shadow-card p-6;
   }
   .page-title {
-    @apply text-xl font-bold text-gray-900;
+    @apply text-lg font-extrabold text-primary;
   }
   .breadcrumb {
-    @apply text-[11px] font-semibold text-gray-400 uppercase tracking-widest mt-0.5;
+    @apply text-[12.5px] text-ink-muted mt-0.5;
   }
   .section-label {
-    @apply text-[9px] font-semibold text-gray-400 uppercase tracking-widest;
+    @apply text-[9px] font-bold text-ink-muted uppercase tracking-widest;
   }
+  /* Small uppercase field/section label used across cards */
+  .label-xs {
+    @apply text-[11px] font-bold text-ink-muted uppercase tracking-wider;
+  }
+  /* Status pills */
+  .pill {
+    @apply text-[10.5px] font-extrabold uppercase tracking-wide rounded-full px-2.5 py-1 whitespace-nowrap;
+  }
+  .pill-good    { @apply pill bg-lime-soft text-lime-text; }
+  .pill-pending { @apply pill bg-[#FFF3E6] text-[#a8631f]; }
+  .pill-neutral { @apply pill bg-[#EFF3F6] text-[#4d6274]; }
 }

@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
         <div style={cardStyle}>
           <h2 style={{ fontWeight: 600, marginBottom: 8 }}>Check your email</h2>
           <p style={{ color: '#6b7280', fontSize: 14 }}>We sent a password reset link to your inbox.</p>
-          <a href="/login" style={{ display: 'block', marginTop: 20, fontSize: 13, color: '#2563eb' }}>Back to sign in</a>
+          <a href="/login" style={{ display: 'block', marginTop: 20, fontSize: 13, color: '#0F3D2E' }}>Back to sign in</a>
         </div>
       </div>
     );
@@ -50,4 +50,4 @@ export default function ForgotPasswordPage() {
 const wrapStyle: React.CSSProperties = { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const cardStyle: React.CSSProperties = { width: 360, padding: 32, background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' };
 const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14 };
-const btnStyle: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer' };
+const btnStyle: React.CSSProperties = { height: 36, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer' };

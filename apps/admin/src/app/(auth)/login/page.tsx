@@ -120,7 +120,7 @@ export default function LoginPage() {
                   padding: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  color: '#A2CD34',
+                  color: '#8BC53F',
                 }}
               >
                 {showPwd ? <EyeOff /> : <EyeOn />}
@@ -138,7 +138,7 @@ export default function LoginPage() {
               style={{
                 height: 46,
                 borderRadius: 8,
-                background: '#A2CD34',
+                background: '#8BC53F',
                 color: '#fff',
                 border: 'none',
                 fontWeight: 600,
@@ -162,7 +162,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  style={{ width: 14, height: 14, accentColor: '#A2CD34', cursor: 'pointer' }}
+                  style={{ width: 14, height: 14, accentColor: '#8BC53F', cursor: 'pointer' }}
                 />
                 Remember Me
               </label>

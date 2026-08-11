@@ -62,7 +62,7 @@ export default function UploadForm({
           style={{
             height: 34,
             borderRadius: 6,
-            background: '#2563eb',
+            background: '#0F3D2E',
             color: '#fff',
             border: 'none',
             fontWeight: 500,

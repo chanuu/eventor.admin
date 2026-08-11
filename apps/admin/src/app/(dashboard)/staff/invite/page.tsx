@@ -24,7 +24,7 @@ export default function InviteStaffPage() {
       <div className="max-w-xl">
         <h1 className="page-title mb-3">Invite sent</h1>
         <p className="text-sm text-gray-500 mb-5">The staff member will receive an email to set up their account.</p>
-        <a href="/staff" className="text-sm text-[#2D6A4F] hover:underline">← Back to staff</a>
+        <a href="/staff" className="text-sm text-[#0F3D2E] hover:underline">← Back to staff</a>
       </div>
     );
   }
@@ -33,7 +33,7 @@ export default function InviteStaffPage() {
     <div className="max-w-xl">
       <h1 className="page-title">Invite Staff Member</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/staff" className="hover:text-[#2D6A4F]">Staff</a> / <span className="text-[#2D6A4F]">Invite</span>
+        Main Menu / <a href="/staff" className="hover:text-[#0F3D2E]">Staff</a> / <span className="text-[#0F3D2E]">Invite</span>
       </p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">

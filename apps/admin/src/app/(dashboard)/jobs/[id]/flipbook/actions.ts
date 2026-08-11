@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { uploadToS3, isS3Configured } from '@/lib/s3';
 
 type StaffCtx = { studio_id: string; role: string };
 
@@ -51,24 +52,28 @@ export async function uploadFlipbook(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.' };
 
+  if (!isS3Configured()) return { error: 'Album storage is not configured. Set the AWS_* environment variables.' };
+
   const file = formData.get('file') as File | null;
   if (!file || file.size === 0) return { error: 'Please select a file.' };
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'pdf';
-  const storagePath = `${studioId}/${flipbookId}.${ext}`;
-  const buffer = await file.arrayBuffer();
+  // Stable key per flipbook, so re-uploading replaces the album rather than orphaning it.
+  const key = `albums/${studioId}/${flipbookId}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  let albumUrl: string;
+  try {
+    albumUrl = await uploadToS3(key, buffer, file.type || 'application/pdf');
+  } catch (err) {
+    console.error('[uploadFlipbook] S3 upload failed', err);
+    return { error: err instanceof Error ? err.message : 'Upload to S3 failed.' };
+  }
 
   const admin = createAdminClient();
-
-  const { error: uploadErr } = await admin.storage
-    .from('flipbooks')
-    .upload(storagePath, buffer, { contentType: file.type || 'application/pdf', upsert: true });
-
-  if (uploadErr) return { error: uploadErr.message };
-
   await admin
     .from('flipbooks')
-    .update({ storage_path: storagePath })
+    .update({ storage_path: albumUrl })
     .eq('id', flipbookId)
     .eq('studio_id', studioId);
 

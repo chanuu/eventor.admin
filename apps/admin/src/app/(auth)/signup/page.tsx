@@ -72,7 +72,7 @@ export default function SignupPage() {
         </form>
 
         <p style={{ marginTop: 20, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
-          Already have an account? <a href="/login" style={{ color: '#2563eb' }}>Sign in</a>
+          Already have an account? <a href="/login" style={{ color: '#0F3D2E' }}>Sign in</a>
         </p>
       </div>
     </div>
@@ -89,4 +89,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%' };
-const btnStyle: React.CSSProperties = { height: 38, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', fontSize: 14 };
+const btnStyle: React.CSSProperties = { height: 38, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', fontSize: 14 };

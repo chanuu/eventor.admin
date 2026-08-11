@@ -44,7 +44,7 @@ export default async function EditClientPage({ params, searchParams }: {
       <div style={{ marginTop: 20 }}>
         <a
           href={`/jobs?client=${client.id}`}
-          style={{ fontSize: 13, color: '#2563eb' }}
+          style={{ fontSize: 13, color: '#0F3D2E' }}
         >
           View jobs for this client →
         </a>

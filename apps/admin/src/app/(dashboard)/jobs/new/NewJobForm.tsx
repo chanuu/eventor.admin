@@ -68,7 +68,7 @@ export default function NewJobForm({
       {clients.length === 0 && (
         <p className="text-sm text-amber-500">
           No clients yet.{' '}
-          <a href="/clients/new" className="text-[#2D6A4F] hover:underline">Create a client first</a>
+          <a href="/clients/new" className="text-[#0F3D2E] hover:underline">Create a client first</a>
         </p>
       )}
 

@@ -34,7 +34,7 @@ export default async function ClientsPage() {
         <h1 style={{ fontSize: 20, fontWeight: 600 }}>Clients</h1>
         <a
           href="/clients/new"
-          style={{ background: '#2563eb', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
+          style={{ background: '#0F3D2E', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
         >
           + New client
         </a>
@@ -43,7 +43,7 @@ export default async function ClientsPage() {
       {clients.length === 0 ? (
         <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af', border: '2px dashed #e5e7eb', borderRadius: 8 }}>
           No clients yet.{' '}
-          <a href="/clients/new" style={{ color: '#2563eb' }}>Add your first client</a>
+          <a href="/clients/new" style={{ color: '#0F3D2E' }}>Add your first client</a>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -62,7 +62,7 @@ export default async function ClientsPage() {
               <div style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>
                 {jobCounts[c.id] ?? 0} job{(jobCounts[c.id] ?? 0) !== 1 ? 's' : ''}
               </div>
-              <a href={`/clients/${c.id}/edit`} style={{ fontSize: 13, color: '#2563eb', fontWeight: 500, flexShrink: 0 }}>
+              <a href={`/clients/${c.id}/edit`} style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500, flexShrink: 0 }}>
                 Edit
               </a>
             </div>

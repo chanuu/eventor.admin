@@ -132,7 +132,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
       <div className="flex items-start justify-between mb-5">
         <div>
           <h1 className="page-title">Schedule</h1>
-          <p className="breadcrumb">Main Menu / <span className="text-[#2D6A4F]">Schedule</span></p>
+          <p className="breadcrumb">Main Menu / <span className="text-[#0F3D2E]">Schedule</span></p>
         </div>
         <div className="text-sm text-gray-400 text-right">
           <span className="font-semibold text-gray-700">{totalShoots}</span> shoot{totalShoots !== 1 ? 's' : ''} this month
@@ -201,7 +201,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
                 <div className="flex justify-end mb-1">
                   <span
                     style={isToday ? {
-                      background: '#1B4332', color: '#fff',
+                      background: '#0A2A20', color: '#fff',
                       width: 24, height: 24, borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 12, fontWeight: 700,
@@ -313,7 +313,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
       {events.length === 0 && (
         <div className="mt-6 bg-white rounded-2xl shadow-card px-6 py-12 text-center">
           <p className="text-gray-400 text-sm">No shoots scheduled for {MONTH_NAMES[month - 1]} {year}.</p>
-          <a href="/jobs" className="inline-block mt-3 text-sm font-medium text-[#2D6A4F] hover:underline">
+          <a href="/jobs" className="inline-block mt-3 text-sm font-medium text-[#0F3D2E] hover:underline">
             Go to Jobs to add a shoot →
           </a>
         </div>

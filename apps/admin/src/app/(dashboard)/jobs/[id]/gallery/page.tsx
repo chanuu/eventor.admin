@@ -89,7 +89,7 @@ export default async function GalleryListPage({ params }: { params: { id: string
                 <span style={{ fontSize: 12, fontWeight: 600, background: badge.bg, color: badge.color, padding: '3px 10px', borderRadius: 99, flexShrink: 0 }}>
                   {badge.label}
                 </span>
-                <span style={{ fontSize: 13, color: '#2D6A4F', fontWeight: 500, flexShrink: 0 }}>Open →</span>
+                <span style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500, flexShrink: 0 }}>Open →</span>
               </a>
             );
           })}
@@ -142,4 +142,4 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 const sectionHeading: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 };
 const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };
+const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };

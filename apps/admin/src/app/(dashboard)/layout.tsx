@@ -26,8 +26,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const studio = studioRaw as StudioRow | null;
 
   return (
-    <div className="flex h-screen bg-[#F5F7FA] overflow-hidden">
-      <Sidebar />
+    <div className="flex h-screen bg-canvas overflow-hidden">
+      <Sidebar
+        studioName={studio?.name ?? ''}
+        staffName={staff?.full_name ?? 'User'}
+        role={staff?.role ?? 'admin'}
+      />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AppHeader

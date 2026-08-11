@@ -11,13 +11,13 @@ export type MonthlyPoint    = { month: string; revenue: number };
 export type EventTypePoint  = { type: string; revenue: number; count: number };
 export type StatusPoint     = { status: string; count: number };
 
-const EVENT_COLORS = ['#2D6A4F', '#A2CD34', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444'];
+const EVENT_COLORS = ['#0F3D2E', '#8BC53F', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444'];
 
 const STATUS_COLORS: Record<string, string> = {
   lead:       '#9ca3af',
   quoted:     '#f59e0b',
   contracted: '#3b82f6',
-  active:     '#2D6A4F',
+  active:     '#0F3D2E',
   editing:    '#8b5cf6',
   proofing:   '#ec4899',
   delivered:  '#10b981',
@@ -44,8 +44,8 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyPoint[] }) {
       <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#2D6A4F" stopOpacity={0.18} />
-            <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0}    />
+            <stop offset="5%"  stopColor="#0F3D2E" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="#0F3D2E" stopOpacity={0}    />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -64,11 +64,11 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyPoint[] }) {
         <Area
           type="monotone"
           dataKey="revenue"
-          stroke="#2D6A4F"
+          stroke="#0F3D2E"
           strokeWidth={2}
           fill="url(#revenueGrad)"
-          dot={{ r: 3, fill: '#2D6A4F', strokeWidth: 0 }}
-          activeDot={{ r: 5, fill: '#2D6A4F' }}
+          dot={{ r: 3, fill: '#0F3D2E', strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: '#0F3D2E' }}
         />
       </AreaChart>
     </ResponsiveContainer>

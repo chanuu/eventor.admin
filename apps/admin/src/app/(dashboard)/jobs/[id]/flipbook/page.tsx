@@ -112,7 +112,7 @@ export default async function FlipbookPage({ params }: { params: { id: string } 
                   padding: '6px 10px',
                   fontSize: 13,
                   wordBreak: 'break-all',
-                  color: '#2563eb',
+                  color: '#0F3D2E',
                 }}>
                   {shareUrl}
                 </code>
@@ -120,11 +120,25 @@ export default async function FlipbookPage({ params }: { params: { id: string } 
                   href={shareUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 13, color: '#2563eb', whiteSpace: 'nowrap' }}
+                  style={{ fontSize: 13, color: '#0F3D2E', whiteSpace: 'nowrap' }}
                 >
                   Open ↗
                 </a>
               </div>
+
+              {flipbook.storage_path?.startsWith('http') && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #bbf7d0' }}>
+                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
+                    Direct file link — permanent, opens the PDF straight away with no page around it.
+                  </p>
+                  <code style={{
+                    display: 'block', background: '#fff', border: '1px solid #d1d5db', borderRadius: 4,
+                    padding: '6px 10px', fontSize: 12, wordBreak: 'break-all', color: '#0F3D2E',
+                  }}>
+                    {flipbook.storage_path}
+                  </code>
+                </div>
+              )}
             </div>
           )}
 
@@ -159,5 +173,5 @@ const sectionHeading: React.CSSProperties = {
   letterSpacing: '0.06em',
   marginBottom: 14,
 };
-const primaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 13 };
+const primaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 13 };
 const ghostBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: 'none', color: '#6b7280', border: '1px solid #d1d5db', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };

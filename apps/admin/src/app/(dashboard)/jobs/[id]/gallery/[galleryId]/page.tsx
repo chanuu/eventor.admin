@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isS3Url } from '@/lib/s3';
 import { deletePhoto, updateGalleryStatus, updateGallery } from '../actions';
 import GalleryUploadForm from './GalleryUploadForm';
 
@@ -63,15 +64,19 @@ export default async function GalleryDetailPage({ params, searchParams }: {
 
   const photos = (photosRaw ?? []) as Photo[];
 
-  // Generate signed URLs for thumbnails (1 hour expiry)
-  const admin = createAdminClient();
+  // S3-hosted photos store their public URL directly; legacy rows still hold a
+  // Supabase storage path and need a signed URL (1 hour expiry).
   const signedUrls: Record<string, string> = {};
-  if (photos.length > 0) {
+  const legacy = photos.filter((p) => !isS3Url(p.storage_path));
+  photos.filter((p) => isS3Url(p.storage_path)).forEach((p) => { signedUrls[p.id] = p.storage_path; });
+
+  if (legacy.length > 0) {
+    const admin = createAdminClient();
     const { data: signed } = await admin.storage
       .from('gallery-photos')
-      .createSignedUrls(photos.map((p) => p.storage_path), 3600);
+      .createSignedUrls(legacy.map((p) => p.storage_path), 3600);
     signed?.forEach((s, i) => {
-      if (s.signedUrl) signedUrls[photos[i].id] = s.signedUrl;
+      if (s.signedUrl) signedUrls[legacy[i].id] = s.signedUrl;
     });
   }
 
@@ -126,7 +131,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {statusCfg.next && (
                 <form action={updateGalleryStatus.bind(null, gallery.id, params.id, job.studio_id, statusCfg.next)}>
-                  <button type="submit" style={{ ...primaryBtn, background: statusCfg.next === 'approved' ? '#059669' : '#2563eb' }}>
+                  <button type="submit" style={{ ...primaryBtn, background: statusCfg.next === 'approved' ? '#059669' : '#0F3D2E' }}>
                     {statusCfg.nextLabel}
                   </button>
                 </form>
@@ -171,7 +176,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
               {photos.length} Photo{photos.length !== 1 ? 's' : ''}
             </h2>
             {selectedCount > 0 && (
-              <span style={{ fontSize: 12, color: '#2563eb', fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: '#0F3D2E', fontWeight: 600 }}>
                 {selectedCount} selected
               </span>
             )}
@@ -186,7 +191,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
                     position: 'relative',
                     borderRadius: 8,
                     overflow: 'hidden',
-                    border: photo.is_selected ? '2px solid #2563eb' : '2px solid #e5e7eb',
+                    border: photo.is_selected ? '2px solid #0F3D2E' : '2px solid #e5e7eb',
                     background: '#f3f4f6',
                     aspectRatio: '1',
                   }}
@@ -205,7 +210,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
 
                   {/* Selected badge */}
                   {photo.is_selected && (
-                    <div style={{ position: 'absolute', top: 6, left: 6, background: '#2563eb', borderRadius: 99, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', top: 6, left: 6, background: '#0F3D2E', borderRadius: 99, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ color: '#fff', fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>
                     </div>
                   )}
@@ -265,6 +270,6 @@ function Field({ label, required, children }: { label: string; required?: boolea
 const card: React.CSSProperties = { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 24 };
 const sectionHeading: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 };
 const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
+const primaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
 const secondaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
 const ghostBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: 'none', color: '#6b7280', border: '1px solid #d1d5db', fontWeight: 500, cursor: 'pointer', padding: '0 14px', fontSize: 13 };

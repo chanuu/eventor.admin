@@ -86,7 +86,7 @@ const STATUS_STEPS = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proo
 
 const STATUS_BADGE: Record<string, string> = {
   lead: 'bg-gray-100 text-gray-600', quoted: 'bg-amber-50 text-amber-700',
-  contracted: 'bg-blue-50 text-blue-700', active: 'bg-green-50 text-[#2D6A4F]',
+  contracted: 'bg-blue-50 text-blue-700', active: 'bg-green-50 text-[#0F3D2E]',
   editing: 'bg-violet-50 text-violet-700', proofing: 'bg-pink-50 text-pink-700',
   delivered: 'bg-emerald-50 text-emerald-700', archived: 'bg-gray-100 text-gray-400',
 };
@@ -136,7 +136,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             </span>
           </div>
           <p className="breadcrumb mt-0.5">
-            Main Menu / <a href="/jobs" className="hover:text-[#2D6A4F]">Jobs</a> / <span className="text-[#2D6A4F]">{job.title}</span>
+            Main Menu / <a href="/jobs" className="hover:text-[#0F3D2E]">Jobs</a> / <span className="text-[#0F3D2E]">{job.title}</span>
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             return (
               <button key={id} onClick={() => setActiveTab(id as TabId)}
                 className={`px-5 py-3 text-sm whitespace-nowrap transition-colors border-b-2 -mb-px
-                  ${active ? 'font-semibold text-[#2D6A4F] border-[#2D6A4F]' : 'font-normal text-gray-500 border-transparent hover:text-gray-700'}`}
+                  ${active ? 'font-semibold text-[#0F3D2E] border-[#0F3D2E]' : 'font-normal text-gray-500 border-transparent hover:text-gray-700'}`}
               >
                 {label}{count > 0 ? ` (${count})` : ''}
               </button>
@@ -244,7 +244,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                       <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full whitespace-nowrap">
                         {SHOOT_STATUS[shoot.status] ?? shoot.status}
                       </span>
-                      <a href={`/jobs/${jobId}/shoots/${shoot.id}`} className="text-xs font-medium text-[#2D6A4F] hover:underline shrink-0">Details</a>
+                      <a href={`/jobs/${jobId}/shoots/${shoot.id}`} className="text-xs font-medium text-[#0F3D2E] hover:underline shrink-0">Details</a>
                     </div>
                   ))}
                 </div>

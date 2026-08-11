@@ -38,7 +38,7 @@ export default async function PackagesPage() {
         <h1 style={{ fontSize: 20, fontWeight: 600 }}>Packages</h1>
         <a
           href="/packages/new"
-          style={{ background: '#2563eb', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
+          style={{ background: '#0F3D2E', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
         >
           + New package
         </a>
@@ -47,7 +47,7 @@ export default async function PackagesPage() {
       {packages.length === 0 ? (
         <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af', border: '2px dashed #e5e7eb', borderRadius: 8 }}>
           No packages yet.{' '}
-          <a href="/packages/new" style={{ color: '#2563eb' }}>Create your first package</a>
+          <a href="/packages/new" style={{ color: '#0F3D2E' }}>Create your first package</a>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -92,7 +92,7 @@ export default async function PackagesPage() {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
                 <a
                   href={`/packages/${pkg.id}/edit`}
-                  style={{ fontSize: 13, color: '#2563eb', fontWeight: 500 }}
+                  style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500 }}
                 >
                   Edit
                 </a>

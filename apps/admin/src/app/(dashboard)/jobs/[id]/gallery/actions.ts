@@ -6,9 +6,51 @@ import { redirect } from 'next/navigation';
 import sharp from 'sharp';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { uploadToS3, deleteFromS3, isS3Url, isS3Configured } from '@/lib/s3';
 
-const MAX_DIMENSION = 1920;
-const JPEG_QUALITY  = 82;
+/** Hard ceiling for a stored proofing photo. */
+const MAX_STORED_BYTES = 2 * 1024 * 1024; // 2 MB
+/** Largest original we will accept from the browser, before compression. */
+const MAX_UPLOAD_BYTES = 40 * 1024 * 1024; // 40 MB
+
+/**
+ * Compression ladder. We start at full proofing quality and only step down if the
+ * result is still over 2 MB, so ordinary photos keep their quality and only the
+ * very large ones get reduced.
+ */
+const COMPRESSION_STEPS = [
+  { dimension: 1920, quality: 82 },
+  { dimension: 1920, quality: 72 },
+  { dimension: 1600, quality: 68 },
+  { dimension: 1400, quality: 62 },
+  { dimension: 1200, quality: 55 },
+] as const;
+
+/**
+ * Resizes and compresses to JPEG, stepping the ladder down until the output fits
+ * under MAX_STORED_BYTES. Returns null if the buffer isn't a readable image.
+ */
+async function compressWithinLimit(raw: Buffer): Promise<Buffer | null> {
+  let smallest: Buffer | null = null;
+
+  for (const { dimension, quality } of COMPRESSION_STEPS) {
+    let out: Buffer;
+    try {
+      out = await sharp(raw)
+        .rotate()                        // honour EXIF orientation
+        .resize(dimension, dimension, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer();
+    } catch {
+      return null;                       // not an image, or corrupt
+    }
+    if (out.byteLength <= MAX_STORED_BYTES) return out;
+    if (!smallest || out.byteLength < smallest.byteLength) smallest = out;
+  }
+
+  // Every step was still over the limit — keep the smallest we produced.
+  return smallest;
+}
 
 type StaffCtx = { studio_id: string; role: string };
 
@@ -57,6 +99,8 @@ export async function uploadPhotos(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.', uploaded: 0 };
 
+  if (!isS3Configured()) return { error: 'Photo storage is not configured. Set the AWS_* environment variables.', uploaded: 0 };
+
   const files = formData.getAll('files') as File[];
   const validFiles = files.filter((f) => f.size > 0);
   if (!validFiles.length) return { error: 'Please select at least one image.', uploaded: 0 };
@@ -72,35 +116,44 @@ export async function uploadPhotos(
 
   let sortOrder = ((existing as { sort_order: number }[] | null)?.[0]?.sort_order ?? -1) + 1;
   let uploaded = 0;
+  let uploadError = '';
+
+  const skipped: string[] = [];
 
   for (const file of validFiles) {
-    const rawBuffer = Buffer.from(await file.arrayBuffer());
-
-    // Resize to max 1920px on the longest side and compress to JPEG
-    let compressed: Buffer;
-    try {
-      compressed = await sharp(rawBuffer)
-        .rotate()                          // honour EXIF orientation
-        .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-        .toBuffer();
-    } catch {
-      continue; // skip non-image or corrupt files
+    if (file.type && !file.type.startsWith('image/')) {
+      skipped.push(`${file.name} is not an image`);
+      continue;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      skipped.push(`${file.name} is over ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB`);
+      continue;
     }
 
-    const uniqueName = `${randomUUID()}.jpg`;
-    const storagePath = `${studioId}/${galleryId}/${uniqueName}`;
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: upErr } = await admin.storage
-      .from('gallery-photos')
-      .upload(storagePath, compressed, { contentType: 'image/jpeg' });
+    const compressed = await compressWithinLimit(rawBuffer);
+    if (!compressed) {
+      skipped.push(`${file.name} could not be read as an image`);
+      continue;
+    }
 
-    if (upErr) continue;
+    const key = `galleries/${studioId}/${galleryId}/${randomUUID()}.jpg`;
+
+    // Photos live in S3; Supabase stores only the resulting public URL.
+    let photoUrl: string;
+    try {
+      photoUrl = await uploadToS3(key, compressed, 'image/jpeg');
+    } catch (err) {
+      console.error('[uploadPhotos] S3 upload failed', err);
+      uploadError = err instanceof Error ? err.message : 'Upload to S3 failed.';
+      continue;
+    }
 
     await admin.from('gallery_photos').insert({
       studio_id: studioId,
       gallery_id: galleryId,
-      storage_path: storagePath,
+      storage_path: photoUrl,
       file_name: file.name,
       sort_order: sortOrder++,
     });
@@ -109,7 +162,12 @@ export async function uploadPhotos(
   }
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
-  return { uploaded };
+
+  if (uploaded === 0) {
+    return { error: uploadError || skipped.join('; ') || 'No images could be processed.', uploaded: 0 };
+  }
+  // Some succeeded — report the rest so nothing disappears silently.
+  return skipped.length ? { uploaded, error: `Skipped: ${skipped.join('; ')}` } : { uploaded };
 }
 
 export async function deletePhoto(
@@ -123,7 +181,12 @@ export async function deletePhoto(
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const admin = createAdminClient();
-  await admin.storage.from('gallery-photos').remove([storagePath]);
+  // New photos are S3 URLs; older rows are still Supabase storage paths.
+  if (isS3Url(storagePath)) {
+    await deleteFromS3(storagePath);
+  } else {
+    await admin.storage.from('gallery-photos').remove([storagePath]);
+  }
   await admin.from('gallery_photos').delete().eq('id', photoId).eq('gallery_id', galleryId);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);

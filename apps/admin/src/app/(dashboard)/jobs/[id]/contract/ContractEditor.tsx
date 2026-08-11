@@ -91,8 +91,8 @@ export default function ContractEditor({
             style={{
               padding: '8px 18px', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer',
               fontWeight: tab === t ? 600 : 400,
-              color: tab === t ? '#2563eb' : '#6b7280',
-              borderBottom: tab === t ? '2px solid #2563eb' : '2px solid transparent',
+              color: tab === t ? '#0F3D2E' : '#6b7280',
+              borderBottom: tab === t ? '2px solid #0F3D2E' : '2px solid transparent',
               marginBottom: -1,
             }}
           >
@@ -155,7 +155,7 @@ export default function ContractEditor({
   );
 }
 
-const primaryBtn:   React.CSSProperties = { height: 34, borderRadius: 6, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 13 };
+const primaryBtn:   React.CSSProperties = { height: 34, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 13 };
 const secondaryBtn: React.CSSProperties = { height: 34, borderRadius: 6, background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
 const ghostBtn:     React.CSSProperties = { height: 34, borderRadius: 6, background: 'none', color: '#6b7280', border: '1px solid #d1d5db', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };
 const dangerBtn:    React.CSSProperties = { height: 34, borderRadius: 6, background: 'none', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 500, cursor: 'pointer', padding: '0 16px', fontSize: 13 };

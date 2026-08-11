@@ -28,9 +28,9 @@ export default function GalleryUploadForm({
 
     const result = await uploadPhotos(galleryId, jobId, studioId, new FormData(e.currentTarget));
 
-    if (result.error) {
-      setError(result.error);
-    } else {
+    if (result.error) setError(result.error);
+
+    if (result.uploaded > 0) {
       const n = result.uploaded;
       setMessage(`${n} photo${n !== 1 ? 's' : ''} uploaded successfully.`);
       if (inputRef.current) inputRef.current.value = '';
@@ -57,9 +57,10 @@ export default function GalleryUploadForm({
           style={{ fontSize: 13, color: '#374151' }}
         />
         <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>
-          JPEG, PNG, or WebP. Hold Ctrl / Cmd to select multiple files.
+          JPEG, PNG, or WebP, up to 40 MB each — every photo is resized and compressed to
+          stay under 2 MB. Hold Ctrl / Cmd to select multiple files.
           {fileCount > 0 && (
-            <span style={{ color: '#2563eb', marginLeft: 8, fontWeight: 500 }}>
+            <span style={{ color: '#0F3D2E', marginLeft: 8, fontWeight: 500 }}>
               {fileCount} file{fileCount !== 1 ? 's' : ''} selected
             </span>
           )}
@@ -75,7 +76,7 @@ export default function GalleryUploadForm({
           disabled={loading}
           style={{
             height: 34, borderRadius: 6,
-            background: loading ? '#93c5fd' : '#2563eb',
+            background: loading ? '#A8BDB2' : '#0F3D2E',
             color: '#fff', border: 'none',
             fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
             padding: '0 18px', fontSize: 13,

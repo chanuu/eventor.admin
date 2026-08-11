@@ -19,7 +19,7 @@ export default function NewClientPage() {
     <div className="max-w-xl">
       <h1 className="page-title">New Client</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/clients" className="hover:text-[#2D6A4F]">Clients</a> / <span className="text-[#2D6A4F]">New</span>
+        Main Menu / <a href="/clients" className="hover:text-[#0F3D2E]">Clients</a> / <span className="text-[#0F3D2E]">New</span>
       </p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
