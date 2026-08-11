@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eventor Client Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet" />
+    <style>
+      /* Digital album page surfaces — StPageFlip positions these absolutely. */
+      .album-page { background: #FBFAF7; overflow: hidden; }
+      .album-page .page-inner { position: absolute; inset: 0; }
+      .stf__parent { margin: 0 auto; }
+      @keyframes eqBar { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+    </style>
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #16241d; background: #F6F8F5; }

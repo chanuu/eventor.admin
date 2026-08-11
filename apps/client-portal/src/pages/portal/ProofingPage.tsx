@@ -71,9 +71,24 @@ export default function ProofingPage() {
       }),
     );
 
-    setSaving(false);
     const failed = results.find((r) => r.error);
-    if (failed?.error) { setToast(`Could not save: ${failed.error.message}`); return; }
+    if (failed?.error) {
+      setSaving(false);
+      setToast(`Could not save: ${failed.error.message}`);
+      return;
+    }
+
+    // Mark the set as submitted so the studio knows the client has finished.
+    const { error: submitErr } = await supabase.rpc('submit_gallery_selection', {
+      p_gallery_id: active.id,
+    });
+    setSaving(false);
+
+    if (submitErr) {
+      setToast(`Your picks were saved, but we could not notify the studio: ${submitErr.message}`);
+      reload();
+      return;
+    }
 
     setToast(`Selection of ${picks.size} photo${picks.size === 1 ? '' : 's'} sent to ${job.studio?.name ?? 'your studio'}.`);
     reload();
@@ -105,8 +120,8 @@ export default function ProofingPage() {
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 15.5, fontWeight: 800, color: C.green }}>{c.title}</div>
-                    <span style={statusBadge(proofing ? 'active' : 'done')}>
-                      {proofing ? 'Your turn' : 'Closed'}
+                    <span style={statusBadge(proofing && !c.selection_submitted_at ? 'active' : 'done')}>
+                      {!proofing ? 'Closed' : c.selection_submitted_at ? 'Sent' : 'Your turn'}
                     </span>
                   </div>
                   <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 5 }}>
@@ -200,14 +215,29 @@ export default function ProofingPage() {
                   {picks.size} of {active.photos.length} selected
                 </div>
                 <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>
-                  You can send fewer and add more later; the studio will follow up.
+                  {active.selection_submitted_at
+                    ? `Sent to the studio on ${shortDate(active.selection_submitted_at)}. You can change your picks and send again.`
+                    : 'You can send fewer and add more later; the studio will follow up.'}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setPicks(new Set())} style={{ ...ghostBtn, padding: '11px 20px' }}>Clear all</button>
                 <button onClick={submit} disabled={saving} style={submitBtn(picks.size > 0 && !saving)}>
-                  {saving ? 'Sending…' : 'Submit selection'}
+                  {saving ? 'Sending…' : active.selection_submitted_at ? 'Resend selection' : 'Submit selection'}
                 </button>
+              </div>
+            </div>
+          )}
+
+          {active.selection_submitted_at && (
+            <div style={submittedBanner}>
+              <span style={submittedTick}>✓</span>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: C.green }}>Selection sent to the studio</div>
+                <div style={{ fontSize: 12.5, color: C.limeSoftText, marginTop: 3 }}>
+                  Sent {shortDate(active.selection_submitted_at)}. Album design starts next — you’ll hear from
+                  {' '}{job.studio?.name ?? 'your studio'} once it’s underway.
+                </div>
               </div>
             </div>
           )}
@@ -267,6 +297,16 @@ const footer: React.CSSProperties = {
 const inAlbum: React.CSSProperties = {
   fontSize: 10.5, fontWeight: 800, color: C.limeSoftText, background: C.limeSoft,
   borderRadius: 20, padding: '2px 8px', flexShrink: 0,
+};
+
+const submittedBanner: React.CSSProperties = {
+  background: C.limeSoft, border: `1px solid ${C.limeSoftBorder}`, borderRadius: 12,
+  padding: 18, marginTop: 16, display: 'flex', gap: 14, alignItems: 'center',
+};
+
+const submittedTick: React.CSSProperties = {
+  width: 26, height: 26, borderRadius: '50%', background: C.lime, color: C.green,
+  fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
 };
 
 const coverPlaceholder: React.CSSProperties = {

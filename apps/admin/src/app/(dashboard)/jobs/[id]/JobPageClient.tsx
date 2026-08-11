@@ -78,6 +78,7 @@ const TABS = [
   { id: 'payments', label: 'Payments' },
   { id: 'contract', label: 'Contract' },
   { id: 'gallery',  label: 'Gallery'  },
+  { id: 'album',    label: 'Album'    },
   { id: 'flipbook', label: 'Flipbook' },
 ] as const;
 type TabId = typeof TABS[number]['id'];
@@ -326,6 +327,16 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             <div>
               <p className="text-sm text-gray-500 mb-4">Upload photos for client proofing and album selection.</p>
               <a href={`/jobs/${jobId}/gallery`} className="btn-primary">Manage Gallery →</a>
+            </div>
+          )}
+
+          {/* ── Digital album ── */}
+          {activeTab === 'album' && (
+            <div>
+              <p className="text-sm text-ink-muted mb-4">
+                Build the flip-through digital album: cover text, page order, captions and music.
+              </p>
+              <a href={`/jobs/${jobId}/album`} className="btn-primary">Manage Album →</a>
             </div>
           )}
 

@@ -1,22 +1,84 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { C, solidBtn, ghostBtn, label } from '../../lib/theme';
 import { shortDate } from '../../lib/format';
-import { usePortal, albumShareUrl, albumFileUrl } from '../../lib/portal';
+import {
+  usePortal, photoUrl, albumPhotos, albumPageUrl, albumShareUrl, albumFileUrl, eventDate,
+} from '../../lib/portal';
 import { Screen, Card, CardTitle, Empty, Toast } from '../../components/ui';
+import FlipAlbum, { type AlbumPage as FlipPage } from '../../components/FlipAlbum';
 
-/**
- * Digital album — the PDF the studio uploads and publishes against this job.
- * It is embedded from the studio's public share page, which signs the storage
- * URL server-side, so the portal never needs storage credentials of its own.
- */
 export default function AlbumPage() {
   const { job } = usePortal();
+  const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const album = job.album;
+  // A studio-built album wins; otherwise fall back to the client's proofing picks.
+  const photos = useMemo(() => (album ? [] : albumPhotos(job)), [album, job]);
   const flipbook = job.flipbook;
   const shareUrl = flipbook ? albumShareUrl(flipbook) : null;
-  const fileUrl = flipbook ? albumFileUrl(flipbook) : null;
+  const pdfUrl = flipbook ? albumFileUrl(flipbook) : null;
 
-  const [toast, setToast] = useState('');
-  const [fullscreen, setFullscreen] = useState(false);
+  const evDate = eventDate(job.shoots);
+  const studio = job.studio?.name ?? 'your studio';
+  const venue = job.shoots.find((s) => s.venue)?.venue;
+
+  const defaultKicker = [venue, evDate ? shortDate(evDate) : null].filter(Boolean).join(' · ')
+    || (job.event_type ?? 'Album');
+  const photographer = job.shoots.flatMap((s) => s.crew)[0];
+
+  // Cover, the pages, then a closing page — as the album design lays out.
+  const pages = useMemo<FlipPage[]>(() => {
+    // Studio-built album: use its configured text and ordered pages.
+    if (album) {
+      const built = album.pages
+        .map((p) => ({ url: albumPageUrl(p), caption: p.caption }))
+        .filter((p): p is { url: string; caption: string | null } => !!p.url);
+      if (built.length === 0) return [];
+
+      return [
+        {
+          kind: 'cover',
+          kicker: album.cover_kicker || defaultKicker,
+          title: album.cover_title || album.title || job.title,
+          body: album.cover_body || `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
+        },
+        ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption })),
+        {
+          kind: 'cover',
+          kicker: album.closing_kicker || 'Thank you',
+          title: album.closing_title || `With love,\n${studio}`,
+          body: album.closing_body
+            || (photographer ? `Photographed by ${photographer}` : 'Thank you for letting us tell your story.'),
+        },
+      ];
+    }
+
+    if (photos.length === 0) return [];
+    return [
+      {
+        kind: 'cover',
+        kicker: defaultKicker,
+        title: job.title,
+        body: `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
+      },
+      ...photos.map((p) => ({
+        kind: 'photo' as const,
+        url: photoUrl(p.storage_path),
+        caption: p.caption,
+      })),
+      {
+        kind: 'cover',
+        kicker: 'Thank you',
+        title: `With love,\n${studio}`,
+        body: photographer ? `Photographed by ${photographer}` : 'Thank you for letting us tell your story.',
+      },
+    ];
+  }, [album, photos, job.title, job.event_type, studio, defaultKicker, photographer]);
+
+  const coverImage = album
+    ? album.pages.map(albumPageUrl).find((u): u is string => !!u) ?? null
+    : photos[0] ? photoUrl(photos[0].storage_path) : null;
 
   useEffect(() => {
     if (!toast) return;
@@ -24,109 +86,109 @@ export default function AlbumPage() {
     return () => clearTimeout(t);
   }, [toast]);
 
+  // Body scroll would fight the fullscreen stage.
   useEffect(() => {
-    if (!fullscreen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFullscreen(false); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [fullscreen]);
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
 
-  if (!flipbook || !flipbook.storage_path) {
+  if (open) {
     return (
-      <Screen>
-        <Empty>
-          Your digital album hasn’t been created yet. Once your studio designs and uploads it,
-          you’ll be able to flip through it here.
-        </Empty>
-      </Screen>
+      <FlipAlbum
+        pages={pages}
+        title={album?.title || job.title}
+        musicEnabled={album ? album.music_enabled : true}
+        onClose={() => setOpen(false)}
+      />
     );
   }
-
-  if (!flipbook.published_at || !fileUrl) {
-    return (
-      <Screen>
-        <Card style={{ padding: 26, display: 'flex', gap: 22, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={bookIcon}>📖</div>
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 800, color: C.green }}>Album in progress</div>
-            <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4 }}>
-              Your studio is still working on the layout. It will appear here the moment they publish it.
-            </div>
-          </div>
-          <span style={pendingPill}>Not published</span>
-        </Card>
-      </Screen>
-    );
-  }
-
-  // The direct S3 URL is permanent and needs no login, so it is what we hand out
-  // for sharing. The studio's share page stays available as a branded alternative.
-  const publicUrl = fileUrl;
 
   async function copyLink() {
-    if (!publicUrl) return;
+    if (!pdfUrl) return;
     try {
-      await navigator.clipboard.writeText(publicUrl);
+      await navigator.clipboard.writeText(pdfUrl);
       setToast('Album link copied — share it with family and friends.');
     } catch {
       setToast('Could not copy automatically. Select the link below and copy it.');
     }
   }
 
+  const hasFlipAlbum = pages.length > 0;
+
   return (
     <Screen>
-      <Card style={{ padding: 26, display: 'flex', gap: 22, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={bookIcon}>📖</div>
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ fontSize: 15.5, fontWeight: 800, color: C.green }}>Your digital album</div>
-          <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4 }}>
-            Published {shortDate(flipbook.published_at)} by {job.studio?.name ?? 'your studio'} · shareable private link
+      {hasFlipAlbum ? (
+        <>
+          {/* Cover preview → opens the flipbook */}
+          <div style={hero} onClick={() => setOpen(true)} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') setOpen(true); }}>
+            <div style={{ position: 'absolute', inset: 0 }}>
+              {coverImage && (
+                <img src={coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              )}
+              <div style={heroScrim} />
+            </div>
+            <div style={{ position: 'relative', textAlign: 'center' }}>
+              <div style={{ fontSize: 10.5, letterSpacing: 3, textTransform: 'uppercase', color: C.lime, fontWeight: 700 }}>
+                Digital Album
+              </div>
+              <div style={{ fontFamily: SERIF, fontSize: 34, color: '#fff', marginTop: 10 }}>
+                {album?.cover_title || album?.title || job.title}
+              </div>
+              <div style={{ width: 46, height: 1, background: 'rgba(255,255,255,0.4)', margin: '18px auto' }} />
+              <div style={{ fontSize: 13, color: '#cfe4d8' }}>
+                {pages.length} page{pages.length === 1 ? '' : 's'}
+                {evDate ? ` · ${shortDate(evDate)}` : ''}
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setOpen(true); }} style={openBtn}>
+                Open album
+              </button>
+            </div>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
-          <button onClick={() => setFullscreen(true)} style={{ ...solidBtn, padding: '11px 20px' }}>
-            Full screen
-          </button>
-          <a href={fileUrl} target="_blank" rel="noreferrer" style={{ ...ghostBtn, padding: '11px 20px', display: 'inline-block' }}>
-            Open in new tab
-          </a>
-          <a href={fileUrl} download style={{ ...ghostBtn, padding: '11px 20px', display: 'inline-block' }}>
-            Download PDF
-          </a>
-          <button onClick={copyLink} style={{ ...ghostBtn, padding: '11px 20px' }}>Copy share link</button>
-        </div>
-      </Card>
 
-      <Card style={{ padding: 0, marginTop: 16, overflow: 'hidden' }}>
-        <iframe src={fileUrl} title="Digital album" style={viewer} />
-      </Card>
+          <Card style={{ marginTop: 16 }}>
+            <CardTitle>About your album</CardTitle>
+            <p style={{ fontSize: 12.5, color: C.textMid, marginTop: 8, lineHeight: 1.6 }}>
+              Drag a page corner to turn it, or use the arrows and ← → keys. Tap <strong>Play music</strong> for a
+              soundtrack, and <strong>Full screen</strong> to fill your display.
+            </p>
+          </Card>
+        </>
+      ) : (
+        <Empty>
+          Your album is being put together. Once your studio finalises the photo selection,
+          you’ll be able to flip through it here.
+        </Empty>
+      )}
 
-      <Card style={{ marginTop: 16 }}>
-        <CardTitle>Sharing this album</CardTitle>
-        <p style={{ fontSize: 12.5, color: C.textMid, marginTop: 8, lineHeight: 1.6 }}>
-          Anyone with this link can open your album — no login, no expiry, nothing to install.
-          Send it to family and friends as it is.
-        </p>
-        <div style={linkRow}>
-          <span style={label}>Public link</span>
-          <input readOnly value={publicUrl} onFocus={(e) => e.currentTarget.select()} style={linkInput} />
-        </div>
-        {shareUrl && (
-          <p style={{ fontSize: 12, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
-            Prefer a page with your studio’s branding?{' '}
-            <a href={shareUrl} target="_blank" rel="noreferrer" style={{ fontWeight: 700 }}>Use this link instead</a>.
-          </p>
-        )}
-      </Card>
-
-      {fullscreen && (
-        <div style={fullWrap}>
-          <div style={fullBar}>
-            <span style={{ fontSize: 13, fontWeight: 700 }}>{job.title} — digital album</span>
-            <button onClick={() => setFullscreen(false)} style={closeBtn}>Close ✕</button>
+      {/* The printable PDF, when the studio has published one */}
+      {flipbook?.published_at && pdfUrl && (
+        <Card style={{ marginTop: 16, display: 'flex', gap: 22, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={bookIcon}>📖</div>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 800, color: C.green }}>Printed album file</div>
+            <div style={{ fontSize: 12.5, color: C.textMid, marginTop: 4 }}>
+              Published {shortDate(flipbook.published_at)} by {studio} · shareable, no login needed
+            </div>
           </div>
-          <iframe src={fileUrl} title="Digital album" style={{ flex: 1, border: 'none', width: '100%' }} />
-        </div>
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+            <a href={pdfUrl} target="_blank" rel="noreferrer" style={{ ...ghostBtn, padding: '11px 20px', display: 'inline-block' }}>
+              Open PDF
+            </a>
+            <a href={pdfUrl} download style={{ ...ghostBtn, padding: '11px 20px', display: 'inline-block' }}>Download</a>
+            <button onClick={copyLink} style={{ ...ghostBtn, padding: '11px 20px' }}>Copy share link</button>
+          </div>
+          {shareUrl && (
+            <div style={{ width: '100%' }}>
+              <div style={linkRow}>
+                <span style={label}>Public link</span>
+                <input readOnly value={pdfUrl} onFocus={(e) => e.currentTarget.select()} style={linkInput} />
+              </div>
+            </div>
+          )}
+        </Card>
       )}
 
       {toast && <Toast message={toast} />}
@@ -134,20 +196,26 @@ export default function AlbumPage() {
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
+const SERIF = "'Cormorant Garamond',Georgia,serif";
+
+const hero: React.CSSProperties = {
+  position: 'relative', borderRadius: 20, overflow: 'hidden', color: C.white, padding: 44,
+  minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+};
+
+const heroScrim: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none',
+  background: 'linear-gradient(180deg,rgba(15,61,46,0.55),rgba(11,42,32,0.92))',
+};
+
+const openBtn: React.CSSProperties = {
+  marginTop: 22, background: C.lime, color: C.green, border: 'none', borderRadius: 22,
+  padding: '12px 28px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+};
 
 const bookIcon: React.CSSProperties = {
   width: 52, height: 52, borderRadius: 14, background: C.limeSoft, border: `1px solid ${C.limeSoftBorder}`,
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
-};
-
-const pendingPill: React.CSSProperties = {
-  background: C.amberSoft, color: C.amberText, fontSize: 10.5, fontWeight: 800,
-  textTransform: 'uppercase', letterSpacing: 0.5, borderRadius: 20, padding: '3px 9px', flexShrink: 0,
-};
-
-const viewer: React.CSSProperties = {
-  width: '100%', height: 640, border: 'none', display: 'block', background: C.panel,
 };
 
 const linkRow: React.CSSProperties = {
@@ -158,18 +226,4 @@ const linkRow: React.CSSProperties = {
 const linkInput: React.CSSProperties = {
   flex: 1, minWidth: 0, border: 'none', background: 'transparent', fontFamily: 'inherit',
   fontSize: 12.5, color: C.textStrong, padding: 0, outline: 'none',
-};
-
-const fullWrap: React.CSSProperties = {
-  position: 'fixed', inset: 0, zIndex: 90, background: C.green, display: 'flex', flexDirection: 'column',
-};
-
-const fullBar: React.CSSProperties = {
-  height: 48, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-  padding: '0 18px', color: C.white, borderBottom: '1px solid rgba(255,255,255,0.14)',
-};
-
-const closeBtn: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.12)', color: C.white, border: 'none', borderRadius: 8,
-  padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
 };

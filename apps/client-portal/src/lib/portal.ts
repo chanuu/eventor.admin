@@ -18,19 +18,36 @@ export type Payment = {
   id: string; type: string; amount: number; method: string;
   status: string; paid_at: string | null; notes: string | null; created_at: string;
 };
-export type Photo = { id: string; storage_path: string; file_name: string; is_selected: boolean; sort_order: number };
+export type Photo = {
+  id: string; storage_path: string; file_name: string;
+  is_selected: boolean; sort_order: number; caption: string | null;
+};
 export type Gallery = {
   id: string; title: string; status: string; shoot_id: string | null;
-  selection_deadline: string | null; created_at: string; photos: Photo[];
+  selection_deadline: string | null; selection_submitted_at: string | null;
+  created_at: string; photos: Photo[];
 };
 export type Contract = {
   id: string; status: string; content_html: string | null;
   signed_at: string | null; signature_data: string | null; created_at: string;
 };
-/** The digital album: a PDF the studio uploads and publishes for the client. */
+/** The printable album: a PDF the studio uploads and publishes for the client. */
 export type Flipbook = {
   id: string; storage_path: string | null; share_token: string;
   published_at: string | null; created_at: string;
+};
+
+/** The flip-through digital album the studio builds page by page in admin. */
+export type AlbumPageRow = {
+  id: string; image_url: string | null; caption: string | null; sort_order: number;
+  gallery_photos: { storage_path: string } | null;
+};
+export type Album = {
+  id: string; title: string | null;
+  cover_kicker: string | null; cover_title: string | null; cover_body: string | null;
+  closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
+  music_enabled: boolean; published_at: string | null;
+  pages: AlbumPageRow[];
 };
 
 export type PortalJob = {
@@ -39,7 +56,7 @@ export type PortalJob = {
   clientName: string; studio: Studio | null; pkg: Pkg | null;
   jobAddons: JobAddon[]; availableAddons: Addon[];
   shoots: Shoot[]; payments: Payment[]; galleries: Gallery[];
-  contract: Contract | null; flipbook: Flipbook | null;
+  contract: Contract | null; flipbook: Flipbook | null; album: Album | null;
 };
 
 export type PortalData = {
@@ -109,10 +126,13 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       shoots(id, shoot_type, scheduled_at, venue, status, notes,
              shoot_staff(staff(full_name))),
       payments(id, type, amount, method, status, paid_at, notes, created_at),
-      galleries(id, title, status, shoot_id, selection_deadline, created_at,
-                gallery_photos(id, storage_path, file_name, is_selected, sort_order, is_active)),
+      galleries(id, title, status, shoot_id, selection_deadline, selection_submitted_at, created_at,
+                gallery_photos(id, storage_path, file_name, is_selected, sort_order, caption, is_active)),
       contracts(id, status, content_html, signed_at, signature_data, created_at),
-      flipbooks(id, storage_path, share_token, published_at, created_at)
+      flipbooks(id, storage_path, share_token, published_at, created_at),
+      albums(id, title, cover_kicker, cover_title, cover_body,
+             closing_kicker, closing_title, closing_body, music_enabled, published_at,
+             album_pages(id, image_url, caption, sort_order, gallery_photos(storage_path)))
     `)
     .eq('id', jobId)
     .maybeSingle();
@@ -142,12 +162,14 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
   const galleries: Gallery[] = ((r.galleries ?? []) as any[])
     .map((g) => ({
       id: g.id, title: g.title, status: g.status, shoot_id: g.shoot_id,
-      selection_deadline: g.selection_deadline, created_at: g.created_at,
+      selection_deadline: g.selection_deadline,
+      selection_submitted_at: g.selection_submitted_at ?? null,
+      created_at: g.created_at,
       photos: ((g.gallery_photos ?? []) as any[])
         .filter((p) => p.is_active)
         .map((p) => ({
           id: p.id, storage_path: p.storage_path, file_name: p.file_name,
-          is_selected: p.is_selected, sort_order: p.sort_order,
+          is_selected: p.is_selected, sort_order: p.sort_order, caption: p.caption ?? null,
         }))
         .sort((a, b) => a.sort_order - b.sort_order),
     }))
@@ -173,7 +195,50 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
     galleries,
     contract: ((r.contracts ?? []) as Contract[])[0] ?? null,
     flipbook: ((r.flipbooks ?? []) as Flipbook[])[0] ?? null,
+    album: albumFrom(r.albums),
   };
+}
+
+function albumFrom(raw: any): Album | null {
+  const a = Array.isArray(raw) ? raw[0] : raw;
+  if (!a) return null;
+  return {
+    id: a.id, title: a.title,
+    cover_kicker: a.cover_kicker, cover_title: a.cover_title, cover_body: a.cover_body,
+    closing_kicker: a.closing_kicker, closing_title: a.closing_title, closing_body: a.closing_body,
+    music_enabled: a.music_enabled ?? true,
+    published_at: a.published_at,
+    pages: ((a.album_pages ?? []) as AlbumPageRow[])
+      .slice()
+      .sort((x, y) => x.sort_order - y.sort_order),
+  };
+}
+
+/** Resolves a built album page to a displayable image URL. */
+export function albumPageUrl(page: AlbumPageRow): string | null {
+  if (page.image_url) return page.image_url;
+  const path = page.gallery_photos?.storage_path;
+  return path ? photoUrl(path) : null;
+}
+
+/**
+ * Pages for the digital album, in order.
+ *
+ * Preference is the photos the client picked during proofing — that selection is
+ * literally "what goes in the album". If nothing has been selected yet, fall back
+ * to the newest gallery that has photos so the album is never empty for a client
+ * whose studio hasn't run proofing.
+ */
+export function albumPhotos(job: PortalJob): Photo[] {
+  const visible = galleriesVisible(job);
+
+  const selected = visible
+    .flatMap((g) => g.photos.filter((p) => p.is_selected))
+    .sort((a, b) => a.sort_order - b.sort_order);
+  if (selected.length) return selected;
+
+  const newestWithPhotos = visible.find((g) => g.photos.length > 0);
+  return newestWithPhotos ? newestWithPhotos.photos : [];
 }
 
 /** Public share page for a published album, served by the admin app. */

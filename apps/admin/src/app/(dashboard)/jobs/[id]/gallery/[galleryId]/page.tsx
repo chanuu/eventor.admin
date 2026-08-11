@@ -10,6 +10,7 @@ type Gallery = {
   title: string;
   status: string;
   selection_deadline: string | null;
+  selection_submitted_at: string | null;
   job_id: string;
 };
 
@@ -47,7 +48,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
 
   const { data: galleryRaw } = await supabase
     .from('galleries')
-    .select('id, title, status, selection_deadline, job_id')
+    .select('id, title, status, selection_deadline, selection_submitted_at, job_id')
     .eq('id', params.galleryId)
     .eq('job_id', params.id)
     .single();
@@ -103,6 +104,50 @@ export default async function GalleryDetailPage({ params, searchParams }: {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Client submission banner — the studio's signal that proofing is done */}
+        {gallery.status === 'proofing' && (
+          gallery.selection_submitted_at ? (
+            <div style={{ background: '#F1F6EC', border: '1px solid #DCE9CE', borderRadius: 12, padding: 18, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#8BC53F', color: '#0F3D2E', fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✓</span>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#0F3D2E', margin: 0 }}>
+                  Client submitted their selection
+                </p>
+                <p style={{ fontSize: 13, color: '#3f6b2b', margin: '3px 0 0' }}>
+                  {selectedCount} of {photos.length} photo{photos.length !== 1 ? 's' : ''} chosen ·
+                  {' '}{new Date(gallery.selection_submitted_at).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' })}
+                </p>
+              </div>
+              <form action={updateGalleryStatus.bind(null, gallery.id, params.id, job.studio_id, 'approved')}>
+                <button type="submit" style={{ ...primaryBtn, background: '#059669' }}>
+                  Mark Proofing Complete
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div style={{ background: '#FFF3E6', border: '1px solid #F3D9BC', borderRadius: 12, padding: 16 }}>
+              <p style={{ fontSize: 13.5, fontWeight: 700, color: '#a8631f', margin: 0 }}>
+                Waiting for the client to submit
+              </p>
+              <p style={{ fontSize: 12.5, color: '#8a6a45', margin: '3px 0 0' }}>
+                {selectedCount > 0
+                  ? `They have ticked ${selectedCount} of ${photos.length} so far but have not sent the selection yet.`
+                  : 'They have not started choosing yet.'}
+              </p>
+            </div>
+          )
+        )}
+
+        {gallery.status === 'approved' && gallery.selection_submitted_at && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 12, padding: 16 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 700, color: '#166534', margin: 0 }}>Proofing complete</p>
+            <p style={{ fontSize: 12.5, color: '#3f6b2b', margin: '3px 0 0' }}>
+              {selectedCount} photo{selectedCount !== 1 ? 's' : ''} approved for the album ·
+              client submitted {new Date(gallery.selection_submitted_at).toLocaleDateString('en-LK', { dateStyle: 'medium' })}
+            </p>
+          </div>
+        )}
 
         {/* Status card */}
         <div style={card}>

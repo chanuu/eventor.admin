@@ -8,6 +8,7 @@ type Gallery = {
   title: string;
   status: string;
   selection_deadline: string | null;
+  selection_submitted_at: string | null;
   created_at: string;
 };
 
@@ -36,7 +37,7 @@ export default async function GalleryListPage({ params }: { params: { id: string
   const [{ data: galleriesRaw }, { data: photoCounts }, { data: shootsRaw }] = await Promise.all([
     supabase
       .from('galleries')
-      .select('id, title, status, selection_deadline, created_at')
+      .select('id, title, status, selection_deadline, selection_submitted_at, created_at')
       .eq('job_id', params.id)
       .order('created_at'),
     createAdminClient()
@@ -86,6 +87,11 @@ export default async function GalleryListPage({ params }: { params: { id: string
                     {g.selection_deadline && ` · Deadline ${new Date(g.selection_deadline).toLocaleDateString('en-LK', { dateStyle: 'medium' })}`}
                   </p>
                 </div>
+                {g.status === 'proofing' && g.selection_submitted_at && (
+                  <span style={{ fontSize: 12, fontWeight: 700, background: '#8BC53F', color: '#0F3D2E', padding: '3px 10px', borderRadius: 99, flexShrink: 0 }}>
+                    Selection submitted
+                  </span>
+                )}
                 <span style={{ fontSize: 12, fontWeight: 600, background: badge.bg, color: badge.color, padding: '3px 10px', borderRadius: 99, flexShrink: 0 }}>
                   {badge.label}
                 </span>
