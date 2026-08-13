@@ -1,0 +1,3 @@
+# Client portal is a single-page app: every route must serve index.html so that
+# deep links like /portal/<jobId>/album work on a hard refresh.
+/*    /index.html   200

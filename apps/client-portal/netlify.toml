@@ -1,0 +1,23 @@
+# Netlify site: client portal (Vite SPA)
+# Set this site's Base directory to `apps/client-portal` in Netlify.
+# pnpm installs from the workspace root automatically.
+
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+# Single-page app: deep links such as /portal/<jobId>/album must serve index.html
+# rather than 404 on a hard refresh.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Album pages and photos are immutable, hashed assets.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
