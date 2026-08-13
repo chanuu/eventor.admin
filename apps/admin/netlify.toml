@@ -1,0 +1,20 @@
+# Netlify site: studio admin (Next.js with server actions)
+# Set this site's Base directory to `apps/admin` in Netlify.
+
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+# Required for server actions, server components and route handlers. Without it
+# the site deploys as static files and every dynamic route 404s.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Admin is staff-only; keep it out of search results.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

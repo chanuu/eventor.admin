@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install *)",
+      "Bash(pnpm build *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Chanaka Chathuranga\\\\source\\\\repos\\\\eventor.admin\\\\eventor.admin\\\\apps\\\\admin\\\\next.config.ts\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Chanaka Chathuranga\\\\source\\\\repos\\\\eventor.admin\\\\eventor.admin\\\\apps\\\\landing\\\\next.config.ts\" -Force)",
+      "Bash(pnpm --filter admin dev)",
+      "Bash(Start-Sleep -Seconds 12)",
+      "Bash(Get-Content \"C:\\\\Users\\\\CHANAK~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Chanaka-Chathuranga-source-repos-eventor-admin-eventor-admin\\\\8a4bb615-d1a9-479f-961e-a55155caa2c5\\\\tasks\\\\bjq8hcyn3.output\" -ErrorAction SilentlyContinue)",
+      "Bash(pnpm --filter admin add @tanstack/react-query)",
+      "Bash(pnpm --filter admin exec tsc --noEmit)",
+      "Bash(pnpm --filter admin build)",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(pnpm --filter admin add -D tailwindcss@3 postcss autoprefixer)",
+      "Bash(pnpm --filter admin add recharts)",
+      "Bash(pnpm --filter admin typecheck)",
+      "Bash(pnpm add *)"
+    ]
+  }
+}
