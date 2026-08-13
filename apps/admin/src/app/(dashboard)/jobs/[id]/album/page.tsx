@@ -4,10 +4,11 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isS3Url } from '@/lib/s3';
 import {
   createAlbum, updateAlbum, setAlbumStatus,
-  addSelectedPhotos, movePage, deletePage,
+  addSelectedPhotos, movePage, deletePage, removeAlbumMusic,
 } from './actions';
 import AlbumPageUploader from './AlbumPageUploader';
 import PageCaptionField from './PageCaptionField';
+import MusicUploader from './MusicUploader';
 
 type Job = { id: string; title: string; studio_id: string; event_type: string | null };
 
@@ -15,7 +16,8 @@ type Album = {
   id: string; title: string | null;
   cover_kicker: string | null; cover_title: string | null; cover_body: string | null;
   closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
-  music_enabled: boolean; status: string; published_at: string | null;
+  music_enabled: boolean; music_url: string | null; music_name: string | null;
+  status: string; published_at: string | null;
 };
 
 type PageRow = {
@@ -40,7 +42,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
 
   const { data: albumRaw } = await supabase
     .from('albums')
-    .select('id, title, cover_kicker, cover_title, cover_body, closing_kicker, closing_title, closing_body, music_enabled, status, published_at')
+    .select('id, title, cover_kicker, cover_title, cover_body, closing_kicker, closing_title, closing_body, music_enabled, music_url, music_name, status, published_at')
     .eq('job_id', params.id)
     .maybeSingle();
   const album = albumRaw as Album | null;
@@ -134,7 +136,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
 
             <fieldset style={fieldset}>
               <legend style={legendStyle}>Cover page</legend>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                 <Field label="Kicker (small caps line)">
                   <input name="cover_kicker" defaultValue={album.cover_kicker ?? ''} placeholder="Water's Edge · 12 May 2026" style={inputStyle} />
                 </Field>
@@ -149,7 +151,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
 
             <fieldset style={fieldset}>
               <legend style={legendStyle}>Closing page</legend>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                 <Field label="Kicker">
                   <input name="closing_kicker" defaultValue={album.closing_kicker ?? 'Thank you'} style={inputStyle} />
                 </Field>
@@ -171,6 +173,44 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
               <button type="submit" style={primaryBtn}>Save settings</button>
             </div>
           </form>
+        </div>
+
+        {/* Soundtrack */}
+        <div style={card}>
+          <h2 style={sectionHeading}>Soundtrack</h2>
+          {album.music_url ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 16 }}>
+              <span style={{ fontSize: 22 }}>🎵</span>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <p style={{ fontSize: 13.5, fontWeight: 700, color: '#123528', margin: 0 }}>
+                  {album.music_name ?? 'Custom track'}
+                </p>
+                <audio controls preload="none" src={album.music_url} style={{ marginTop: 8, width: '100%', maxWidth: 380, height: 34 }} />
+              </div>
+              <form action={removeAlbumMusic.bind(null, album.id, params.id, job.studio_id, album.music_url)}>
+                <button type="submit" style={{ ...ghostBtn, color: '#dc2626', borderColor: '#fecaca' }}>
+                  Remove
+                </button>
+              </form>
+            </div>
+          ) : (
+            <p style={{ fontSize: 12.5, color: '#8b968f', margin: '0 0 16px' }}>
+              No track uploaded. The album plays a soft built-in instrumental instead — upload your own to replace it.
+            </p>
+          )}
+
+          <MusicUploader
+            albumId={album.id}
+            jobId={params.id}
+            studioId={job.studio_id}
+            hasTrack={!!album.music_url}
+          />
+
+          {!album.music_enabled && (
+            <p style={{ fontSize: 12, color: '#a8631f', marginTop: 12 }}>
+              Music is switched off in the settings above, so the client won’t see a play button.
+            </p>
+          )}
         </div>
 
         {/* Pages */}

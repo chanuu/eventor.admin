@@ -108,7 +108,7 @@ export default async function ShootDetailPage({ params, searchParams }: {
       {/* Shoot details */}
       <Section title="Details">
         <form action={updateShootAction} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
             <Field label="Shoot type">
               <input name="shoot_type" defaultValue={shoot.shoot_type ?? ''} style={inputStyle} placeholder="Wedding, Pre-shoot…" />
             </Field>

@@ -150,7 +150,7 @@ export default async function DashboardPage() {
       <p className="breadcrumb mb-6">Main Menu</p>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         {stats.map((s) => (
           <div key={s.label} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${s.color}`}>
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Revenue chart + Job pipeline */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
 
         {/* Monthly revenue */}
         <div className="col-span-2 bg-white rounded-2xl shadow-card p-5">
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Event type revenue + Upcoming shoots */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
 
         {/* Revenue by event type */}
         <div className="bg-white rounded-2xl shadow-card p-5">
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
         {payments.length === 0 ? (
           <p className="text-sm text-gray-400 py-4 text-center">No pending payments.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-cols-3">
             {payments.map((p: any) => (
               <div key={p.id} className="p-3 rounded-xl border border-gray-100">
                 <div className="flex justify-between items-start mb-1">

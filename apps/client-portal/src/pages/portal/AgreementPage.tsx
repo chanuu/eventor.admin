@@ -86,7 +86,7 @@ export default function AgreementPage() {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginTop: 16 }}>
+      <div className="grid-cards" style={{ marginTop: 16 }}>
         <Card style={{ padding: 20 }}>
           <div style={label}>Package value</div>
           <div style={fact}>{money(job.total_price)}</div>

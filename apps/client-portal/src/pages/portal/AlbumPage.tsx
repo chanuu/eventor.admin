@@ -100,6 +100,7 @@ export default function AlbumPage() {
         pages={pages}
         title={album?.title || job.title}
         musicEnabled={album ? album.music_enabled : true}
+        musicUrl={album?.music_url ?? null}
         onClose={() => setOpen(false)}
       />
     );

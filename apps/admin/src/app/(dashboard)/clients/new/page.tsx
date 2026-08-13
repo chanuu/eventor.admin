@@ -27,7 +27,7 @@ export default function NewClientPage() {
           <input name="full_name" required className="input" placeholder="Priya & Sahan Fernando" />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Email">
             <input name="email" type="email" className="input" placeholder="priya@example.com" />
           </Field>

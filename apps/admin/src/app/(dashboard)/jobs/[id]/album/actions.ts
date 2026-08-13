@@ -244,6 +244,84 @@ export async function uploadAlbumPages(
   return skipped.length ? { uploaded, error: `Skipped: ${skipped.join('; ')}` } : { uploaded };
 }
 
+// ─── Soundtrack ──────────────────────────────────────────────────────────────
+
+const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // 12 MB — a few minutes of MP3
+const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/aac', 'audio/mp4', 'audio/x-m4a', 'audio/ogg', 'audio/wav'];
+
+export async function uploadAlbumMusic(
+  albumId: string,
+  jobId: string,
+  studioId: string,
+  formData: FormData,
+): Promise<{ error?: string; name?: string }> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.' };
+  if (!isS3Configured()) return { error: 'Album storage is not configured. Set the AWS_* environment variables.' };
+
+  const file = formData.get('music') as File | null;
+  if (!file || file.size === 0) return { error: 'Please choose an audio file.' };
+
+  const typeOk = AUDIO_TYPES.includes(file.type) || /\.(mp3|m4a|aac|ogg|wav)$/i.test(file.name);
+  if (!typeOk) return { error: 'That file is not audio. Use MP3, M4A, AAC, OGG or WAV.' };
+  if (file.size > MAX_AUDIO_BYTES) {
+    return { error: `“${file.name}” is over ${MAX_AUDIO_BYTES / 1024 / 1024} MB. Please use a shorter or more compressed track.` };
+  }
+
+  const admin = createAdminClient();
+
+  // Replace any previous track rather than accumulating files.
+  const { data: current } = await admin
+    .from('albums')
+    .select('music_url')
+    .eq('id', albumId)
+    .maybeSingle();
+  const previous = (current as { music_url: string | null } | null)?.music_url ?? null;
+
+  const ext = (file.name.split('.').pop() ?? 'mp3').toLowerCase();
+  const key = `albums/${studioId}/${albumId}/music/${randomUUID()}.${ext}`;
+
+  let url: string;
+  try {
+    url = await uploadToS3(key, Buffer.from(await file.arrayBuffer()), file.type || 'audio/mpeg');
+  } catch (err) {
+    console.error('[uploadAlbumMusic] S3 upload failed', err);
+    return { error: err instanceof Error ? err.message : 'Upload to S3 failed.' };
+  }
+
+  await admin
+    .from('albums')
+    .update({ music_url: url, music_name: file.name, music_enabled: true })
+    .eq('id', albumId)
+    .eq('studio_id', studioId);
+
+  if (previous && isS3Url(previous)) await deleteFromS3(previous);
+
+  revalidatePath(`/jobs/${jobId}/album`);
+  return { name: file.name };
+}
+
+export async function removeAlbumMusic(
+  albumId: string,
+  jobId: string,
+  studioId: string,
+  musicUrl: string | null,
+): Promise<void> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from('albums')
+    .update({ music_url: null, music_name: null })
+    .eq('id', albumId)
+    .eq('studio_id', studioId);
+
+  if (musicUrl && isS3Url(musicUrl)) await deleteFromS3(musicUrl);
+
+  revalidatePath(`/jobs/${jobId}/album`);
+}
+
 export async function updatePageCaption(
   pageId: string,
   jobId: string,

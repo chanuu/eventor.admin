@@ -44,7 +44,7 @@ export default function PackagePage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
+      <div className="grid-cards cols-2" style={{ marginTop: 16 }}>
         <Card>
           <CardTitle>What’s included</CardTitle>
           <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>

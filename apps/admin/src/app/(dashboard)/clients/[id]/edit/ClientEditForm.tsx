@@ -36,7 +36,7 @@ export default function ClientEditForm({
         <input name="full_name" required defaultValue={client.full_name} style={inputStyle} />
       </Field>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
         <Field label="Email">
           <input name="email" type="email" defaultValue={client.email ?? ''} style={inputStyle} />
         </Field>

@@ -50,7 +50,7 @@ export default function OverviewPage() {
       </div>
 
       {/* ── Three stat cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginTop: 18 }}>
+      <div className="grid-cards" style={{ marginTop: 18 }}>
         <div style={card}>
           <div style={label}>Balance due</div>
           <div style={{ fontSize: 24, fontWeight: 800, color: C.green, marginTop: 8 }}>{money(Math.max(0, due))}</div>
@@ -122,7 +122,7 @@ export default function OverviewPage() {
       )}
 
       {/* ── Journey + latest gallery ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16, marginTop: 16 }}>
+      <div className="grid-split" style={{ marginTop: 16 }}>
         <Card>
           <CardTitle>Your journey</CardTitle>
           <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column' }}>

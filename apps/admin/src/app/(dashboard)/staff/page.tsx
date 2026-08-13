@@ -43,8 +43,8 @@ export default async function StaffPage() {
         )}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
               {['Name', 'Role', 'Status', 'Joined', isAdmin ? 'Actions' : ''].filter(Boolean).map((h) => (

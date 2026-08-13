@@ -31,8 +31,9 @@ export default function DataTable<T extends object>({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100">
-      <table className="w-full border-collapse">
+    // Tables scroll sideways on phones rather than squashing or overflowing the page.
+    <div className="overflow-x-auto rounded-2xl border border-line">
+      <table className="w-full border-collapse min-w-[640px]">
         <thead>
           <tr className="border-b border-gray-100">
             {columns.map((col) => (

@@ -79,7 +79,7 @@ export default async function EditPackagePage({ params, searchParams }: {
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Base price (LKR)" required>
               <input name="base_price" type="number" min="0" step="500" required defaultValue={pkg.base_price} className="input" />
             </Field>

@@ -175,7 +175,7 @@ export default function ProofingPage() {
           </div>
 
           {visiblePhotos.length > 0 ? (
-            <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 }}>
+            <div className="grid-photos" style={{ marginTop: 20 }}>
               {visiblePhotos.map((p) => {
                 const on = picks.has(p.id);
                 return (

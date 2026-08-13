@@ -46,7 +46,8 @@ export type Album = {
   id: string; title: string | null;
   cover_kicker: string | null; cover_title: string | null; cover_body: string | null;
   closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
-  music_enabled: boolean; published_at: string | null;
+  music_enabled: boolean; music_url: string | null; music_name: string | null;
+  published_at: string | null;
   pages: AlbumPageRow[];
 };
 
@@ -131,7 +132,8 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       contracts(id, status, content_html, signed_at, signature_data, created_at),
       flipbooks(id, storage_path, share_token, published_at, created_at),
       albums(id, title, cover_kicker, cover_title, cover_body,
-             closing_kicker, closing_title, closing_body, music_enabled, published_at,
+             closing_kicker, closing_title, closing_body,
+             music_enabled, music_url, music_name, published_at,
              album_pages(id, image_url, caption, sort_order, gallery_photos(storage_path)))
     `)
     .eq('id', jobId)
@@ -207,6 +209,8 @@ function albumFrom(raw: any): Album | null {
     cover_kicker: a.cover_kicker, cover_title: a.cover_title, cover_body: a.cover_body,
     closing_kicker: a.closing_kicker, closing_title: a.closing_title, closing_body: a.closing_body,
     music_enabled: a.music_enabled ?? true,
+    music_url: a.music_url ?? null,
+    music_name: a.music_name ?? null,
     published_at: a.published_at,
     pages: ((a.album_pages ?? []) as AlbumPageRow[])
       .slice()

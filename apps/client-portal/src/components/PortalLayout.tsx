@@ -41,6 +41,27 @@ export default function PortalLayout({ user }: { user: User }) {
   const [job, setJob] = useState<PortalJob | null>(null);
   const [jobOptions, setJobOptions] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [navOpen, setNavOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Close the drawer whenever navigation happens.
+  useEffect(() => { setNavOpen(false); }, [pathname]);
+
+  // Don't let the page scroll behind an open drawer.
+  useEffect(() => {
+    if (!navOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [navOpen]);
 
   const load = useCallback(() => {
     if (!jobId) return;
@@ -73,8 +94,13 @@ export default function PortalLayout({ user }: { user: User }) {
     <PortalContext.Provider value={{ job, jobOptions, reload: load }}>
       <div style={pageBase}>
 
-        {/* ── Sidebar ── */}
-        <div style={sidebar}>
+        {/* Scrim behind the mobile drawer */}
+        {isMobile && navOpen && (
+          <div onClick={() => setNavOpen(false)} style={scrim} aria-hidden />
+        )}
+
+        {/* ── Sidebar (drawer on mobile) ── */}
+        <div style={sidebar(isMobile, navOpen)}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 22px 24px' }}>
             {job.studio?.logo_url
               ? <img src={job.studio.logo_url} alt="" style={{ width: 32, height: 32, borderRadius: 9, objectFit: 'cover' }} />
@@ -130,15 +156,27 @@ export default function PortalLayout({ user }: { user: User }) {
 
         {/* ── Main ── */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={topBar}>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: C.green }}>{title}</div>
-              <div style={{ fontSize: 12.5, color: C.muted, marginTop: 2 }}>
-                {section === 'event' ? eventSubtitle(job, evDate) : sub}
+          <div style={{ ...topBar, padding: isMobile ? '14px 16px' : '16px 34px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              {isMobile && (
+                <button onClick={() => setNavOpen(true)} aria-label="Open menu" style={hamburger}>
+                  <span style={burgerBar} /><span style={burgerBar} /><span style={burgerBar} />
+                </button>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 800, color: C.green }} className="truncate-1">
+                  {title}
+                </div>
+                {!isMobile && (
+                  <div style={{ fontSize: 12.5, color: C.muted, marginTop: 2 }}>
+                    {section === 'event' ? eventSubtitle(job, evDate) : sub}
+                  </div>
+                )}
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {days !== null && days >= 0 && (
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+              {days !== null && days >= 0 && !isMobile && (
                 <div style={countdownChip}>
                   <span style={pulseDot} />
                   <span style={{ fontSize: 11.5, fontWeight: 700, color: C.limeSoftText }}>
@@ -148,17 +186,31 @@ export default function PortalLayout({ user }: { user: User }) {
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                 <div style={clientAvatar}>{job.clientName.charAt(0).toUpperCase()}</div>
-                <div>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.textStrong }}>{job.clientName}</div>
-                  <div style={{ fontSize: 11, color: C.muted }}>
-                    {user.phone ? prettyPhone(user.phone) : user.email}
+                {!isMobile && (
+                  <div>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: C.textStrong }}>{job.clientName}</div>
+                    <div style={{ fontSize: 11, color: C.muted }}>
+                      {user.phone ? prettyPhone(user.phone) : user.email}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div style={{ padding: '28px 34px 60px', maxWidth: 1120 }}>
+          {/* The countdown moves below the bar on phones rather than being dropped. */}
+          {isMobile && days !== null && days >= 0 && (
+            <div style={{ padding: '12px 16px 0' }}>
+              <div style={{ ...countdownChip, display: 'inline-flex' }}>
+                <span style={pulseDot} />
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: C.limeSoftText }}>
+                  {days === 0 ? 'Your event is today' : `${days} day${days === 1 ? '' : 's'} to your ${(job.event_type ?? 'event').toLowerCase()}`}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div style={{ padding: isMobile ? '16px 16px 48px' : '28px 34px 60px', maxWidth: 1120 }}>
             <Outlet />
           </div>
         </div>
@@ -181,10 +233,24 @@ const pageBase: React.CSSProperties = {
   fontFamily: FONT, background: C.bg, color: C.text, minHeight: '100vh', display: 'flex',
 };
 
-const sidebar: React.CSSProperties = {
-  width: 246, flexShrink: 0, background: C.green, color: C.white,
-  display: 'flex', flexDirection: 'column', padding: '22px 0',
-  position: 'sticky', top: 0, height: '100vh',
+function sidebar(isMobile: boolean, open: boolean): React.CSSProperties {
+  const base: React.CSSProperties = {
+    width: 246, flexShrink: 0, background: C.green, color: C.white,
+    display: 'flex', flexDirection: 'column', padding: '22px 0',
+  };
+  if (!isMobile) return { ...base, position: 'sticky', top: 0, height: '100vh' };
+  return {
+    ...base,
+    position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 60,
+    height: '100dvh', overflowY: 'auto',
+    transform: open ? 'translateX(0)' : 'translateX(-100%)',
+    transition: 'transform 0.25s ease',
+    boxShadow: open ? '0 0 40px rgba(0,0,0,0.3)' : 'none',
+  };
+}
+
+const scrim: React.CSSProperties = {
+  position: 'fixed', inset: 0, background: 'rgba(11,42,32,0.5)', zIndex: 55,
 };
 
 const logoMark: React.CSSProperties = {
@@ -227,9 +293,19 @@ const signOutBtn: React.CSSProperties = {
 };
 
 const topBar: React.CSSProperties = {
-  background: C.white, borderBottom: `1px solid ${C.border}`, padding: '16px 34px',
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  background: C.white, borderBottom: `1px solid ${C.border}`, padding: '14px 16px',
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
   position: 'sticky', top: 0, zIndex: 20,
+};
+
+const hamburger: React.CSSProperties = {
+  width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+  background: C.limeSoft, border: `1px solid ${C.limeSoftBorder}`, cursor: 'pointer',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+};
+
+const burgerBar: React.CSSProperties = {
+  display: 'block', width: 16, height: 2, borderRadius: 2, background: C.green,
 };
 
 const countdownChip: React.CSSProperties = {

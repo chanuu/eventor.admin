@@ -16,13 +16,15 @@ export type AlbumPage =
  * React would fight over the same nodes.
  */
 export default function FlipAlbum({
-  pages, title, onClose, musicEnabled = true,
+  pages, title, onClose, musicEnabled = true, musicUrl = null,
 }: {
   pages: AlbumPage[];
   title: string;
   onClose?: () => void;
   /** Studios can turn the soundtrack off for an album. */
   musicEnabled?: boolean;
+  /** Uploaded track. When absent, the built-in generated loop is used. */
+  musicUrl?: string | null;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const bookRef = useRef<HTMLDivElement | null>(null);
@@ -43,7 +45,18 @@ export default function FlipAlbum({
   const masterRef = useRef<GainNode | null>(null);
   const audioTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const elementRef = useRef<HTMLAudioElement | null>(null);
+
   const stopAudio = useCallback(() => {
+    // Uploaded track
+    const el = elementRef.current;
+    if (el) {
+      const fade = setInterval(() => {
+        el.volume = Math.max(0, el.volume - 0.08);
+        if (el.volume <= 0.02) { clearInterval(fade); el.pause(); }
+      }, 60);
+    }
+
     if (audioTimerRef.current) clearInterval(audioTimerRef.current);
     audioTimerRef.current = null;
 
@@ -61,6 +74,22 @@ export default function FlipAlbum({
   }, []);
 
   const startAudio = useCallback(() => {
+    // An uploaded track replaces the generated loop entirely.
+    if (musicUrl) {
+      const el = elementRef.current;
+      if (!el) return;
+      el.loop = true;
+      el.volume = 0;
+      el.play().then(() => {
+        // Ease in so it doesn't jump out at the reader.
+        const fade = setInterval(() => {
+          el.volume = Math.min(0.5, el.volume + 0.04);
+          if (el.volume >= 0.5) clearInterval(fade);
+        }, 90);
+      }).catch(() => { /* blocked by the browser; the toggle simply stays off */ });
+      return;
+    }
+
     const AC = window.AudioContext ?? (window as any).webkitAudioContext;
     if (!AC) return;
 
@@ -103,7 +132,7 @@ export default function FlipAlbum({
 
     playChord();
     audioTimerRef.current = setInterval(playChord, 5200);
-  }, []);
+  }, [musicUrl]);
 
   function toggleAudio() {
     const next = !audioOn;
@@ -308,6 +337,8 @@ export default function FlipAlbum({
 
   return (
     <div ref={stageRef} style={stageStyle(immersive, !!onClose)}>
+      {musicUrl && <audio ref={elementRef} src={musicUrl} preload="none" loop />}
+
       {/* Header */}
       <div style={headerRow}>
         <div>

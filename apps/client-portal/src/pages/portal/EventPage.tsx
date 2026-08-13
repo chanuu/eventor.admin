@@ -15,10 +15,10 @@ export default function EventPage() {
 
   return (
     <Screen>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+      <div className="grid-split wide-left">
         <Card style={{ padding: 24 }}>
           <CardTitle>Event details</CardTitle>
-          <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 24px' }}>
+          <div className="grid-fields" style={{ marginTop: 18 }}>
             <Field name="Event type" value={job.event_type ?? '—'} />
             <Field name="Date" value={evDate ? shortDate(evDate) : 'To be confirmed'} />
             <Field name="Package" value={job.pkg?.name ?? 'Not assigned'} />

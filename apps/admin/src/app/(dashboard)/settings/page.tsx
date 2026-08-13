@@ -65,7 +65,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
               className="input h-auto py-2 resize-y"
             />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Phone">
               <input name="phone" defaultValue={studio.phone ?? ''} className="input" placeholder="+94 77 XXX XXXX" />
             </Field>

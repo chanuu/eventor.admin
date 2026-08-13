@@ -178,7 +178,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               <div>
                 <SectionHeader title="Job Details"
                   action={<button type="button" onClick={() => setOpenModal('details')} className="btn-secondary">Edit Details</button>} />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ReadField label="Title" value={job.title} />
                   <ReadField label="Event Type" value={job.eventType} />
                 </div>
@@ -261,7 +261,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               <SectionHeader title="Payments"
                 action={<button type="button" onClick={() => setOpenModal('payment')} className="btn-primary">+ Record Payment</button>} />
 
-              <div className="grid grid-cols-3 gap-4 mb-5 p-4 bg-gray-50 rounded-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 p-4 bg-gray-50 rounded-xl">
                 <StatBox label="Total"       value={`LKR ${job.totalPrice.toLocaleString()}`} />
                 <StatBox label="Paid"        value={`LKR ${totalPaid.toLocaleString()}`}   color="text-emerald-600" />
                 <StatBox label="Balance Due" value={`LKR ${balanceDue.toLocaleString()}`}  color={balanceDue > 0 ? 'text-red-500' : 'text-emerald-600'} />
@@ -357,7 +357,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <form onSubmit={(e) => { e.preventDefault(); updateJobMutation.mutate(new FormData(e.currentTarget)); }}
           className="flex flex-col gap-4"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="Title" required>
               <input name="title" required defaultValue={job.title} className="input" />
             </FormField>
@@ -394,7 +394,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <form onSubmit={(e) => { e.preventDefault(); createShootMutation.mutate(new FormData(e.currentTarget)); }}
           className="flex flex-col gap-4"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="Shoot Type"><input name="shoot_type" className="input" placeholder="Wedding, Pre-shoot…" /></FormField>
             <FormField label="Venue"><input name="venue" className="input" placeholder="Location" /></FormField>
           </div>
@@ -409,7 +409,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <form onSubmit={(e) => { e.preventDefault(); recordPayMutation.mutate(new FormData(e.currentTarget)); }}
           className="flex flex-col gap-4"
         >
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <FormField label="Type" required>
               <select name="type" required className="input">
                 <option value="advance">Advance</option>
@@ -430,7 +430,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               <input name="amount" type="number" min="0" step="100" required className="input" placeholder="50000" />
             </FormField>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="Paid On"><input name="paid_at" type="date" className="input" /></FormField>
             <FormField label="Notes"><input name="notes" className="input" placeholder="Optional reference…" /></FormField>
           </div>

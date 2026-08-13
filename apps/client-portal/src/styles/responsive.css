@@ -1,0 +1,75 @@
+/*
+ * Mobile-first layout helpers.
+ *
+ * The portal is built with inline styles, which cannot express media queries.
+ * Layouts that need to reflow use these classes instead: single column by
+ * default, expanding at wider breakpoints.
+ */
+
+/* Auto-fitting grids — the count is a maximum, not a minimum. */
+.grid-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.grid-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.grid-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+/* Photo grids stay multi-column even on phones — two up reads better here. */
+.grid-photos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Stack rows that put actions beside content. */
+.stack-sm {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.stack-sm > * { min-width: 0; }
+
+/* Buttons go full width when a row stacks. */
+@media (max-width: 640px) {
+  .stack-sm button,
+  .stack-sm a[role='button'] { width: 100%; }
+  .actions-wrap { width: 100%; }
+  .actions-wrap > * { flex: 1 1 auto; }
+}
+
+@media (min-width: 640px) {
+  .grid-cards { gap: 16px; }
+  .grid-photos { grid-template-columns: repeat(3, 1fr); }
+  .stack-sm { flex-direction: row; align-items: center; }
+}
+
+@media (min-width: 900px) {
+  .grid-cards { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-split { grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  .grid-split.wide-left { grid-template-columns: 1.4fr 1fr; }
+  .grid-photos { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Long values (URLs, emails) must never widen the page. */
+.truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nothing may cause a horizontal scrollbar on a phone. */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video { max-width: 100%; }

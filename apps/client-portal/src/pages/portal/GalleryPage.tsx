@@ -43,7 +43,7 @@ export default function GalleryPage() {
             </div>
 
             {g.photos.length > 0 ? (
-              <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
+              <div className="grid-photos" style={{ marginTop: 18 }}>
                 {g.photos.map((p) => (
                   <button key={p.id} onClick={() => setLightbox(p)} style={thumbBtn}>
                     <img src={photoUrl(p.storage_path)} alt={p.file_name} style={thumb} />

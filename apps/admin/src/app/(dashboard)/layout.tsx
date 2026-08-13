@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { StaffRole } from '@eventor/types';
 import { createClient } from '@/lib/supabase/server';
 import Sidebar from '@/components/Sidebar';
+import SidebarShell from '@/components/SidebarShell';
 import AppHeader from '@/components/AppHeader';
 import QueryProvider from '@/components/QueryProvider';
 
@@ -27,11 +28,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex h-screen bg-canvas overflow-hidden">
-      <Sidebar
-        studioName={studio?.name ?? ''}
-        staffName={staff?.full_name ?? 'User'}
-        role={staff?.role ?? 'admin'}
-      />
+      <SidebarShell>
+        <Sidebar
+          studioName={studio?.name ?? ''}
+          staffName={staff?.full_name ?? 'User'}
+          role={staff?.role ?? 'admin'}
+        />
+      </SidebarShell>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AppHeader
@@ -39,7 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           role={staff?.role ?? 'admin'}
           studioName={studio?.name ?? ''}
         />
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <QueryProvider>{children}</QueryProvider>
         </main>
       </div>

@@ -194,7 +194,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
         <div style={card}>
           <h2 style={sectionHeading}>Gallery Settings</h2>
           <form action={updateAction} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
               <Field label="Title" required>
                 <input name="title" required defaultValue={gallery.title} style={inputStyle} />
               </Field>
