@@ -146,29 +146,42 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
       <div className="bg-white rounded-2xl shadow-card mt-5 overflow-hidden">
 
         {/* Status bar */}
-        <div className="flex items-center gap-3 px-6 py-3.5 bg-gray-50 border-b border-gray-100">
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5 bg-gray-50 border-b border-gray-100">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
           <JobStatusForm current={job.status} steps={STATUS_STEPS} isPending={statusMutation.isPending} onStatusChange={(s) => statusMutation.mutate(s)} />
         </div>
 
-        {/* Tab nav */}
-        <div className="flex border-b border-gray-100 bg-white overflow-x-auto">
-          {TABS.map(({ id, label }) => {
-            const count  = id === 'shoots' ? job.shoots.length : id === 'payments' ? job.payments.length : 0;
-            const active = activeTab === id;
-            return (
-              <button key={id} onClick={() => setActiveTab(id as TabId)}
-                className={`px-5 py-3 text-sm whitespace-nowrap transition-colors border-b-2 -mb-px
-                  ${active ? 'font-semibold text-[#0F3D2E] border-[#0F3D2E]' : 'font-normal text-gray-500 border-transparent hover:text-gray-700'}`}
-              >
-                {label}{count > 0 ? ` (${count})` : ''}
-              </button>
-            );
-          })}
+        {/* Tab nav — pills that wrap, so all seven stay reachable on a phone */}
+        <div className="bg-white border-b border-line px-4 sm:px-5 py-3.5">
+          <div className="flex flex-wrap gap-1.5 gap-y-2">
+            {TABS.map(({ id, label }) => {
+              const count  = id === 'shoots' ? job.shoots.length : id === 'payments' ? job.payments.length : 0;
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id as TabId)}
+                  className={`flex items-center gap-2 whitespace-nowrap rounded-[10px] border px-4 sm:px-[18px] py-[11px]
+                    text-[13.5px] font-bold transition-colors
+                    ${active
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-panel text-ink-mid border-line hover:bg-lime-soft'}`}
+                >
+                  <span>{label}</span>
+                  {count > 0 && (
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold
+                      ${active ? 'bg-lime text-primary' : 'bg-line-soft text-ink-mid'}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Tab content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
 
           {/* ── Details ── */}
           {activeTab === 'details' && (
@@ -446,7 +459,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
 /** Section title with an optional action button (the "Add" button above a grid). */
 function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 mb-3">
+    <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
       <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
       {action}
     </div>

@@ -17,7 +17,7 @@ const JobStatusPipeline = dynamic(
 
 const STATUS_ORDER = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { denied?: string } }) {
   const supabase = createClient();
 
   const [
@@ -149,6 +149,15 @@ export default async function DashboardPage() {
       <h1 className="page-title">Dashboard</h1>
       <p className="breadcrumb mb-6">Main Menu</p>
 
+      {searchParams.denied && (
+        <div className="mb-5 rounded-xl border border-[#F3D9BC] bg-[#FFF3E6] px-4 py-3">
+          <p className="text-[13px] font-bold text-[#a8631f]">You don’t have access to that page</p>
+          <p className="text-[12.5px] text-[#8a6a45] mt-0.5">
+            Ask a studio admin if you need it added to your role.
+          </p>
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         {stats.map((s) => (
@@ -170,7 +179,7 @@ export default async function DashboardPage() {
 
         {/* Monthly revenue */}
         <div className="col-span-2 bg-white rounded-2xl shadow-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap mb-4">
             <div>
               <h2 className="text-sm font-bold text-gray-800">Revenue Overview</h2>
               <p className="text-xs text-gray-400 mt-0.5">Collected payments — last 6 months</p>
@@ -184,7 +193,7 @@ export default async function DashboardPage() {
 
         {/* Job status pipeline */}
         <div className="bg-white rounded-2xl shadow-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap mb-4">
             <h2 className="text-sm font-bold text-gray-800">Job Pipeline</h2>
             <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
               {jobCount ?? 0} Jobs
@@ -200,7 +209,7 @@ export default async function DashboardPage() {
 
         {/* Revenue by event type */}
         <div className="bg-white rounded-2xl shadow-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap mb-4">
             <div>
               <h2 className="text-sm font-bold text-gray-800">Revenue by Event Type</h2>
               <p className="text-xs text-gray-400 mt-0.5">Total job value per category</p>
@@ -211,7 +220,7 @@ export default async function DashboardPage() {
 
         {/* Upcoming shoots */}
         <div className="bg-white rounded-2xl shadow-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap mb-4">
             <h2 className="text-sm font-bold text-gray-800">Upcoming Shoots</h2>
             <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
               {upcoming.length} Jobs
@@ -226,7 +235,7 @@ export default async function DashboardPage() {
                 <a
                   key={shoot.id}
                   href={`/jobs/${shoot.jobs?.id}`}
-                  className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-[#8BC53F] hover:bg-gray-50 transition-colors group"
+                  className="flex items-center justify-between flex-wrap p-3 rounded-xl border border-gray-100 hover:border-[#8BC53F] hover:bg-gray-50 transition-colors group"
                 >
                   <div className="min-w-0">
                     <p className="text-xs text-gray-400">
@@ -250,7 +259,7 @@ export default async function DashboardPage() {
 
       {/* Pending payments */}
       <div className="bg-white rounded-2xl shadow-card p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap mb-4">
           <h2 className="text-sm font-bold text-gray-800">Pending Payments</h2>
           <span className="text-xs font-semibold bg-[#8BC53F] text-white px-2.5 py-1 rounded-full">
             {payments.length} Records

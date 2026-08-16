@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createGallery } from './actions';
+import { EmptyState } from '@/components/states';
 
 type Gallery = {
   id: string;
@@ -101,7 +102,9 @@ export default async function GalleryListPage({ params }: { params: { id: string
           })}
         </div>
       ) : (
-        <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 24 }}>No galleries yet for this job.</p>
+        <div style={{ marginBottom: 24 }}>
+          <EmptyState title="No galleries yet" description="Create a gallery to upload proofs and share them with the client." />
+        </div>
       )}
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 24 }}>

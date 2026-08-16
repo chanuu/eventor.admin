@@ -25,6 +25,28 @@ img, video { max-width: 100%; height: auto; }
   input, select, textarea { font-size: 16px; }
 }
 
+/* ── Auth screens ───────────────────────────────────────────────
+   The sign-in card is a two-column layout on desktop. On phones it
+   becomes a single column and the decorative panel is dropped, so the
+   form gets the whole screen. */
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 880px;
+  min-height: 580px;
+}
+.auth-panel { width: 320px; flex-shrink: 0; }
+
+@media (max-width: 820px) {
+  .auth-card { max-width: 480px; min-height: 0; }
+  .auth-panel { display: none; }
+  .auth-form { padding: 32px 24px !important; }
+}
+
+@media (max-width: 420px) {
+  .auth-form { padding: 24px 18px !important; }
+}
+
 @layer components {
   .input {
     @apply w-full h-10 border border-line-btn rounded-lg px-3 text-sm text-ink-strong

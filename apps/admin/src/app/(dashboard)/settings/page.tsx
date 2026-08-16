@@ -1,7 +1,9 @@
+import { requireCapability, getStaff } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { updateStudioSettings } from './actions';
 import LogoUploadForm from './LogoUploadForm';
+import ChangePassword from './ChangePassword';
 
 type Studio = {
   id: string;
@@ -13,21 +15,13 @@ type Studio = {
 };
 
 export default async function SettingsPage({ searchParams }: { searchParams: { saved?: string } }) {
+  await requireCapability('settings.manage');
+  // requireCapability at the top of this component already redirected anyone
+  // without settings.manage, so the studio lookup can rely on that context.
+  const staff = await getStaff();
+  if (!staff) redirect('/login');
+
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: staffRaw } = await supabase
-    .from('staff')
-    .select('studio_id, role')
-    .eq('user_id', user.id)
-    .single();
-  const staff = staffRaw as { studio_id: string; role: string } | null;
-
-  if (!staff || staff.role !== 'admin') {
-    return <p className="text-sm text-red-500">Only admins can access settings.</p>;
-  }
-
   const { data: studioRaw } = await supabase
     .from('studios')
     .select('id, name, address, email, phone, logo_url')
@@ -91,6 +85,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
         )}
         <LogoUploadForm studioId={studio.id} hasLogo={!!studio.logo_url} />
       </div>
+
+      <ChangePassword />
     </div>
   );
 }

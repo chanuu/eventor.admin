@@ -172,7 +172,7 @@ export default async function ShootDetailPage({ params, searchParams }: {
               </select>
             </Field>
             <Field label="Role in shoot">
-              <input name="role_in_shoot" style={{ ...inputStyle, width: 160 }} placeholder="Photographer, 2nd…" />
+              <input name="role_in_shoot" style={{ ...inputStyle, flex: '1 1 160px', minWidth: 0 }} placeholder="Photographer, 2nd…" />
             </Field>
             <button type="submit" style={{ ...secondaryBtn, marginBottom: 1 }}>Assign</button>
           </form>

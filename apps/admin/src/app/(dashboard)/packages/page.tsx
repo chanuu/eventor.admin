@@ -1,3 +1,4 @@
+import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { togglePackageActive } from './actions';
 
@@ -12,6 +13,7 @@ type PackageRow = {
 };
 
 export default async function PackagesPage() {
+  await requireCapability('packages.manage');
   const supabase = createClient();
 
   const { data: raw } = await supabase

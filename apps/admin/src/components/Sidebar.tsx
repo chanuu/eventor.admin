@@ -1,11 +1,14 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+
 import { signOut } from '@/app/(auth)/login/actions';
+import type { Capability } from '@/lib/permissions';
 
 const MAIN_NAV = [
   {
     href: '/dashboard',
+    cap: 'dashboard.view' as const,
     label: 'Dashboard',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -15,6 +18,7 @@ const MAIN_NAV = [
   },
   {
     href: '/schedule',
+    cap: 'schedule.view' as const,
     label: 'Schedule',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -25,6 +29,7 @@ const MAIN_NAV = [
   },
   {
     href: '/jobs',
+    cap: 'jobs.view' as const,
     label: 'Jobs',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -34,6 +39,7 @@ const MAIN_NAV = [
   },
   {
     href: '/clients',
+    cap: 'clients.manage' as const,
     label: 'Clients',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -43,6 +49,7 @@ const MAIN_NAV = [
   },
   {
     href: '/packages',
+    cap: 'packages.manage' as const,
     label: 'Packages',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -52,6 +59,7 @@ const MAIN_NAV = [
   },
   {
     href: '/staff',
+    cap: 'staff.manage' as const,
     label: 'Staff',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -63,7 +71,18 @@ const MAIN_NAV = [
 
 const SETTINGS_NAV = [
   {
+    href: '/roles',
+    cap: 'staff.manage' as const,
+    label: 'Roles',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+      </svg>
+    ),
+  },
+  {
     href: '/settings',
+    cap: 'settings.manage' as const,
     label: 'Settings',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -77,8 +96,8 @@ const navItem = (active: boolean) =>
   `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors
    ${active ? 'bg-white text-primary' : 'text-[#cfe4d8] hover:bg-white/10'}`;
 
-export default function Sidebar({ studioName, staffName, role }: {
-  studioName: string; staffName: string; role: string;
+export default function Sidebar({ studioName, staffName, roleName, permissions }: {
+  studioName: string; staffName: string; roleName: string; permissions: Capability[];
 }) {
   const pathname = usePathname();
 
@@ -86,6 +105,10 @@ export default function Sidebar({ studioName, staffName, role }: {
     if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
   }
+
+  // Only show what this role can actually use — the pages guard themselves too.
+  const mainNav = MAIN_NAV.filter(({ cap }) => permissions.includes(cap));
+  const settingsNav = SETTINGS_NAV.filter(({ cap }) => permissions.includes(cap));
 
   return (
     <aside className="w-[246px] shrink-0 bg-primary text-white flex flex-col py-[22px] h-screen sticky top-0">
@@ -102,7 +125,7 @@ export default function Sidebar({ studioName, staffName, role }: {
 
       {/* Main nav */}
       <nav className="flex flex-col gap-0.5 px-3">
-        {MAIN_NAV.map(({ href, label, icon }) => (
+        {mainNav.map(({ href, label, icon }) => (
           <a key={href} href={href} className={navItem(isActive(href))}>
             <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
             <span className="flex-1">{label}</span>
@@ -114,7 +137,7 @@ export default function Sidebar({ studioName, staffName, role }: {
 
       {/* Setup + account */}
       <div className="px-3">
-        {SETTINGS_NAV.map(({ href, label, icon }) => (
+        {settingsNav.map(({ href, label, icon }) => (
           <a key={href} href={href} className={navItem(isActive(href))}>
             <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
             <span className="flex-1">{label}</span>
@@ -131,7 +154,7 @@ export default function Sidebar({ studioName, staffName, role }: {
             </span>
             <span className="min-w-0">
               <span className="block text-[12.5px] font-bold truncate">{staffName}</span>
-              <span className="block text-[11px] text-[#8fae9d] capitalize">{role}</span>
+              <span className="block text-[11px] text-[#8fae9d]">{roleName}</span>
             </span>
           </div>
           <form action={signOut}>

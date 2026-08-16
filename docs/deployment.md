@@ -70,15 +70,20 @@ NEXT_PUBLIC_SUPABASE_URL       https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY  <anon key>
 SUPABASE_SERVICE_ROLE_KEY      <service role key>     ← server only, never in the portal
 NEXT_PUBLIC_APP_URL            https://admin.eventor.lk
-AWS_REGION                     ap-south-1
-AWS_S3_BUCKET                  eventor.media
-AWS_ACCESS_KEY_ID              <key id>
-AWS_SECRET_ACCESS_KEY          <secret>
-AWS_S3_PUBLIC_URL              (optional CloudFront/custom domain)
+S3_REGION                      ap-south-1
+S3_BUCKET                      eventor.media
+S3_ACCESS_KEY_ID               <key id>
+S3_SECRET_ACCESS_KEY           <secret>
+S3_PUBLIC_URL                  (optional CloudFront/custom domain)
 ```
 
-`NEXT_PUBLIC_APP_URL` builds the public album share link. Left at
-`http://localhost:3001`, clients receive dead links.
+`NEXT_PUBLIC_APP_URL` builds password-reset links, staff invite links and the
+public album share link. Left at `http://localhost:3001`, those all break.
+
+> **The storage variables are `S3_*`, not `AWS_*`.** Netlify reserves the `AWS_*`
+> names for its own build infrastructure and rejects them as site variables.
+> `apps/admin/src/lib/s3.ts` reads `S3_*` first and falls back to `AWS_*`, so an
+> older local `.env` keeps working.
 
 ### Client portal (`apps/client-portal`)
 

@@ -7,12 +7,17 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client
  * `gallery_photos.storage_path`, so rendering is just `<img src={storage_path}>`.
  */
 
-const REGION      = process.env.AWS_REGION ?? '';
-const BUCKET      = process.env.AWS_S3_BUCKET ?? '';
-const ACCESS_KEY  = process.env.AWS_ACCESS_KEY_ID ?? '';
-const SECRET_KEY  = process.env.AWS_SECRET_ACCESS_KEY ?? '';
+/**
+ * Netlify reserves the AWS_* names for its own build infrastructure and refuses
+ * to accept them as site variables, so S3_* is the canonical set. The AWS_*
+ * names are still read as a fallback for local .env files.
+ */
+const REGION      = process.env.S3_REGION            ?? process.env.AWS_REGION            ?? '';
+const BUCKET      = process.env.S3_BUCKET            ?? process.env.AWS_S3_BUCKET         ?? '';
+const ACCESS_KEY  = process.env.S3_ACCESS_KEY_ID     ?? process.env.AWS_ACCESS_KEY_ID     ?? '';
+const SECRET_KEY  = process.env.S3_SECRET_ACCESS_KEY ?? process.env.AWS_SECRET_ACCESS_KEY ?? '';
 /** Optional CDN/CloudFront origin, e.g. https://cdn.example.com. Falls back to the bucket URL. */
-const PUBLIC_BASE = (process.env.AWS_S3_PUBLIC_URL ?? '').replace(/\/$/, '');
+const PUBLIC_BASE = (process.env.S3_PUBLIC_URL ?? process.env.AWS_S3_PUBLIC_URL ?? '').replace(/\/$/, '');
 
 export function isS3Configured(): boolean {
   return Boolean(REGION && BUCKET && ACCESS_KEY && SECRET_KEY);

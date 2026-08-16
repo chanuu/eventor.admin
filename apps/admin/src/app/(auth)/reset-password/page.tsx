@@ -1,36 +1,45 @@
-'use client';
+import { createClient } from '@/lib/supabase/server';
+import ResetPasswordForm from './ResetPasswordForm';
 
-import { useState } from 'react';
-import { updatePassword } from './actions';
+/**
+ * Reached from the emailed link, after /auth/callback has exchanged the code
+ * for a session. Without that session there is nothing to update, so say so
+ * instead of showing a form that will fail on submit.
+ */
+export default async function ResetPasswordPage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-export default function ResetPasswordPage() {
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const result = await updatePassword(new FormData(e.currentTarget));
-    if (result?.error) { setError(result.error); setLoading(false); }
+  if (!user) {
+    return (
+      <div style={wrap}>
+        <div style={card}>
+          <h1 style={{ fontSize: 18, fontWeight: 800, color: '#0F3D2E', marginBottom: 6 }}>
+            This link has expired
+          </h1>
+          <p style={{ color: '#5b6660', fontSize: 13.5, lineHeight: 1.6 }}>
+            Password reset links can only be used once, and expire after a short time.
+            Request a new one and it will arrive within a minute.
+          </p>
+          <a href="/forgot-password" className="btn-primary" style={{ marginTop: 20, display: 'inline-flex' }}>
+            Send a new link
+          </a>
+          <a href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#8b968f' }}>
+            ← Back to sign in
+          </a>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 360, padding: 32, background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Set new password</h1>
-        <p style={{ color: '#6b7280', marginBottom: 24, fontSize: 14 }}>Choose a strong password for your account.</p>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input name="password" type="password" required minLength={8} placeholder="New password" style={inputStyle} autoComplete="new-password" />
-          <input name="confirm"  type="password" required minLength={8} placeholder="Confirm password" style={inputStyle} autoComplete="new-password" />
-          {error && <p style={{ fontSize: 13, color: '#dc2626' }}>{error}</p>}
-          <button type="submit" disabled={loading} style={btnStyle}>{loading ? 'Saving…' : 'Update password'}</button>
-        </form>
-      </div>
-    </div>
-  );
+  return <ResetPasswordForm email={user.email ?? ''} />;
 }
 
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14 };
-const btnStyle: React.CSSProperties = { height: 36, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer' };
+const wrap: React.CSSProperties = {
+  minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: '#F6F8F5', padding: 24,
+};
+const card: React.CSSProperties = {
+  width: '100%', maxWidth: 400, padding: 32, background: '#fff',
+  borderRadius: 16, border: '1px solid #E7EAE5',
+};

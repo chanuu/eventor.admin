@@ -26,11 +26,8 @@ export default function LoginPage() {
       background: '#ffffff',
       padding: 24,
     }}>
-      <div style={{
+      <div className="auth-card" style={{
         display: 'flex',
-        width: '100%',
-        maxWidth: 880,
-        minHeight: 580,
         background: '#fff',
         borderRadius: 20,
         boxShadow: '0 8px 48px rgba(0,0,0,0.10)',
@@ -38,7 +35,7 @@ export default function LoginPage() {
       }}>
 
         {/* ── Left: form ── */}
-        <div style={{
+        <div className="auth-form" style={{
           flex: 1,
           padding: '52px 52px',
           display: 'flex',
@@ -212,8 +209,7 @@ export default function LoginPage() {
         </div>
 
         {/* ── Right: image panel ── */}
-        <div style={{
-          width: 320,
+        <div className="auth-panel" style={{
           margin: 16,
           borderRadius: 16,
           background: 'linear-gradient(175deg, #6b8f5e 0%, #3a4f35 55%, #2a3a28 100%)',
