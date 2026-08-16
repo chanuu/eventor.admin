@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Lottie from './Lottie';
 
 export type Column<T> = {
   key: string;
@@ -24,8 +25,10 @@ export default function DataTable<T extends object>({
 
   if (rows.length === 0) {
     return (
-      <div className="py-16 text-center text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl">
-        {emptyMessage}
+      <div className="rounded-2xl border-2 border-dashed border-line bg-white
+                      flex flex-col items-center text-center px-6 pt-6 pb-10">
+        <Lottie kind="empty" size={190} />
+        <div className="text-[13.5px] text-ink-mid -mt-2">{emptyMessage}</div>
       </div>
     );
   }

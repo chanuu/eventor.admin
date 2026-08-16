@@ -143,7 +143,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
 
         {/* Month navigation */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between flex-wrap px-6 py-4 border-b border-gray-100">
           <a
             href={`/schedule?month=${prevMonth(year, month)}`}
             className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"

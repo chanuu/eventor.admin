@@ -22,7 +22,7 @@ export default function SignupPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb' }}>
-      <div style={{ width: 400, padding: 32, background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }}>
+      <div style={{ width: '100%', maxWidth: 400, padding: 32, background: '#fff', borderRadius: 8, border: '1px solid #e5e7eb' }}>
         <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Create your studio</h1>
         <p style={{ color: '#6b7280', marginBottom: 24, fontSize: 14 }}>Set up your Eventor account in seconds.</p>
 

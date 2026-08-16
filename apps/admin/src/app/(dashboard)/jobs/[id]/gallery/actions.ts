@@ -1,5 +1,7 @@
 'use server';
 
+import { requireCapabilityCtx } from '@/lib/staff';
+import type { Capability } from '@/lib/permissions';
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -54,18 +56,9 @@ async function compressWithinLimit(raw: Buffer): Promise<Buffer | null> {
 
 type StaffCtx = { studio_id: string; role: string };
 
-async function requireStaff(allowed = ['admin', 'editor']): Promise<StaffCtx | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase
-    .from('staff')
-    .select('studio_id, role')
-    .eq('user_id', user.id)
-    .single();
-  const staff = data as StaffCtx | null;
-  if (!staff || !allowed.includes(staff.role)) return null;
-  return staff;
+async function requireStaff(capability: Capability = 'gallery.manage'): Promise<StaffCtx | null> {
+  const ctx = await requireCapabilityCtx(capability);
+  return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
 export async function createGallery(jobId: string, studioId: string, formData: FormData): Promise<void> {
@@ -99,7 +92,7 @@ export async function uploadPhotos(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.', uploaded: 0 };
 
-  if (!isS3Configured()) return { error: 'Photo storage is not configured. Set the AWS_* environment variables.', uploaded: 0 };
+  if (!isS3Configured()) return { error: 'Photo storage is not configured. Set the S3_* environment variables.', uploaded: 0 };
 
   const files = formData.getAll('files') as File[];
   const validFiles = files.filter((f) => f.size > 0);

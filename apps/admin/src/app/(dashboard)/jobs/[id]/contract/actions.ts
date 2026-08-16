@@ -1,23 +1,20 @@
 'use server';
 
+import { requireCapabilityCtx } from '@/lib/staff';
+import type { Capability } from '@/lib/permissions';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
 type StaffCtx = { studio_id: string; role: string };
 
-async function requireStaff(allowed: string[]): Promise<StaffCtx | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase.from('staff').select('studio_id, role').eq('user_id', user.id).single();
-  const s = data as StaffCtx | null;
-  if (!s || !allowed.includes(s.role)) return null;
-  return s;
+async function requireStaff(capability: Capability = 'jobs.contracts'): Promise<StaffCtx | null> {
+  const ctx = await requireCapabilityCtx(capability);
+  return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
 export async function ensureContract(jobId: string, studioId: string): Promise<void> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -41,7 +38,7 @@ export async function saveContractDraft(
   studioId: string,
   formData: FormData,
 ): Promise<{ error?: string }> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
 
   const supabase = createClient();
@@ -62,7 +59,7 @@ export async function sendContract(
   studioId: string,
   formData: FormData,
 ): Promise<{ error?: string }> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
 
   const html = formData.get('content_html') as string;
@@ -87,7 +84,7 @@ export async function voidContract(
   jobId: string,
   studioId: string,
 ): Promise<{ error?: string }> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
 
   const supabase = createClient();

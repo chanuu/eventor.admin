@@ -1,23 +1,16 @@
 'use server';
 
+import { requireCapabilityCtx } from '@/lib/staff';
+import type { Capability } from '@/lib/permissions';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
 type StaffCtx = { studio_id: string; role: string };
 
-async function requireStaff(allowed = ['admin', 'sales', 'coordinator']): Promise<StaffCtx | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase
-    .from('staff')
-    .select('studio_id, role')
-    .eq('user_id', user.id)
-    .single();
-  const staff = data as StaffCtx | null;
-  if (!staff || !allowed.includes(staff.role)) return null;
-  return staff;
+async function requireStaff(capability: Capability = 'jobs.write'): Promise<StaffCtx | null> {
+  const ctx = await requireCapabilityCtx(capability);
+  return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
 // ─── Jobs ─────────────────────────────────────────────────────────────────────
@@ -178,7 +171,7 @@ async function recalcJobTotal(jobId: string, studioId: string) {
 // ─── Shoots ───────────────────────────────────────────────────────────────────
 
 export async function createShoot(jobId: string, studioId: string, formData: FormData): Promise<void> {
-  const ctx = await requireStaff(['admin', 'coordinator', 'editor']);
+  const ctx = await requireStaff('jobs.shoots');
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -201,7 +194,7 @@ export async function updateShoot(
   studioId: string,
   formData: FormData,
 ): Promise<void> {
-  const ctx = await requireStaff(['admin', 'coordinator', 'editor']);
+  const ctx = await requireStaff('jobs.shoots');
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -223,7 +216,7 @@ export async function updateShoot(
 }
 
 export async function updateShootStatus(shootId: string, jobId: string, status: string): Promise<void> {
-  const ctx = await requireStaff(['admin', 'coordinator', 'editor']);
+  const ctx = await requireStaff('jobs.shoots');
   if (!ctx) return;
 
   const supabase = createClient();
@@ -242,7 +235,7 @@ export async function assignShootStaff(
   studioId: string,
   formData: FormData,
 ): Promise<void> {
-  const ctx = await requireStaff(['admin', 'coordinator']);
+  const ctx = await requireStaff('jobs.shoots');
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -261,7 +254,7 @@ export async function removeShootStaff(
   shootId: string,
   jobId: string,
 ): Promise<void> {
-  const ctx = await requireStaff(['admin', 'coordinator']);
+  const ctx = await requireStaff('jobs.shoots');
   if (!ctx) return;
 
   const supabase = createClient();
@@ -277,7 +270,7 @@ export async function removeShootStaff(
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
 export async function recordPayment(jobId: string, studioId: string, formData: FormData): Promise<void> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -298,7 +291,7 @@ export async function recordPayment(jobId: string, studioId: string, formData: F
 }
 
 export async function markPaymentPaid(paymentId: string, jobId: string): Promise<void> {
-  const ctx = await requireStaff(['admin', 'sales']);
+  const ctx = await requireStaff('jobs.contracts');
   if (!ctx) return;
 
   const supabase = createClient();

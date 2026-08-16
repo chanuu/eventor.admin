@@ -1,3 +1,4 @@
+import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 
 type ClientRow = {
@@ -9,6 +10,7 @@ type ClientRow = {
 };
 
 export default async function ClientsPage() {
+  await requireCapability('clients.manage');
   const supabase = createClient();
 
   const { data: raw } = await supabase

@@ -1,25 +1,16 @@
 'use server';
 
+import { requireCapabilityCtx } from '@/lib/staff';
+import type { Capability } from '@/lib/permissions';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
 type StaffCtx = { studio_id: string; role: string };
 
-async function requireStaff(allowed = ['admin', 'sales']): Promise<StaffCtx | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data } = await supabase
-    .from('staff')
-    .select('studio_id, role')
-    .eq('user_id', user.id)
-    .single();
-
-  const staff = data as StaffCtx | null;
-  if (!staff || !allowed.includes(staff.role)) return null;
-  return staff;
+async function requireStaff(capability: Capability = 'packages.manage'): Promise<StaffCtx | null> {
+  const ctx = await requireCapabilityCtx(capability);
+  return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
 // ─── Packages ─────────────────────────────────────────────────────────────────
