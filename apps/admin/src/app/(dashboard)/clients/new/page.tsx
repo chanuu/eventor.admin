@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { createClient } from '../actions';
 
@@ -19,7 +21,7 @@ export default function NewClientPage() {
     <div className="max-w-xl">
       <h1 className="page-title">New Client</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/clients" className="hover:text-[#0F3D2E]">Clients</a> / <span className="text-[#0F3D2E]">New</span>
+        Main Menu / <Link href="/clients" className="hover:text-[#0F3D2E]">Clients</Link> / <span className="text-[#0F3D2E]">New</span>
       </p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
@@ -51,7 +53,7 @@ export default function NewClientPage() {
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Saving…' : 'Create client'}
           </button>
-          <a href="/clients" className="btn-secondary">Cancel</a>
+          <Link href="/clients" className="btn-secondary">Cancel</Link>
         </div>
       </form>
     </div>

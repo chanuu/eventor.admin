@@ -1,5 +1,7 @@
 'use client';
 
+import { EmptyState } from '@/components/states';
+
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -77,7 +79,7 @@ export function MonthlyRevenueChart({ data }: { data: MonthlyPoint[] }) {
 
 export function EventTypeChart({ data }: { data: EventTypePoint[] }) {
   if (data.length === 0) {
-    return <p className="text-sm text-gray-400 py-10 text-center">No job data yet.</p>;
+    return <EmptyState compact title="No job data yet" description="Revenue by event type appears once you have jobs." />;
   }
   return (
     <ResponsiveContainer width="100%" height={Math.max(160, data.length * 36)}>
@@ -110,7 +112,7 @@ export function EventTypeChart({ data }: { data: EventTypePoint[] }) {
 export function JobStatusPipeline({ data }: { data: StatusPoint[] }) {
   const max = Math.max(...data.map((d) => d.count), 1);
   if (data.length === 0) {
-    return <p className="text-sm text-gray-400 py-4 text-center">No jobs yet.</p>;
+    return <EmptyState compact title="No jobs yet" description="Your pipeline fills in as jobs move through their stages." />;
   }
   return (
     <div className="flex flex-col gap-3">

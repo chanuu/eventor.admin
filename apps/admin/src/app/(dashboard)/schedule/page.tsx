@@ -1,3 +1,5 @@
+import { EmptyState } from '@/components/states';
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
@@ -144,27 +146,25 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
 
         {/* Month navigation */}
         <div className="flex items-center justify-between flex-wrap px-6 py-4 border-b border-gray-100">
-          <a
-            href={`/schedule?month=${prevMonth(year, month)}`}
+          <Link             href={`/schedule?month=${prevMonth(year, month)}`}
             className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-          </a>
+          </Link>
 
           <div className="text-center">
             <h2 className="text-base font-bold text-gray-900">{MONTH_NAMES[month - 1]} {year}</h2>
           </div>
 
-          <a
-            href={`/schedule?month=${nextMonth(year, month)}`}
+          <Link             href={`/schedule?month=${nextMonth(year, month)}`}
             className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
-          </a>
+          </Link>
         </div>
 
         {/* Status legend */}
@@ -222,8 +222,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
                   {shoots.map((shoot) => {
                     const cfg = STATUS[shoot.job_status] ?? STATUS.lead;
                     return (
-                      <a
-                        key={shoot.id}
+                      <Link                         key={shoot.id}
                         href={`/jobs/${shoot.job_id}/shoots/${shoot.id}`}
                         style={{ borderLeftWidth: 3, borderLeftStyle: 'solid', borderLeftColor: cfg.color, background: cfg.bg }}
                         className="rounded-r-md px-1.5 py-1 block group hover:brightness-95 transition-all"
@@ -239,7 +238,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
                         <p style={{ fontSize: 10, color: cfg.color, fontWeight: 600, lineHeight: 1.3 }}>
                           {formatTime(shoot.scheduled_at)}
                         </p>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -261,8 +260,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
               const cfg = STATUS[shoot.job_status] ?? STATUS.lead;
               const dt  = new Date(shoot.scheduled_at);
               return (
-                <a
-                  key={shoot.id}
+                <Link                   key={shoot.id}
                   href={`/jobs/${shoot.job_id}/shoots/${shoot.id}`}
                   className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors group"
                 >
@@ -303,7 +301,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
                   <svg className="text-gray-300 group-hover:text-gray-400 shrink-0 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -312,10 +310,14 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
 
       {events.length === 0 && (
         <div className="mt-6 bg-white rounded-2xl shadow-card px-6 py-12 text-center">
-          <p className="text-gray-400 text-sm">No shoots scheduled for {MONTH_NAMES[month - 1]} {year}.</p>
-          <a href="/jobs" className="inline-block mt-3 text-sm font-medium text-[#0F3D2E] hover:underline">
+          <EmptyState
+            compact
+            title="Nothing scheduled"
+            description={`No shoots booked for ${MONTH_NAMES[month - 1]} ${year}.`}
+          />
+          <Link href="/jobs" className="inline-block mt-3 text-sm font-medium text-[#0F3D2E] hover:underline">
             Go to Jobs to add a shoot →
-          </a>
+          </Link>
         </div>
       )}
     </div>

@@ -1,3 +1,5 @@
+import { EmptyState } from '@/components/states';
+import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
 import dynamic from 'next/dynamic';
 import type { MonthlyPoint, EventTypePoint, StatusPoint } from './DashboardCharts';
@@ -228,12 +230,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           </div>
 
           {upcoming.length === 0 ? (
-            <p className="text-sm text-gray-400 py-6 text-center">No upcoming shoots.</p>
+            <EmptyState compact title="No upcoming shoots" description="Scheduled shoots across all jobs appear here." />
           ) : (
             <div className="flex flex-col gap-2">
               {upcoming.map((shoot: any) => (
-                <a
-                  key={shoot.id}
+                <Link                   key={shoot.id}
                   href={`/jobs/${shoot.jobs?.id}`}
                   className="flex items-center justify-between flex-wrap p-3 rounded-xl border border-gray-100 hover:border-[#8BC53F] hover:bg-gray-50 transition-colors group"
                 >
@@ -249,7 +250,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                   <span className="text-xs font-medium text-[#0F3D2E] border border-[#0F3D2E] px-3 py-1 rounded-lg group-hover:bg-[#0F3D2E] group-hover:text-white transition-colors shrink-0 ml-3">
                     view
                   </span>
-                </a>
+                </Link>
               ))}
             </div>
           )}
@@ -267,7 +268,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         </div>
 
         {payments.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">No pending payments.</p>
+          <EmptyState compact title="Nothing outstanding" description="Payments awaiting collection show up here." />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:grid-cols-3">
             {payments.map((p: any) => (

@@ -1,76 +1,90 @@
+import Link from 'next/link';
 import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
+import Pagination from '@/components/Pagination';
+import SearchInput from '@/components/SearchInput';
+import ClientsTable, { type ClientRow } from './ClientsTable';
 
-type ClientRow = {
-  id: string;
-  full_name: string;
-  email: string | null;
-  phone: string | null;
-  created_at: string;
-};
+const PAGE_SIZE = 25;
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; page?: string };
+}) {
   await requireCapability('clients.manage');
   const supabase = createClient();
 
-  const { data: raw } = await supabase
+  const term = (searchParams.q ?? '').trim();
+  const page = Math.max(1, Number(searchParams.page) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to   = from + PAGE_SIZE - 1;
+
+  let query = supabase
     .from('clients')
-    .select('id, full_name, email, phone, created_at')
-    .order('created_at', { ascending: false });
+    .select('id, full_name, email, phone, created_at', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-  const clients = (raw ?? []) as ClientRow[];
+  // Name, email or phone — whichever the studio remembers.
+  if (term) {
+    const like = `%${term}%`;
+    query = query.or(`full_name.ilike.${like},email.ilike.${like},phone.ilike.${like}`);
+  }
 
-  // Job counts per client
-  const { data: jobRaw } = await supabase
-    .from('jobs')
-    .select('client_id');
+  const { data: raw, count } = await query;
+  const rows = (raw ?? []) as Omit<ClientRow, 'jobCount'>[];
+
+  // Job counts for the clients on this page only.
+  const ids = rows.map((c) => c.id);
+  const { data: jobRaw } = ids.length
+    ? await supabase.from('jobs').select('client_id').in('client_id', ids)
+    : { data: [] };
 
   const jobCounts: Record<string, number> = {};
   ((jobRaw ?? []) as { client_id: string }[]).forEach(({ client_id }) => {
     jobCounts[client_id] = (jobCounts[client_id] ?? 0) + 1;
   });
 
+  const clients: ClientRow[] = rows.map((c) => ({ ...c, jobCount: jobCounts[c.id] ?? 0 }));
+
+  const totalCount = count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const paginationParams: Record<string, string> = {};
+  if (term) paginationParams.q = term;
+
+  const emptyMessage = term
+    ? <span>No clients match “{term}”.</span>
+    : <span>No clients yet. <Link href="/clients/new" className="text-primary hover:underline">Add your first client</Link></span>;
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600 }}>Clients</h1>
-        <a
-          href="/clients/new"
-          style={{ background: '#0F3D2E', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
-        >
-          + New client
-        </a>
-      </div>
+      <h1 className="page-title">Clients</h1>
+      <p className="breadcrumb mb-6">
+        Main Menu / <span className="text-primary">Clients</span>
+      </p>
 
-      {clients.length === 0 ? (
-        <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af', border: '2px dashed #e5e7eb', borderRadius: 8 }}>
-          No clients yet.{' '}
-          <a href="/clients/new" style={{ color: '#0F3D2E' }}>Add your first client</a>
+      <div className="bg-white rounded-2xl border border-line shadow-card p-4 sm:p-6">
+        {/* Toolbar — stacks on phones, single row from md up */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-5">
+          <SearchInput placeholder="Search name, email or phone…" className="w-full md:flex-1 md:max-w-xs" />
+          <div className="hidden md:block md:flex-1" />
+          <Link href="/clients/new" className="btn-primary px-5 whitespace-nowrap w-full md:w-auto">
+            + New Client
+          </Link>
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {clients.map((c) => (
-            <div
-              key={c.id}
-              style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 16 }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{c.full_name}</div>
-                <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2, display: 'flex', gap: 10 }}>
-                  {c.email && <span>{c.email}</span>}
-                  {c.phone && <span>{c.phone}</span>}
-                </div>
-              </div>
-              <div style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>
-                {jobCounts[c.id] ?? 0} job{(jobCounts[c.id] ?? 0) !== 1 ? 's' : ''}
-              </div>
-              <a href={`/clients/${c.id}/edit`} style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500, flexShrink: 0 }}>
-                Edit
-              </a>
-            </div>
-          ))}
-        </div>
-      )}
+
+        {totalCount > 0 && (
+          <p className="text-xs text-ink-muted mb-3">
+            {from + 1}–{Math.min(to + 1, totalCount)} of {totalCount} client{totalCount !== 1 ? 's' : ''}
+            {term ? ` matching “${term}”` : ''}
+          </p>
+        )}
+
+        <ClientsTable clients={clients} emptyMessage={emptyMessage} />
+
+        <Pagination page={page} totalPages={totalPages} pathname="/clients" params={paginationParams} />
+      </div>
     </div>
   );
 }

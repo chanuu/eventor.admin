@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { createRole } from './actions';
@@ -30,7 +31,7 @@ export default async function RolesPage({ searchParams }: { searchParams: { save
     <div style={{ maxWidth: 900 }}>
       <h1 className="page-title">Roles &amp; permissions</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/staff" className="hover:text-primary">Staff</a> / Roles
+        Main Menu / <Link href="/staff" className="hover:text-primary">Staff</Link> / Roles
       </p>
 
       {searchParams.saved && (
@@ -39,7 +40,7 @@ export default async function RolesPage({ searchParams }: { searchParams: { save
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
         {roles.map((r) => (
-          <a key={r.id} href={`/roles/${r.id}`} style={roleRow}>
+          <Link key={r.id} href={`/roles/${r.id}`} style={roleRow}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: '#123528' }}>{r.name}</span>
@@ -58,7 +59,7 @@ export default async function RolesPage({ searchParams }: { searchParams: { save
               </div>
             </div>
             <span style={{ color: '#8b968f', flexShrink: 0 }}>›</span>
-          </a>
+          </Link>
         ))}
       </div>
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -66,7 +67,7 @@ export default async function GalleryListPage({ params }: { params: { id: string
   return (
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: 24 }}>
-        <a href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>← {job.title}</a>
+        <Link href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>← {job.title}</Link>
         <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>Galleries</h1>
       </div>
 
@@ -76,8 +77,7 @@ export default async function GalleryListPage({ params }: { params: { id: string
             const badge = STATUS_BADGE[g.status] ?? STATUS_BADGE.hidden;
             const count = countByGallery[g.id] ?? 0;
             return (
-              <a
-                key={g.id}
+              <Link                 key={g.id}
                 href={`/jobs/${params.id}/gallery/${g.id}`}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, textDecoration: 'none', color: 'inherit' }}
               >
@@ -97,7 +97,7 @@ export default async function GalleryListPage({ params }: { params: { id: string
                   {badge.label}
                 </span>
                 <span style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500, flexShrink: 0 }}>Open →</span>
-              </a>
+              </Link>
             );
           })}
         </div>

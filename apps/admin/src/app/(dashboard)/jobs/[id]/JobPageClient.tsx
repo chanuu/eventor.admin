@@ -1,5 +1,9 @@
 'use client';
 
+import { EmptyState } from '@/components/states';
+
+import Link from "next/link";
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
@@ -79,7 +83,6 @@ const TABS = [
   { id: 'contract', label: 'Contract' },
   { id: 'gallery',  label: 'Gallery'  },
   { id: 'album',    label: 'Album'    },
-  { id: 'flipbook', label: 'Flipbook' },
 ] as const;
 type TabId = typeof TABS[number]['id'];
 
@@ -129,7 +132,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
       {/* ── Page heading ── */}
       <div className="flex items-start justify-between mb-1">
         <div>
-          <a href="/jobs" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Jobs</a>
+          <Link href="/jobs" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Jobs</Link>
           <div className="flex items-center gap-2.5 mt-1">
             <h1 className="page-title">{job.title}</h1>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[job.status] ?? STATUS_BADGE.lead}`}>
@@ -137,7 +140,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             </span>
           </div>
           <p className="breadcrumb mt-0.5">
-            Main Menu / <a href="/jobs" className="hover:text-[#0F3D2E]">Jobs</a> / <span className="text-[#0F3D2E]">{job.title}</span>
+            Main Menu / <Link href="/jobs" className="hover:text-[#0F3D2E]">Jobs</Link> / <span className="text-[#0F3D2E]">{job.title}</span>
           </p>
         </div>
       </div>
@@ -225,7 +228,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                   )}
 
                   {job.jobAddons.length === 0 && (
-                    <p className="text-sm text-gray-400 mb-4">No add-ons on this job yet.</p>
+                    <EmptyState compact title="No add-ons yet" description="Extras you add appear here and are included in the job total." />
                   )}
 
                   <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
@@ -258,12 +261,14 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                       <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full whitespace-nowrap">
                         {SHOOT_STATUS[shoot.status] ?? shoot.status}
                       </span>
-                      <a href={`/jobs/${jobId}/shoots/${shoot.id}`} className="text-xs font-medium text-[#0F3D2E] hover:underline shrink-0">Details</a>
+                      <Link href={`/jobs/${jobId}/shoots/${shoot.id}`} className="text-xs font-medium text-[#0F3D2E] hover:underline shrink-0">Details</Link>
                     </div>
                   ))}
                 </div>
               ) : (
-                <EmptyState message="No shoots scheduled yet." />
+                <div className="rounded-2xl border-2 border-dashed border-line">
+                  <EmptyState compact title="No shoots scheduled" description="Add a shoot to plan the dates, venues and crew for this job." />
+                </div>
               )}
             </div>
           )}
@@ -302,7 +307,9 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                   ))}
                 </div>
               ) : (
-                <EmptyState message="No payments recorded yet." />
+                <div className="rounded-2xl border-2 border-dashed border-line">
+                  <EmptyState compact title="No payments recorded" description="Record an advance or balance payment to track what is owed." />
+                </div>
               )}
             </div>
           )}
@@ -322,14 +329,14 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                       </span>
                     )}
                   </div>
-                  <a href={`/jobs/${jobId}/contract`} className="btn-primary">
+                  <Link href={`/jobs/${jobId}/contract`} className="btn-primary">
                     {job.contract.status === 'draft' ? 'Edit Contract →' : 'View Contract →'}
-                  </a>
+                  </Link>
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-gray-400 mb-4">No contract created yet.</p>
-                  <a href={`/jobs/${jobId}/contract`} className="btn-primary">Create Contract →</a>
+                  <EmptyState compact title="No agreement yet" description="Create the agreement to send it to your client for signing." />
+                  <Link href={`/jobs/${jobId}/contract`} className="btn-primary">Create Contract →</Link>
                 </>
               )}
             </div>
@@ -339,7 +346,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
           {activeTab === 'gallery' && (
             <div>
               <p className="text-sm text-gray-500 mb-4">Upload photos for client proofing and album selection.</p>
-              <a href={`/jobs/${jobId}/gallery`} className="btn-primary">Manage Gallery →</a>
+              <Link href={`/jobs/${jobId}/gallery`} className="btn-primary">Manage Gallery →</Link>
             </div>
           )}
 
@@ -349,15 +356,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               <p className="text-sm text-ink-muted mb-4">
                 Build the flip-through digital album: cover text, page order, captions and music.
               </p>
-              <a href={`/jobs/${jobId}/album`} className="btn-primary">Manage Album →</a>
-            </div>
-          )}
-
-          {/* ── Flipbook ── */}
-          {activeTab === 'flipbook' && (
-            <div>
-              <p className="text-sm text-gray-500 mb-4">Upload and share a PDF flipbook with your client.</p>
-              <a href={`/jobs/${jobId}/flipbook`} className="btn-primary">Manage Flipbook →</a>
+              <Link href={`/jobs/${jobId}/album`} className="btn-primary">Manage Album →</Link>
             </div>
           )}
 
@@ -482,14 +481,6 @@ function ReadField({ label, value }: { label: string; value: string | null }) {
     <div className="flex flex-col gap-1">
       <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</span>
       <span className="text-sm text-gray-800 whitespace-pre-wrap">{value?.trim() ? value : '—'}</span>
-    </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="py-16 text-center text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl">
-      {message}
     </div>
   );
 }

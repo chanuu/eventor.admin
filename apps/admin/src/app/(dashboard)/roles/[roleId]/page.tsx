@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
@@ -40,7 +41,7 @@ export default async function RoleDetailPage({ params }: { params: { roleId: str
   return (
     <div style={{ maxWidth: 820 }}>
       <div style={{ marginBottom: 20 }}>
-        <a href="/roles" style={{ fontSize: 13, color: '#8b968f' }}>← Roles</a>
+        <Link href="/roles" style={{ fontSize: 13, color: '#8b968f' }}>← Roles</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
           <h1 className="page-title">{role.name}</h1>
           {role.is_system && (

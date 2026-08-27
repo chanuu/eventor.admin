@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
 import ResetPasswordForm from './ResetPasswordForm';
 
@@ -21,12 +22,12 @@ export default async function ResetPasswordPage() {
             Password reset links can only be used once, and expire after a short time.
             Request a new one and it will arrive within a minute.
           </p>
-          <a href="/forgot-password" className="btn-primary" style={{ marginTop: 20, display: 'inline-flex' }}>
+          <Link href="/forgot-password" className="btn-primary" style={{ marginTop: 20, display: 'inline-flex' }}>
             Send a new link
-          </a>
-          <a href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#8b968f' }}>
+          </Link>
+          <Link href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#8b968f' }}>
             ← Back to sign in
-          </a>
+          </Link>
         </div>
       </div>
     );

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import DataTable, { type Column } from '@/components/DataTable';
 
 export type JobRow = {
@@ -65,10 +67,10 @@ const COLUMNS: Column<JobRow>[] = [
     label: 'Actions',
     align: 'center',
     width: '90px',
+    hideOnCard: true,   // the whole card is already a link to the job
     render: (job) => (
       <div className="flex items-center justify-center gap-2">
-        <a
-          href={`/jobs/${job.id}`}
+        <Link           href={`/jobs/${job.id}`}
           onClick={(e) => e.stopPropagation()}
           className="text-[#0F3D2E] hover:text-[#0A2A20] transition-colors"
           title="View"
@@ -76,7 +78,7 @@ const COLUMNS: Column<JobRow>[] = [
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
           </svg>
-        </a>
+        </Link>
       </div>
     ),
   },

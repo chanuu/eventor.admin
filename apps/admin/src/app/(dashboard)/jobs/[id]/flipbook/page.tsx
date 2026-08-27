@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ensureFlipbook, publishFlipbook, unpublishFlipbook } from './actions';
@@ -42,7 +43,7 @@ export default async function FlipbookPage({ params }: { params: { id: string } 
   return (
     <div style={{ maxWidth: 600 }}>
       <div style={{ marginBottom: 24 }}>
-        <a href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>← {job.title}</a>
+        <Link href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>← {job.title}</Link>
         <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>Flipbook</h1>
       </div>
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updateAddon } from '../../../../actions';
@@ -30,9 +31,9 @@ export default async function EditAddonPage({ params }: { params: { id: string; 
   return (
     <div style={{ maxWidth: 480 }}>
       <div style={{ marginBottom: 24 }}>
-        <a href={`/packages/${params.id}/edit`} style={{ fontSize: 13, color: '#6b7280' }}>
+        <Link href={`/packages/${params.id}/edit`} style={{ fontSize: 13, color: '#6b7280' }}>
           ← Back to package
-        </a>
+        </Link>
         <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>Edit add-on</h1>
       </div>
 

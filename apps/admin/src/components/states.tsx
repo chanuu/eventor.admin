@@ -1,23 +1,26 @@
+import Link from "next/link";
 import Lottie from './Lottie';
 
 /**
  * Empty grid/table state — animation, a line explaining what's missing, and the
  * action that fills it.
  */
-export function EmptyState({ title, description, action }: {
+export function EmptyState({ title, description, action, compact }: {
   title: string;
   description?: string;
   action?: { href: string; label: string };
+  /** Smaller animation for panels and cards, rather than a full-page grid. */
+  compact?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center text-center px-6 pt-7 pb-10">
-      <Lottie kind="empty" size={200} />
+    <div className={`flex flex-col items-center text-center px-6 ${compact ? 'pt-2 pb-6' : 'pt-7 pb-10'}`}>
+      <Lottie kind="empty" size={compact ? 130 : 200} />
       <p className="text-[15px] font-bold text-primary mt-1">{title}</p>
       {description && (
         <p className="text-[13px] text-ink-muted mt-1.5 max-w-[280px]">{description}</p>
       )}
       {action && (
-        <a href={action.href} className="btn-primary mt-4">{action.label}</a>
+        <Link href={action.href} className="btn-primary mt-4">{action.label}</Link>
       )}
     </div>
   );

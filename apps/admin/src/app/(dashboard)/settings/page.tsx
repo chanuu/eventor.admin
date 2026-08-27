@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { updateStudioSettings } from './actions';
 import LogoUploadForm from './LogoUploadForm';
 import ChangePassword from './ChangePassword';
+import AgreementTerms from './AgreementTerms';
+import { buildAgreementHtml, defaultTermsText } from '@/lib/agreement';
 
 type Studio = {
   id: string;
@@ -12,6 +14,8 @@ type Studio = {
   email: string | null;
   phone: string | null;
   logo_url: string | null;
+  agreement_intro: string | null;
+  agreement_terms: string | null;
 };
 
 export default async function SettingsPage({ searchParams }: { searchParams: { saved?: string } }) {
@@ -24,13 +28,31 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
   const supabase = createClient();
   const { data: studioRaw } = await supabase
     .from('studios')
-    .select('id, name, address, email, phone, logo_url')
+    .select('id, name, address, email, phone, logo_url, agreement_intro, agreement_terms')
     .eq('id', staff.studio_id)
     .single();
   const studio = studioRaw as Studio | null;
   if (!studio) return <p className="text-sm text-red-500">Studio not found.</p>;
 
   const updateAction = updateStudioSettings.bind(null, studio.id);
+
+  const previewHtml = buildAgreementHtml({
+    studio_name: studio.name,
+    studio_address: studio.address ?? '',
+    studio_phone: studio.phone ?? '',
+    studio_email: studio.email ?? '',
+    studio_logo: studio.logo_url ?? '',
+    client_name: 'Sample Client',
+    client_email: 'client@example.com',
+    client_phone: '077 000 0000',
+    job_title: 'Sample Wedding',
+    event_type: 'Wedding',
+    package_name: 'Sample Package',
+    total_price: '150,000',
+    contract_date: new Date().toLocaleDateString('en-LK', { dateStyle: 'long' }),
+    intro: studio.agreement_intro,
+    terms: studio.agreement_terms,
+  });
 
   return (
     <div className="max-w-xl">
@@ -85,6 +107,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
         )}
         <LogoUploadForm studioId={studio.id} hasLogo={!!studio.logo_url} />
       </div>
+
+      <AgreementTerms
+        studioId={studio.id}
+        studioName={studio.name}
+        intro={studio.agreement_intro ?? ''}
+        terms={studio.agreement_terms ?? ''}
+        defaultTerms={defaultTermsText(studio.name)}
+        previewHtml={previewHtml}
+      />
 
       <ChangePassword />
     </div>

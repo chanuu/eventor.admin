@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { requestPasswordReset } from './actions';
 
@@ -23,7 +25,7 @@ export default function ForgotPasswordPage() {
         <div style={cardStyle}>
           <h2 style={{ fontWeight: 600, marginBottom: 8 }}>Check your email</h2>
           <p style={{ color: '#6b7280', fontSize: 14 }}>We sent a password reset link to your inbox.</p>
-          <a href="/login" style={{ display: 'block', marginTop: 20, fontSize: 13, color: '#0F3D2E' }}>Back to sign in</a>
+          <Link href="/login" style={{ display: 'block', marginTop: 20, fontSize: 13, color: '#0F3D2E' }}>Back to sign in</Link>
         </div>
       </div>
     );
@@ -41,7 +43,7 @@ export default function ForgotPasswordPage() {
           <button type="submit" disabled={loading} style={btnStyle}>{loading ? 'Sending…' : 'Send reset link'}</button>
         </form>
 
-        <a href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#6b7280' }}>← Back to sign in</a>
+        <Link href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#6b7280' }}>← Back to sign in</Link>
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { createStudioAndAdmin } from './actions';
 
@@ -72,7 +74,7 @@ export default function SignupPage() {
         </form>
 
         <p style={{ marginTop: 20, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
-          Already have an account? <a href="/login" style={{ color: '#0F3D2E' }}>Sign in</a>
+          Already have an account? <Link href="/login" style={{ color: '#0F3D2E' }}>Sign in</Link>
         </p>
       </div>
     </div>

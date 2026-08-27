@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -279,7 +280,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
 function Header({ jobId, jobTitle }: { jobId: string; jobTitle: string }) {
   return (
     <div style={{ marginBottom: 24 }}>
-      <a href={`/jobs/${jobId}`} style={{ fontSize: 13, color: '#8b968f' }}>← {jobTitle}</a>
+      <Link href={`/jobs/${jobId}`} style={{ fontSize: 13, color: '#8b968f' }}>← {jobTitle}</Link>
       <h1 style={{ fontSize: 20, fontWeight: 800, marginTop: 8, color: '#0F3D2E' }}>Digital Album</h1>
     </div>
   );

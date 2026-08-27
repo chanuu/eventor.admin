@@ -8,6 +8,10 @@ export type Column<T> = {
   label: string;
   width?: string;
   align?: 'left' | 'right' | 'center';
+  /** Heads the mobile card instead of appearing as a labelled field. Defaults to the first column. */
+  primary?: boolean;
+  /** Hidden on the mobile card — for row actions the whole card already links to. */
+  hideOnCard?: boolean;
   render: (row: T) => React.ReactNode;
 };
 
@@ -33,9 +37,44 @@ export default function DataTable<T extends object>({
     );
   }
 
+  // The first column is the row's identity; the rest become labelled fields on
+  // the mobile card. A column marked `primary` overrides that choice.
+  const primaryIndex = Math.max(0, columns.findIndex((c) => c.primary));
+  const primary = columns[primaryIndex];
+  const secondary = columns.filter((c, i) => i !== primaryIndex && !c.hideOnCard);
+
   return (
-    // Tables scroll sideways on phones rather than squashing or overflowing the page.
-    <div className="overflow-x-auto rounded-2xl border border-line">
+    <>
+      {/* ── Mobile: one card per row ── */}
+      <div className="md:hidden flex flex-col gap-2.5">
+        {rows.map((row, i) => {
+          const href = getRowHref?.(row);
+          const Card = href ? 'a' : 'div';
+          return (
+            <Card
+              key={i}
+              {...(href ? { href } : {})}
+              className={`block bg-white border border-line rounded-2xl p-4 ${href ? 'active:bg-panel' : ''}`}
+            >
+              <div className="text-[15px] text-ink-strong">{primary.render(row)}</div>
+
+              <div className="mt-3 pt-3 border-t border-line-soft flex flex-col gap-2">
+                {secondary.map((col) => (
+                  <div key={col.key} className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted shrink-0">
+                      {col.label}
+                    </span>
+                    <span className="text-sm text-ink-body text-right min-w-0">{col.render(row)}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* ── Desktop: the table ── */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-line">
       <table className="w-full border-collapse min-w-[640px]">
         <thead>
           <tr className="border-b border-gray-100">
@@ -76,6 +115,7 @@ export default function DataTable<T extends object>({
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }

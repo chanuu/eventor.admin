@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { signIn } from './actions';
 
@@ -163,9 +165,9 @@ export default function LoginPage() {
                 />
                 Remember Me
               </label>
-              <a href="/forgot-password" style={{ fontSize: 13, color: '#374151', textDecoration: 'none' }}>
+              <Link href="/forgot-password" style={{ fontSize: 13, color: '#374151', textDecoration: 'none' }}>
                 Forgot your Password?
-              </a>
+              </Link>
             </div>
 
             {/* Divider */}
@@ -202,9 +204,9 @@ export default function LoginPage() {
           {/* Copyright */}
           <p style={{ fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 32 }}>
             Copyright © 2024. All rights reserved.{' '}
-            <a href="/terms"   style={{ color: '#9ca3af' }}>terms</a>{' '}
+            <Link href="/terms"   style={{ color: '#9ca3af' }}>terms</Link>{' '}
             &amp;{' '}
-            <a href="/privacy" style={{ color: '#9ca3af' }}>privacy policy</a>
+            <Link href="/privacy" style={{ color: '#9ca3af' }}>privacy policy</Link>
           </p>
         </div>
 

@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
 import Pagination from '@/components/Pagination';
 import JobsTable, { type JobRow } from './JobsTable';
+import StatusFilter from './StatusFilter';
+import SearchInput from '@/components/SearchInput';
 
 const PAGE_SIZE = 25;
 const STATUS_ORDER = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
@@ -8,7 +11,7 @@ const STATUS_ORDER = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proo
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; page?: string };
+  searchParams: { status?: string; page?: string; q?: string };
 }) {
   const supabase  = createClient();
   const page      = Math.max(1, Number(searchParams.page) || 1);
@@ -23,6 +26,10 @@ export default async function JobsPage({
 
   if (searchParams.status) query = query.eq('status', searchParams.status);
 
+  // Title only: client name lives on a joined table and cannot be filtered here.
+  const term = (searchParams.q ?? '').trim();
+  if (term) query = query.ilike('title', `%${term}%`);
+
   const { data: raw, count } = await query;
   const jobs       = (raw ?? []) as unknown as JobRow[];
   const totalCount = count ?? 0;
@@ -30,10 +37,13 @@ export default async function JobsPage({
 
   const paginationParams: Record<string, string> = {};
   if (searchParams.status) paginationParams.status = searchParams.status;
+  if (term) paginationParams.q = term;
 
-  const emptyMessage = searchParams.status
+  const emptyMessage = term
+    ? `No jobs match “${term}”.`
+    : searchParams.status
     ? `No jobs with status "${searchParams.status}".`
-    : <span>No jobs yet. <a href="/jobs/new" className="text-[#0F3D2E] hover:underline">Create your first job</a></span>;
+    : <span>No jobs yet. <Link href="/jobs/new" className="text-[#0F3D2E] hover:underline">Create your first job</Link></span>;
 
   return (
     <div>
@@ -44,32 +54,19 @@ export default async function JobsPage({
       </p>
 
       {/* Content panel */}
-      <div className="bg-white rounded-2xl shadow-card p-6">
+      <div className="bg-white rounded-2xl border border-line shadow-card p-4 sm:p-6">
 
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 mb-5">
-          {/* Search */}
-          <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 h-10 flex-1 max-w-md">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" placeholder="Search here..." className="flex-1 bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none" />
-          </div>
+        {/* Toolbar — stacks on phones, single row from md up */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-5">
+          <SearchInput placeholder="Search jobs by title…" className="w-full md:flex-1 md:max-w-xs" />
 
-          <div className="flex-1" />
+          <div className="hidden md:block md:flex-1" />
 
-          {/* Status filters */}
-          <div className="flex gap-1.5 flex-wrap">
-            <FilterTab href="/jobs" label="All" active={!searchParams.status} />
-            {STATUS_ORDER.map((s) => (
-              <FilterTab key={s} href={`/jobs?status=${s}`} label={s} active={searchParams.status === s} />
-            ))}
-          </div>
+          <StatusFilter statuses={STATUS_ORDER} current={searchParams.status} />
 
-          {/* New job */}
-          <a href="/jobs/new" className="btn-primary ml-2 px-5 whitespace-nowrap">
+          <Link href="/jobs/new" className="btn-primary px-5 whitespace-nowrap w-full md:w-auto">
             + New Job
-          </a>
+          </Link>
         </div>
 
         {/* Row count */}
@@ -87,14 +84,3 @@ export default async function JobsPage({
   );
 }
 
-function FilterTab({ href, label, active }: { href: string; label: string; active: boolean }) {
-  return (
-    <a
-      href={href}
-      className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors
-        ${active ? 'bg-[#0F3D2E] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-    >
-      {label}
-    </a>
-  );
-}

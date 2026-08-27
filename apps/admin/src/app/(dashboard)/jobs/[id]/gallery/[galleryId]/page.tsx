@@ -1,3 +1,5 @@
+import { EmptyState } from '@/components/states';
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -91,9 +93,9 @@ export default async function GalleryDetailPage({ params, searchParams }: {
     <div style={{ maxWidth: 920 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <a href={`/jobs/${params.id}/gallery`} style={{ fontSize: 13, color: '#6b7280' }}>
+        <Link href={`/jobs/${params.id}/gallery`} style={{ fontSize: 13, color: '#6b7280' }}>
           ← {job.title} / Galleries
-        </a>
+        </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 20, fontWeight: 600 }}>{gallery.title}</h1>
           <span style={{ fontSize: 12, fontWeight: 600, color: statusCfg.color, background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 99, padding: '3px 10px' }}>
@@ -291,7 +293,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
             </div>
           ) : (
             <p style={{ fontSize: 14, color: '#9ca3af', textAlign: 'center', padding: '24px 0', margin: 0 }}>
-              No photos yet. Upload some above to get started.
+              <EmptyState compact title="No photos yet" description="Upload photos above and they will appear here for proofing." />
             </p>
           )}
         </div>

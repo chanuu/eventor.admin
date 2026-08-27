@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient as createSupabaseClient } from '@/lib/supabase/server';
 import { updateClient } from '../../actions';
@@ -32,7 +33,7 @@ export default async function EditClientPage({ params, searchParams }: {
   return (
     <div style={{ maxWidth: 520 }}>
       <div style={{ marginBottom: 24 }}>
-        <a href="/clients" style={{ fontSize: 13, color: '#6b7280' }}>← Clients</a>
+        <Link href="/clients" style={{ fontSize: 13, color: '#6b7280' }}>← Clients</Link>
         <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>{client.full_name}</h1>
         {searchParams.saved && (
           <p style={{ fontSize: 13, color: '#16a34a', marginTop: 4 }}>Changes saved.</p>
@@ -42,12 +43,11 @@ export default async function EditClientPage({ params, searchParams }: {
       <ClientEditForm client={client} updateAction={updateAction} />
 
       <div style={{ marginTop: 20 }}>
-        <a
-          href={`/jobs?client=${client.id}`}
+        <Link           href={`/jobs?client=${client.id}`}
           style={{ fontSize: 13, color: '#0F3D2E' }}
         >
           View jobs for this client →
-        </a>
+        </Link>
       </div>
     </div>
   );

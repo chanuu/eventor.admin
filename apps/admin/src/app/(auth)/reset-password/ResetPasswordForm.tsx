@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { updatePassword } from './actions';
 
@@ -63,9 +65,9 @@ export default function ResetPasswordForm({ email }: { email: string }) {
           </button>
         </form>
 
-        <a href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#8b968f' }}>
+        <Link href="/login" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#8b968f' }}>
           ← Back to sign in
-        </a>
+        </Link>
       </div>
     </div>
   );
