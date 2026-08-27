@@ -21,14 +21,14 @@
 
 .grid-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px 20px;
 }
 
 /* Photo grids stay multi-column even on phones — two up reads better here. */
 .grid-photos {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -51,16 +51,16 @@
 
 @media (min-width: 640px) {
   .grid-cards { gap: 16px; }
-  .grid-photos { grid-template-columns: repeat(3, 1fr); }
+  .grid-photos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .stack-sm { flex-direction: row; align-items: center; }
 }
 
 @media (min-width: 900px) {
-  .grid-cards { grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .grid-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid-split { grid-template-columns: 1.5fr 1fr; gap: 16px; }
-  .grid-split.wide-left { grid-template-columns: 1.4fr 1fr; }
-  .grid-photos { grid-template-columns: repeat(4, 1fr); }
+  .grid-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .grid-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-split { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+  .grid-split.wide-left { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  .grid-photos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 /* Long values (URLs, emails) must never widen the page. */
