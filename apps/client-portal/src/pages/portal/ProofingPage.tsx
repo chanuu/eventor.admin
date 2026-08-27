@@ -19,8 +19,14 @@ export default function ProofingPage() {
   const [filter, setFilter] = useState<'all' | 'picked'>('all');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
+  const [viewing, setViewing] = useState<string | null>(null);
 
   const active = collections.find((g) => g.id === openId) ?? null;
+
+  // Computed before the early return so the lightbox's keyboard handler can use it.
+  const visiblePhotosRef = active
+    ? active.photos.filter((p) => filter === 'all' || picks.has(p.id))
+    : [];
 
   // Seed selection from what the studio already has on record.
   useEffect(() => {
@@ -34,6 +40,25 @@ export default function ProofingPage() {
     const t = setTimeout(() => setToast(''), 2600);
     return () => clearTimeout(t);
   }, [toast]);
+
+  const viewIndex = viewing ? visiblePhotosRef.findIndex((p) => p.id === viewing) : -1;
+  const viewingPhoto = viewIndex >= 0 ? visiblePhotosRef[viewIndex] : null;
+
+  useEffect(() => {
+    if (!viewingPhoto) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setViewing(null);
+      if (e.key === 'ArrowRight' && viewIndex < visiblePhotosRef.length - 1) {
+        setViewing(visiblePhotosRef[viewIndex + 1].id);
+      }
+      if (e.key === 'ArrowLeft' && viewIndex > 0) {
+        setViewing(visiblePhotosRef[viewIndex - 1].id);
+      }
+      if (e.key === ' ') { e.preventDefault(); toggle(viewingPhoto.id); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  });
 
   if (collections.length === 0) {
     return (
@@ -94,9 +119,7 @@ export default function ProofingPage() {
     reload();
   }
 
-  const visiblePhotos = active
-    ? active.photos.filter((p) => filter === 'all' || picks.has(p.id))
-    : [];
+  const visiblePhotos = visiblePhotosRef;
 
   return (
     <Screen>
@@ -181,8 +204,13 @@ export default function ProofingPage() {
                 return (
                   <div key={p.id} style={tile(on)}>
                     <div style={{ position: 'relative' }}>
-                      <img src={photoUrl(p.storage_path)} alt={p.file_name}
-                        style={{ width: '100%', height: 112, objectFit: 'cover', borderRadius: 10, display: 'block' }} />
+                      <button
+                        onClick={() => setViewing(p.id)}
+                        title="View larger"
+                        style={thumbButton}
+                      >
+                        <img src={photoUrl(p.storage_path)} alt={p.file_name} style={thumbImg} />
+                      </button>
                       <button
                         onClick={() => toggle(p.id)}
                         disabled={!canEdit}
@@ -192,8 +220,8 @@ export default function ProofingPage() {
                         {on ? '✓' : '+'}
                       </button>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 6 }}>
-                      <span style={{ fontSize: 11.5, color: C.muted, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 6, minWidth: 0 }}>
+                      <span className="truncate-1" style={{ fontSize: 11.5, color: C.muted, fontWeight: 600, minWidth: 0 }}>
                         {p.file_name}
                       </span>
                       {on && <span style={inAlbum}>In album</span>}
@@ -244,6 +272,52 @@ export default function ProofingPage() {
         </Card>
       )}
 
+      {/* Full-size viewer — look before you choose */}
+      {viewingPhoto && (
+        <div style={lightboxWrap} onClick={() => setViewing(null)}>
+          <div style={lightboxInner} onClick={(e) => e.stopPropagation()}>
+            <img
+              src={photoUrl(viewingPhoto.storage_path)}
+              alt={viewingPhoto.file_name}
+              style={lightboxImg}
+            />
+
+            <div style={lightboxBar}>
+              <div style={{ minWidth: 0 }}>
+                <div className="truncate-1" style={{ fontSize: 13, fontWeight: 700, color: C.white }}>
+                  {viewingPhoto.file_name}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
+                  {viewIndex + 1} of {visiblePhotosRef.length}
+                  {picks.has(viewingPhoto.id) ? ' · in your album' : ''}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={() => setViewing(visiblePhotosRef[viewIndex - 1].id)}
+                  disabled={viewIndex <= 0}
+                  style={navBtn(viewIndex > 0)}
+                  aria-label="Previous photo"
+                >‹</button>
+                <button
+                  onClick={() => setViewing(visiblePhotosRef[viewIndex + 1].id)}
+                  disabled={viewIndex >= visiblePhotosRef.length - 1}
+                  style={navBtn(viewIndex < visiblePhotosRef.length - 1)}
+                  aria-label="Next photo"
+                >›</button>
+                {canEdit && (
+                  <button onClick={() => toggle(viewingPhoto.id)} style={pickBtn(picks.has(viewingPhoto.id))}>
+                    {picks.has(viewingPhoto.id) ? '✓ In album' : '+ Add to album'}
+                  </button>
+                )}
+                <button onClick={() => setViewing(null)} style={closeBtn} aria-label="Close">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && <Toast message={toast} />}
     </Screen>
   );
@@ -263,7 +337,7 @@ function chip(on: boolean): React.CSSProperties {
 
 function tile(on: boolean): React.CSSProperties {
   return {
-    borderRadius: 12, padding: 8, transition: 'background 0.15s ease, box-shadow 0.15s ease',
+    borderRadius: 12, padding: 8, minWidth: 0, transition: 'background 0.15s ease, box-shadow 0.15s ease',
     background: on ? C.limeSoft : C.panel,
     boxShadow: on ? `inset 0 0 0 2px ${C.lime}` : `inset 0 0 0 1px ${C.borderSoft}`,
   };
@@ -292,6 +366,60 @@ function submitBtn(enabled: boolean): React.CSSProperties {
 const footer: React.CSSProperties = {
   marginTop: 22, borderTop: `1px solid ${C.borderSoft}`, paddingTop: 18,
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14,
+};
+
+const lightboxWrap: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(11,42,32,0.92)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+};
+
+const lightboxInner: React.CSSProperties = {
+  width: '100%', maxWidth: 1100, display: 'flex', flexDirection: 'column',
+  gap: 12, maxHeight: '100%',
+};
+
+const lightboxImg: React.CSSProperties = {
+  width: '100%', flex: 1, minHeight: 0, objectFit: 'contain',
+  borderRadius: 12, background: '#0B2A20',
+};
+
+const lightboxBar: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  gap: 12, flexWrap: 'wrap', flexShrink: 0,
+};
+
+function navBtn(enabled: boolean): React.CSSProperties {
+  return {
+    width: 38, height: 38, borderRadius: '50%', fontSize: 20, lineHeight: 1,
+    cursor: enabled ? 'pointer' : 'default', fontFamily: 'inherit',
+    background: 'rgba(255,255,255,0.12)',
+    color: `rgba(255,255,255,${enabled ? 0.9 : 0.3})`,
+    border: '1px solid rgba(255,255,255,0.2)',
+  };
+}
+
+function pickBtn(on: boolean): React.CSSProperties {
+  return {
+    height: 38, borderRadius: 20, padding: '0 18px', fontSize: 12.5, fontWeight: 700,
+    cursor: 'pointer', fontFamily: 'inherit', border: 'none',
+    background: on ? C.lime : C.white,
+    color: C.green,
+  };
+}
+
+const closeBtn: React.CSSProperties = {
+  width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.12)',
+  color: C.white, border: '1px solid rgba(255,255,255,0.2)', fontSize: 15,
+  cursor: 'pointer', fontFamily: 'inherit',
+};
+
+const thumbButton: React.CSSProperties = {
+  display: 'block', width: '100%', padding: 0, border: 'none', background: 'none',
+  cursor: 'zoom-in', borderRadius: 10, overflow: 'hidden',
+};
+
+const thumbImg: React.CSSProperties = {
+  width: '100%', height: 150, objectFit: 'cover', borderRadius: 10, display: 'block',
 };
 
 const inAlbum: React.CSSProperties = {
