@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import ResultToast from '@/components/ResultToast';
+import NavProgress from '@/components/NavProgress';
 import { getStaff } from '@/lib/staff';
 import Sidebar from '@/components/Sidebar';
 import SidebarShell from '@/components/SidebarShell';
@@ -34,6 +35,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <QueryProvider>{children}</QueryProvider>
         </main>
+
+        {/* Instant feedback while the next page renders on the server */}
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
 
         {/* Save / delete confirmations for every page in the dashboard */}
         <Suspense fallback={null}>
