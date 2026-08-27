@@ -82,6 +82,7 @@ export async function createAlbum(jobId: string, studioId: string, jobTitle: str
   }
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/album?saved=1`);
 }
 
@@ -113,6 +114,7 @@ export async function updateAlbum(
     .eq('studio_id', studioId);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/album?saved=1`);
 }
 
@@ -133,6 +135,7 @@ export async function setAlbumStatus(
     .eq('studio_id', studioId);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/album?saved=1`);
 }
 
@@ -187,6 +190,7 @@ export async function addSelectedPhotos(
   if (toInsert.length) await admin.from('album_pages').insert(toInsert);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
 }
 
 export async function uploadAlbumPages(
@@ -233,6 +237,7 @@ export async function uploadAlbumPages(
   }
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
   if (uploaded === 0) return { error: skipped.join('; ') || 'No images could be processed.', uploaded: 0 };
   return skipped.length ? { uploaded, error: `Skipped: ${skipped.join('; ')}` } : { uploaded };
 }
@@ -291,6 +296,7 @@ export async function uploadAlbumMusic(
   if (previous && isS3Url(previous)) await deleteFromS3(previous);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
   return { name: file.name };
 }
 
@@ -313,6 +319,7 @@ export async function removeAlbumMusic(
   if (musicUrl && isS3Url(musicUrl)) await deleteFromS3(musicUrl);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
 }
 
 export async function updatePageCaption(
@@ -332,6 +339,7 @@ export async function updatePageCaption(
     .eq('studio_id', studioId);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
 }
 
 /** Swaps sort_order with the neighbouring page in the given direction. */
@@ -363,6 +371,7 @@ export async function movePage(
   ]);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
 }
 
 export async function deletePage(
@@ -381,4 +390,5 @@ export async function deletePage(
   await admin.from('album_pages').delete().eq('id', pageId).eq('studio_id', studioId);
 
   revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Modal from '@/components/Modal';
 import { sendAgreement, voidContract } from './actions';
 import CreateAgreementButton from './CreateAgreementButton';
@@ -97,6 +98,17 @@ export default function AgreementPanel(props: Props) {
             />
           </div>
 
+          {status === 'sent' && (
+            <div className="mt-5 rounded-xl border border-[#F3D9BC] bg-[#FFF3E6] px-4 py-3.5">
+              <p className="text-[13.5px] font-bold text-[#a8631f]">Waiting on {clientName || 'the client'}</p>
+              <p className="text-[12.5px] text-[#8a6a45] mt-1 leading-relaxed">
+                They can now read and sign it in their portal under <strong>Agreement</strong>. Signing
+                is instant — this page shows the date and their name as soon as they accept. Nothing
+                further is needed from you.
+              </p>
+            </div>
+          )}
+
           {isSigned && (
             <div className="mt-5 rounded-xl border border-lime-border bg-lime-soft px-4 py-3.5">
               <p className="text-[13.5px] font-bold text-primary">
@@ -110,6 +122,7 @@ export default function AgreementPanel(props: Props) {
           )}
 
           <div className="mt-5 pt-4 border-t border-line-soft flex gap-2 flex-wrap">
+            <Link href={`/jobs/${jobId}`} className="btn-secondary">← Back to job</Link>
             {isDraft && (
               <CreateAgreementButton
                 jobId={jobId}

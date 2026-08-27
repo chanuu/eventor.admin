@@ -195,14 +195,20 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       .map((p) => ({ ...p, amount: Number(p.amount) }))
       .sort((a, b) => a.created_at.localeCompare(b.created_at)),
     galleries,
-    contract: ((r.contracts ?? []) as Contract[])[0] ?? null,
-    flipbook: ((r.flipbooks ?? []) as Flipbook[])[0] ?? null,
+    contract: one<Contract>(r.contracts),
+    flipbook: one<Flipbook>(r.flipbooks),
     album: albumFrom(r.albums),
   };
 }
 
+/** Normalises a to-one embed, which PostgREST may return as object or array. */
+function one<T>(raw: any): T | null {
+  if (!raw) return null;
+  return (Array.isArray(raw) ? raw[0] : raw) ?? null;
+}
+
 function albumFrom(raw: any): Album | null {
-  const a = Array.isArray(raw) ? raw[0] : raw;
+  const a = one<any>(raw);
   if (!a) return null;
   return {
     id: a.id, title: a.title,

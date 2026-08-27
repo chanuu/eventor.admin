@@ -33,6 +33,12 @@ type JobFull = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+/** A to-one embed arrives as an object; older code assumed an array. */
+function oneOf<T>(raw: unknown): T | null {
+  if (!raw) return null;
+  return ((Array.isArray(raw) ? raw[0] : raw) as T) ?? null;
+}
+
 export default async function JobDetailPage({ params, searchParams }: {
   params: { id: string };
   searchParams: { tab?: string; saved?: string };
@@ -88,7 +94,7 @@ export default async function JobDetailPage({ params, searchParams }: {
     availableAddons,
     shoots,
     payments:        (full.payments ?? []) as JobData['payments'],
-    contract:        (full.contracts ?? [])[0] ?? null,
+    contract:        oneOf<any>(full.contracts),
   };
 
   return (
