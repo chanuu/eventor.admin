@@ -330,13 +330,13 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                     )}
                   </div>
                   <Link href={`/jobs/${jobId}/contract`} className="btn-primary">
-                    {job.contract.status === 'draft' ? 'Edit Contract →' : 'View Contract →'}
+                    {job.contract.status === 'draft' ? 'Open Agreement →' : 'View Agreement →'}
                   </Link>
                 </>
               ) : (
                 <>
                   <EmptyState compact title="No agreement yet" description="Create the agreement to send it to your client for signing." />
-                  <Link href={`/jobs/${jobId}/contract`} className="btn-primary">Create Contract →</Link>
+                  <Link href={`/jobs/${jobId}/contract`} className="btn-primary">Create Agreement →</Link>
                 </>
               )}
             </div>

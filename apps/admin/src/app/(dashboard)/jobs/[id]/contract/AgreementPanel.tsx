@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import Modal from '@/components/Modal';
-import { createAgreement, sendAgreement, voidContract } from './actions';
+import { sendAgreement, voidContract } from './actions';
+import CreateAgreementButton from './CreateAgreementButton';
 
 type Props = {
   contractId: string;
@@ -37,7 +38,17 @@ export default function AgreementPanel(props: Props) {
   } = props;
 
   const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+
+  async function send() {
+    setPending(true);
+    setError('');
+    const result = await sendAgreement(contractId, jobId, studioId);
+    // A successful send redirects, so reaching here means it did not.
+    setPending(false);
+    if (result?.error) setError(result.error);
+  }
 
   const s = STATUS[status] ?? STATUS.draft;
   const isDraft = status === 'draft';
@@ -60,16 +71,18 @@ export default function AgreementPanel(props: Props) {
             <button onClick={() => setOpen(true)} className="btn-secondary">View agreement</button>
 
             {isDraft && (
-              <button
-                onClick={() => startTransition(() => { sendAgreement(contractId, jobId, studioId); })}
-                disabled={pending}
-                className="btn-primary"
-              >
+              <button onClick={send} disabled={pending} className="btn-primary">
                 {pending ? 'Sending…' : 'Send to client'}
               </button>
             )}
           </div>
         </div>
+
+        {error && (
+          <p className="px-5 sm:px-6 py-3 text-[12.5px] text-red-700 bg-red-50 border-b border-red-100">
+            {error}
+          </p>
+        )}
 
         {/* Record */}
         <div className="p-5 sm:p-6">
@@ -98,9 +111,13 @@ export default function AgreementPanel(props: Props) {
 
           <div className="mt-5 pt-4 border-t border-line-soft flex gap-2 flex-wrap">
             {isDraft && (
-              <form action={createAgreement.bind(null, jobId, studioId, resolvedTemplate)}>
-                <button type="submit" className="btn-secondary">Regenerate from current details</button>
-              </form>
+              <CreateAgreementButton
+                jobId={jobId}
+                studioId={studioId}
+                html={resolvedTemplate}
+                label="Regenerate from current details"
+                className="btn-secondary"
+              />
             )}
             {status !== 'void' && !isSigned && (
               <form action={voidContract.bind(null, contractId, jobId, studioId)}>
