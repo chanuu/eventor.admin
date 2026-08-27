@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updatePackage, createAddon, toggleAddonActive, deleteAddon } from '../../actions';
@@ -55,7 +56,7 @@ export default async function EditPackagePage({ params, searchParams }: {
         )}
       </h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/packages" className="hover:text-[#0F3D2E]">Packages</a> / <span className="text-[#0F3D2E]">Edit</span>
+        Main Menu / <Link href="/packages" className="hover:text-[#0F3D2E]">Packages</Link> / <span className="text-[#0F3D2E]">Edit</span>
       </p>
 
       {searchParams.saved && (
@@ -123,12 +124,11 @@ export default async function EditPackagePage({ params, searchParams }: {
                     + LKR {addon.price.toLocaleString()}
                   </span>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <a
-                      href={`/packages/${pkg.id}/addons/${addon.id}/edit`}
+                    <Link                       href={`/packages/${pkg.id}/addons/${addon.id}/edit`}
                       className="text-xs text-[#0F3D2E] hover:underline"
                     >
                       Edit
-                    </a>
+                    </Link>
                     <form action={toggleAction} className="inline">
                       <button type="submit" className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-0.5 hover:bg-gray-50 cursor-pointer bg-transparent">
                         {addon.is_active ? 'Deactivate' : 'Activate'}

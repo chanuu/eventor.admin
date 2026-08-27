@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { usePathname } from 'next/navigation';
 
 import { signOut } from '@/app/(auth)/login/actions';
@@ -113,7 +115,7 @@ export default function Sidebar({ studioName, staffName, roleName, permissions }
   return (
     <aside className="w-[246px] shrink-0 bg-primary text-white flex flex-col py-[22px] h-screen sticky top-0">
       {/* Brand */}
-      <a href="/dashboard" className="flex items-center gap-2.5 px-[22px] pb-6">
+      <Link href="/dashboard" className="flex items-center gap-2.5 px-[22px] pb-6">
         <span className="w-8 h-8 rounded-[9px] bg-lime text-primary font-extrabold text-base flex items-center justify-center shrink-0">
           {(studioName || 'E').charAt(0).toUpperCase()}
         </span>
@@ -121,15 +123,15 @@ export default function Sidebar({ studioName, staffName, roleName, permissions }
           <span className="block font-bold text-sm leading-tight truncate">{studioName || 'Eventor'}</span>
           <span className="block text-[10.5px] text-[#8fae9d] tracking-wider">STUDIO ADMIN</span>
         </span>
-      </a>
+      </Link>
 
       {/* Main nav */}
       <nav className="flex flex-col gap-0.5 px-3">
         {mainNav.map(({ href, label, icon }) => (
-          <a key={href} href={href} className={navItem(isActive(href))}>
+          <Link key={href} href={href} className={navItem(isActive(href))}>
             <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
             <span className="flex-1">{label}</span>
-          </a>
+          </Link>
         ))}
       </nav>
 
@@ -138,10 +140,10 @@ export default function Sidebar({ studioName, staffName, roleName, permissions }
       {/* Setup + account */}
       <div className="px-3">
         {settingsNav.map(({ href, label, icon }) => (
-          <a key={href} href={href} className={navItem(isActive(href))}>
+          <Link key={href} href={href} className={navItem(isActive(href))}>
             <span className="w-5 flex items-center justify-center shrink-0">{icon}</span>
             <span className="flex-1">{label}</span>
-          </a>
+          </Link>
         ))}
       </div>
 

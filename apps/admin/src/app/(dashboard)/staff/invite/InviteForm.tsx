@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { inviteStaffMember } from './actions';
 
@@ -27,7 +29,7 @@ export default function InviteForm({ roles }: { roles: Role[] }) {
         <p className="text-sm text-ink-mid mb-5">
           The staff member will receive an email to set up their account.
         </p>
-        <a href="/staff" className="text-sm text-primary hover:underline">← Back to staff</a>
+        <Link href="/staff" className="text-sm text-primary hover:underline">← Back to staff</Link>
       </div>
     );
   }
@@ -38,7 +40,7 @@ export default function InviteForm({ roles }: { roles: Role[] }) {
     <div className="max-w-xl">
       <h1 className="page-title">Invite Staff Member</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/staff" className="hover:text-primary">Staff</a> /{' '}
+        Main Menu / <Link href="/staff" className="hover:text-primary">Staff</Link> /{' '}
         <span className="text-primary">Invite</span>
       </p>
 
@@ -66,7 +68,7 @@ export default function InviteForm({ roles }: { roles: Role[] }) {
           )}
           <p className="text-xs text-ink-muted mt-1">
             Need a different set of permissions?{' '}
-            <a href="/roles" className="font-semibold text-primary">Configure roles</a>
+            <Link href="/roles" className="font-semibold text-primary">Configure roles</Link>
           </p>
         </Field>
 

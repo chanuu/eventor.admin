@@ -1,3 +1,4 @@
+import Link from "next/link";
 type Props = {
   page: number;
   totalPages: number;
@@ -50,9 +51,9 @@ function NavBtn({ href, label }: { href: string | null; label: string }) {
     );
   }
   return (
-    <a href={href} className="w-8 h-8 flex items-center justify-center rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors">
+    <Link href={href} className="w-8 h-8 flex items-center justify-center rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors">
       {label}
-    </a>
+    </Link>
   );
 }
 

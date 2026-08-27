@@ -43,5 +43,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|ico|css|js)$).*)'],
+  matcher: [
+    /*
+     * Every request except:
+     *  - _next internals and the image optimiser
+     *  - static asset extensions
+     * Each match costs one Supabase auth round trip, so the list is deliberately broad.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|logo.png|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|map)$).*)",
+  ],
 };

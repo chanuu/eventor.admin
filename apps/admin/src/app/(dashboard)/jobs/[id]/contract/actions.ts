@@ -13,8 +13,17 @@ async function requireStaff(capability: Capability = 'jobs.contracts'): Promise<
   return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
-export async function ensureContract(jobId: string, studioId: string): Promise<void> {
-  const ctx = await requireStaff('jobs.contracts');
+/**
+ * Creates the agreement from the studio's template, already filled in with the
+ * job, client and package details. There is no authoring step — the document is
+ * generated, then viewed, sent and signed.
+ */
+export async function createAgreement(
+  jobId: string,
+  studioId: string,
+  html: string,
+): Promise<void> {
+  const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
@@ -24,79 +33,64 @@ export async function ensureContract(jobId: string, studioId: string): Promise<v
     .eq('job_id', jobId)
     .maybeSingle();
 
-  if (!existing) {
-    await supabase.from('contracts').insert({ job_id: jobId, studio_id: studioId });
+  if (existing) {
+    // Only a draft may be regenerated; a sent or signed document is a record.
+    await supabase
+      .from('contracts')
+      .update({ content_html: html })
+      .eq('id', (existing as { id: string }).id)
+      .eq('studio_id', studioId)
+      .eq('status', 'draft');
+  } else {
+    await supabase.from('contracts').insert({
+      job_id: jobId,
+      studio_id: studioId,
+      content_html: html,
+      status: 'draft',
+    });
   }
 
   revalidatePath(`/jobs/${jobId}/contract`);
-  redirect(`/jobs/${jobId}/contract`);
+  redirect(`/jobs/${jobId}/contract?saved=1`);
 }
 
-export async function saveContractDraft(
+/** Makes the agreement visible to the client so they can read and sign it. */
+export async function sendAgreement(
   contractId: string,
   jobId: string,
   studioId: string,
-  formData: FormData,
-): Promise<{ error?: string }> {
-  const ctx = await requireStaff('jobs.contracts');
-  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
+): Promise<void> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
-  const { error } = await supabase
+  await supabase
     .from('contracts')
-    .update({ content_html: formData.get('content_html') as string, status: 'draft' })
+    .update({ status: 'sent', sent_at: new Date().toISOString() })
     .eq('id', contractId)
     .eq('studio_id', studioId);
-
-  if (error) return { error: error.message };
-  revalidatePath(`/jobs/${jobId}/contract`);
-  return {};
-}
-
-export async function sendContract(
-  contractId: string,
-  jobId: string,
-  studioId: string,
-  formData: FormData,
-): Promise<{ error?: string }> {
-  const ctx = await requireStaff('jobs.contracts');
-  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
-
-  const html = formData.get('content_html') as string;
-  if (!html?.trim()) return { error: 'Contract content is empty.' };
-
-  const supabase = createClient();
-  const { error } = await supabase
-    .from('contracts')
-    .update({ content_html: html, status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', contractId)
-    .eq('studio_id', studioId);
-
-  if (error) return { error: error.message };
 
   revalidatePath(`/jobs/${jobId}/contract`);
   revalidatePath(`/jobs/${jobId}`);
-  redirect(`/jobs/${jobId}/contract`);
+  redirect(`/jobs/${jobId}/contract?saved=1`);
 }
 
 export async function voidContract(
   contractId: string,
   jobId: string,
   studioId: string,
-): Promise<{ error?: string }> {
-  const ctx = await requireStaff('jobs.contracts');
-  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized' };
+): Promise<void> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) return;
 
   const supabase = createClient();
-  const { error } = await supabase
+  await supabase
     .from('contracts')
     .update({ status: 'void' })
     .eq('id', contractId)
     .eq('studio_id', studioId);
 
-  if (error) return { error: error.message };
-
   revalidatePath(`/jobs/${jobId}/contract`);
   revalidatePath(`/jobs/${jobId}`);
-  redirect(`/jobs/${jobId}/contract`);
+  redirect(`/jobs/${jobId}/contract?saved=1`);
 }

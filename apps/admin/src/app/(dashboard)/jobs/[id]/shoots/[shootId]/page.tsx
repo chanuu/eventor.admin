@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -82,9 +83,9 @@ export default async function ShootDetailPage({ params, searchParams }: {
     <div style={{ maxWidth: 600 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <a href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>
+        <Link href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>
           ← {jobTitle}
-        </a>
+        </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
           <h1 style={{ fontSize: 20, fontWeight: 600 }}>
             {shoot.shoot_type ?? 'Shoot'}

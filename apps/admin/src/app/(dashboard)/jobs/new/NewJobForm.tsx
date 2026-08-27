@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { createJob } from '../actions';
 
@@ -68,7 +70,7 @@ export default function NewJobForm({
       {clients.length === 0 && (
         <p className="text-sm text-amber-500">
           No clients yet.{' '}
-          <a href="/clients/new" className="text-[#0F3D2E] hover:underline">Create a client first</a>
+          <Link href="/clients/new" className="text-[#0F3D2E] hover:underline">Create a client first</Link>
         </p>
       )}
 
@@ -76,7 +78,7 @@ export default function NewJobForm({
         <button type="submit" disabled={loading || clients.length === 0} className="btn-primary">
           {loading ? 'Creating…' : 'Create job'}
         </button>
-        <a href="/jobs" className="btn-secondary">Cancel</a>
+        <Link href="/jobs" className="btn-secondary">Cancel</Link>
       </div>
     </form>
   );

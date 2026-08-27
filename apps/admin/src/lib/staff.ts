@@ -9,6 +9,7 @@ export type StaffContext = {
   full_name: string;
   role_id: string | null;
   roleName: string;
+  studioName: string;
   permissions: Capability[];
 };
 
@@ -23,7 +24,7 @@ export const getStaff = cache(async (): Promise<StaffContext | null> => {
 
   const { data } = await supabase
     .from('staff')
-    .select('id, studio_id, full_name, role_id, roles(name, role_permissions(permission_key))')
+    .select('id, studio_id, full_name, role_id, studios(name), roles(name, role_permissions(permission_key))')
     .eq('user_id', user.id)
     .eq('is_active', true)
     .maybeSingle();
@@ -31,6 +32,7 @@ export const getStaff = cache(async (): Promise<StaffContext | null> => {
   if (!data) return null;
   const row = data as any;
   const role = Array.isArray(row.roles) ? row.roles[0] : row.roles;
+  const studio = Array.isArray(row.studios) ? row.studios[0] : row.studios;
 
   return {
     id: row.id,
@@ -38,6 +40,7 @@ export const getStaff = cache(async (): Promise<StaffContext | null> => {
     full_name: row.full_name,
     role_id: row.role_id,
     roleName: role?.name ?? 'No role',
+    studioName: studio?.name ?? '',
     permissions: ((role?.role_permissions ?? []) as { permission_key: Capability }[])
       .map((p) => p.permission_key),
   };

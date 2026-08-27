@@ -26,7 +26,7 @@ export default function PortalEntry() {
         <div style={{ maxWidth: 420, textAlign: 'center' }}>
           <div style={{ fontSize: 16, fontWeight: 800, color: C.green }}>No events yet</div>
           <p style={{ marginTop: 8, lineHeight: 1.6 }}>
-            Your studio hasn’t linked an event to this email address yet. Once they do, it appears here automatically.
+            Your studio hasn’t linked an event to this mobile number yet. Once they do, it appears here automatically.
           </p>
         </div>
       </div>

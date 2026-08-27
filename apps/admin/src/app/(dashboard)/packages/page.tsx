@@ -1,3 +1,5 @@
+import { EmptyState } from '@/components/states';
+import Link from "next/link";
 import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { togglePackageActive } from './actions';
@@ -38,18 +40,20 @@ export default async function PackagesPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 20, fontWeight: 600 }}>Packages</h1>
-        <a
-          href="/packages/new"
+        <Link           href="/packages/new"
           style={{ background: '#0F3D2E', color: '#fff', padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}
         >
           + New package
-        </a>
+        </Link>
       </div>
 
       {packages.length === 0 ? (
-        <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af', border: '2px dashed #e5e7eb', borderRadius: 8 }}>
-          No packages yet.{' '}
-          <a href="/packages/new" style={{ color: '#0F3D2E' }}>Create your first package</a>
+        <div className="rounded-2xl border-2 border-dashed border-line bg-white">
+          <EmptyState
+            title="No packages yet"
+            description="Create a package so you can quote jobs and add extras to them."
+            action={{ href: '/packages/new', label: '+ New Package' }}
+          />
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -92,12 +96,11 @@ export default async function PackagesPage() {
               </div>
 
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                <a
-                  href={`/packages/${pkg.id}/edit`}
+                <Link                   href={`/packages/${pkg.id}/edit`}
                   style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500 }}
                 >
                   Edit
-                </a>
+                </Link>
                 <form action={togglePackageActive.bind(null, pkg.id, !pkg.is_active)}>
                   <button
                     type="submit"

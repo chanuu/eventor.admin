@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
 import NewJobForm from './NewJobForm';
 
@@ -19,7 +20,7 @@ export default async function NewJobPage() {
     <div className="max-w-xl">
       <h1 className="page-title">New Job</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/jobs" className="hover:text-[#0F3D2E]">Jobs</a> / <span className="text-[#0F3D2E]">New</span>
+        Main Menu / <Link href="/jobs" className="hover:text-[#0F3D2E]">Jobs</Link> / <span className="text-[#0F3D2E]">New</span>
       </p>
       <NewJobForm clients={clients} packages={packages} />
     </div>

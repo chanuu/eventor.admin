@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 import { useState } from 'react';
 import { createPackage } from '../actions';
 
@@ -20,7 +22,7 @@ export default function NewPackagePage() {
     <div className="max-w-xl">
       <h1 className="page-title">New Package</h1>
       <p className="breadcrumb mb-6">
-        Main Menu / <a href="/packages" className="hover:text-[#0F3D2E]">Packages</a> / <span className="text-[#0F3D2E]">New</span>
+        Main Menu / <Link href="/packages" className="hover:text-[#0F3D2E]">Packages</Link> / <span className="text-[#0F3D2E]">New</span>
       </p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-card p-6 flex flex-col gap-4">
@@ -52,7 +54,7 @@ export default function NewPackagePage() {
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Creating…' : 'Create package'}
           </button>
-          <a href="/packages" className="btn-secondary">Cancel</a>
+          <Link href="/packages" className="btn-secondary">Cancel</Link>
         </div>
       </form>
     </div>

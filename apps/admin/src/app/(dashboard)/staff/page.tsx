@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireCapability } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { toggleStaffActive } from './invite/actions';
@@ -39,8 +40,8 @@ export default async function StaffPage() {
           <p className="breadcrumb">Main Menu / Staff</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <a href="/roles" style={ghostBtn}>Roles &amp; permissions</a>
-          <a href="/staff/invite" style={primaryBtn}>Invite staff</a>
+          <Link href="/roles" style={ghostBtn}>Roles &amp; permissions</Link>
+          <Link href="/staff/invite" style={primaryBtn}>Invite staff</Link>
         </div>
       </div>
 
@@ -107,7 +108,7 @@ export default async function StaffPage() {
       <div style={{ background: '#fff', border: '1px solid #E7EAE5', borderRadius: 16, padding: 24, marginTop: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
           <h2 style={{ fontSize: 14, fontWeight: 800, color: '#0F3D2E' }}>Your studio’s roles</h2>
-          <a href="/roles" style={{ fontSize: 12.5, fontWeight: 700, color: '#0F3D2E' }}>Configure →</a>
+          <Link href="/roles" style={{ fontSize: 12.5, fontWeight: 700, color: '#0F3D2E' }}>Configure →</Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginTop: 14 }}>
           {roles.map((r) => (

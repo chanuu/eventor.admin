@@ -53,8 +53,15 @@ export default function AgreementPage() {
         </div>
         <div style={{ border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginTop: 14, background: C.white }}>
           {contract.content_html ? (
-            // Studio-authored HTML, not client input.
-            <div style={documentBody} dangerouslySetInnerHTML={{ __html: contract.content_html }} />
+            // The agreement is a complete HTML document with its own typography.
+            // A sandboxed iframe preserves that formatting; innerHTML would drop
+            // the body styles and render it unstyled.
+            <iframe
+              srcDoc={contract.content_html}
+              title="Photography Services Agreement"
+              sandbox=""
+              style={{ width: '100%', height: 720, border: 'none', display: 'block', background: C.white }}
+            />
           ) : (
             <p style={{ ...documentBody, color: C.muted, fontStyle: 'italic' }}>
               Your studio is still drafting this agreement.
