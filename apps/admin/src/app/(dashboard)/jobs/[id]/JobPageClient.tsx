@@ -38,6 +38,12 @@ export type JobPageClientProps = {
 
 // ─── Browser query ────────────────────────────────────────────────────────────
 
+/** A to-one embed arrives as an object; older code assumed an array. */
+function oneOf<T>(raw: unknown): T | null {
+  if (!raw) return null;
+  return ((Array.isArray(raw) ? raw[0] : raw) as T) ?? null;
+}
+
 async function fetchJob(jobId: string): Promise<JobData> {
   const supabase = createClient();
   const { data: raw, error } = await supabase
@@ -72,7 +78,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
     availableAddons: (pkg?.package_addons ?? []).filter((a) => a.is_active).map(({ id, name, price }) => ({ id, name, price })),
     shoots,
     payments: (r.payments ?? []) as Payment[],
-    contract: ((r.contracts ?? []) as Contract[])[0] ?? null,
+    contract: oneOf<Contract>(r.contracts),
   };
 }
 

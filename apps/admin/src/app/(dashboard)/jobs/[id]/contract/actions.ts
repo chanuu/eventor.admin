@@ -60,6 +60,7 @@ export async function createAgreement(
   }
 
   revalidatePath(`/jobs/${jobId}/contract`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/contract?saved=1`);
 }
 

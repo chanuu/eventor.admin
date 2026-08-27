@@ -80,6 +80,7 @@ export async function createGallery(jobId: string, studioId: string, formData: F
     .single();
 
   revalidatePath(`/jobs/${jobId}/gallery`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/gallery/${(data as { id: string } | null)?.id ?? ''}`);
 }
 
@@ -155,6 +156,7 @@ export async function uploadPhotos(
   }
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
+  revalidatePath(`/jobs/${jobId}`);
 
   if (uploaded === 0) {
     return { error: uploadError || skipped.join('; ') || 'No images could be processed.', uploaded: 0 };
@@ -183,6 +185,7 @@ export async function deletePhoto(
   await admin.from('gallery_photos').delete().eq('id', photoId).eq('gallery_id', galleryId);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
+  revalidatePath(`/jobs/${jobId}`);
 }
 
 export async function updateGalleryStatus(
@@ -198,6 +201,7 @@ export async function updateGalleryStatus(
   await admin.from('galleries').update({ status }).eq('id', galleryId);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/gallery/${galleryId}`);
 }
 
@@ -221,5 +225,6 @@ export async function updateGallery(
     .eq('id', galleryId);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
+  revalidatePath(`/jobs/${jobId}`);
   redirect(`/jobs/${jobId}/gallery/${galleryId}?saved=1`);
 }
