@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createAgreement } from './actions';
+import CreateAgreementButton from './CreateAgreementButton';
 import { buildAgreementHtml } from '@/lib/agreement';
 import AgreementPanel from './AgreementPanel';
 
@@ -71,7 +71,6 @@ export default async function ContractPage({ params }: { params: { id: string } 
     terms:          studio.agreement_terms,
   });
 
-  const createAction = createAgreement.bind(null, job.id, job.studio_id, resolvedTemplate);
 
   return (
     <div style={{ maxWidth: 960 }}>
@@ -89,9 +88,7 @@ export default async function ContractPage({ params }: { params: { id: string } 
             It is generated from your studio details, this job, the client and the package —
             then sent to the client to read and sign in their portal.
           </p>
-          <form action={createAction}>
-            <button type="submit" style={primaryBtn}>Create agreement</button>
-          </form>
+          <CreateAgreementButton jobId={job.id} studioId={job.studio_id} html={resolvedTemplate} />
         </div>
       ) : (
         <AgreementPanel
@@ -112,4 +109,3 @@ export default async function ContractPage({ params }: { params: { id: string } 
   );
 }
 
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 20px', fontSize: 14 };
