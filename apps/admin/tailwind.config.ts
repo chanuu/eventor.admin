@@ -53,6 +53,10 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(12px)' },
           to:   { opacity: '1', transform: 'translateY(0)' },
         },
+        navbar: {
+          '0%':   { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
         pulseDot: {
           '0%, 100%': { opacity: '1' },
           '50%':      { opacity: '0.35' },
@@ -61,6 +65,7 @@ const config: Config = {
       animation: {
         fadeUp: 'fadeUp 0.4s ease both',
         pulseDot: 'pulseDot 2s ease-in-out infinite',
+        navbar: 'navbar 1.1s ease-in-out infinite',
       },
     },
   },
