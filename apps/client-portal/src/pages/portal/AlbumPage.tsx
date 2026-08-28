@@ -101,6 +101,8 @@ export default function AlbumPage() {
         title={album?.title || job.title}
         musicEnabled={album ? album.music_enabled : true}
         musicUrl={album?.music_url ?? null}
+        autoplay={album?.autoplay ?? false}
+        autoplaySeconds={album?.autoplay_seconds ?? 6}
         onClose={() => setOpen(false)}
       />
     );
@@ -148,6 +150,43 @@ export default function AlbumPage() {
               </button>
             </div>
           </div>
+
+          {album?.is_public && album.share_token && (
+            <Card style={{ marginTop: 16 }}>
+              <CardTitle>Share your album</CardTitle>
+              <p style={{ fontSize: 12.5, color: C.textMid, marginTop: 8, lineHeight: 1.6 }}>
+                Anyone with this link can watch your album — no account needed. Send it to family and
+                friends.
+              </p>
+              <div style={{
+                marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                background: C.panel, border: `1px solid ${C.borderSoft}`, borderRadius: 12, padding: '12px 14px',
+              }}>
+                <input
+                  readOnly
+                  value={`${window.location.origin}/album/${album.share_token}`}
+                  onFocus={(e) => e.currentTarget.select()}
+                  style={{
+                    flex: '1 1 220px', minWidth: 0, border: 'none', background: 'transparent',
+                    fontFamily: 'inherit', fontSize: 12.5, color: C.textStrong, outline: 'none',
+                  }}
+                />
+                <button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(`${window.location.origin}/album/${album.share_token}`);
+                      setToast('Album link copied — share it with anyone.');
+                    } catch {
+                      setToast('Select the link and copy it.');
+                    }
+                  }}
+                  style={{ ...ghostBtn, padding: '9px 16px' }}
+                >
+                  Copy link
+                </button>
+              </div>
+            </Card>
+          )}
 
           <Card style={{ marginTop: 16 }}>
             <CardTitle>About your album</CardTitle>

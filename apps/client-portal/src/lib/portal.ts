@@ -47,6 +47,8 @@ export type Album = {
   cover_kicker: string | null; cover_title: string | null; cover_body: string | null;
   closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
   music_enabled: boolean; music_url: string | null; music_name: string | null;
+  autoplay: boolean; autoplay_seconds: number;
+  share_token: string | null; is_public: boolean;
   published_at: string | null;
   pages: AlbumPageRow[];
 };
@@ -133,7 +135,8 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       flipbooks(id, storage_path, share_token, published_at, created_at),
       albums(id, title, cover_kicker, cover_title, cover_body,
              closing_kicker, closing_title, closing_body,
-             music_enabled, music_url, music_name, published_at,
+             music_enabled, music_url, music_name,
+             autoplay, autoplay_seconds, share_token, is_public, published_at,
              album_pages(id, image_url, caption, sort_order, gallery_photos(storage_path)))
     `)
     .eq('id', jobId)
@@ -217,6 +220,10 @@ function albumFrom(raw: any): Album | null {
     music_enabled: a.music_enabled ?? true,
     music_url: a.music_url ?? null,
     music_name: a.music_name ?? null,
+    autoplay: a.autoplay ?? false,
+    autoplay_seconds: a.autoplay_seconds ?? 6,
+    share_token: a.share_token ?? null,
+    is_public: a.is_public ?? false,
     published_at: a.published_at,
     pages: ((a.album_pages ?? []) as AlbumPageRow[])
       .slice()
