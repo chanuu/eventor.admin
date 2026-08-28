@@ -44,6 +44,7 @@ export default function FlipAlbum({
   const [fullscreen, setFullscreen] = useState(false);
   const [immersive, setImmersive] = useState(false);
   const [playing, setPlaying] = useState(autoplay);
+  const [ready, setReady] = useState(false);
 
   // ── Audio: a slow four-chord loop synthesised in the browser ──────────────
   const ctxRef = useRef<AudioContext | null>(null);
@@ -253,6 +254,7 @@ export default function FlipAlbum({
 
       flipRef.current = flip;
       readyAtRef.current = Date.now();
+      setReady(true);
       setPageCount(flip.getPageCount());
 
       // Keep the reader's place across a rebuild (resize / fullscreen).
@@ -282,6 +284,7 @@ export default function FlipAlbum({
         try { flipRef.current.destroy(); } catch { /* already gone */ }
         flipRef.current = null;
       }
+      setReady(false);
       if (host) host.innerHTML = '';
     };
   }, [pages, box]);
@@ -316,7 +319,7 @@ export default function FlipAlbum({
   // Autoplay: turn a page every few seconds, and stop at the end rather than
   // looping back to the cover.
   useEffect(() => {
-    if (!playing || !flipRef.current) return;
+    if (!playing || !ready || !flipRef.current) return;
 
     const id = setInterval(() => {
       const flip = flipRef.current;
@@ -330,7 +333,9 @@ export default function FlipAlbum({
     }, Math.max(2, autoplaySeconds) * 1000);
 
     return () => clearInterval(id);
-  }, [playing, autoplaySeconds, box]);
+  }, [playing, ready, autoplaySeconds]);
+
+  useEffect(() => { setPlaying(autoplay); }, [autoplay]);
 
   // Turning a page by hand takes over from autoplay.
   function manualTurn(fn: 'flipNext' | 'flipPrev') {
