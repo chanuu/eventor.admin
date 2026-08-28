@@ -155,7 +155,7 @@ export default function PortalLayout({ user }: { user: User }) {
         </div>
 
         {/* ── Main ── */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, marginLeft: isMobile ? 0 : SIDEBAR_WIDTH }}>
           <div style={{ ...topBar, padding: isMobile ? '14px 16px' : '16px 34px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
               {isMobile && (
@@ -235,10 +235,16 @@ const pageBase: React.CSSProperties = {
 
 function sidebar(isMobile: boolean, open: boolean): React.CSSProperties {
   const base: React.CSSProperties = {
-    width: 246, flexShrink: 0, background: C.green, color: C.white,
+    width: SIDEBAR_WIDTH, flexShrink: 0, background: C.green, color: C.white,
     display: 'flex', flexDirection: 'column', padding: '22px 0',
   };
-  if (!isMobile) return { ...base, position: 'sticky', top: 0, height: '100vh' };
+  if (!isMobile) {
+    return {
+      ...base,
+      position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 40,
+      height: '100dvh', overflowY: 'auto',
+    };
+  }
   return {
     ...base,
     position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 60,
@@ -248,6 +254,8 @@ function sidebar(isMobile: boolean, open: boolean): React.CSSProperties {
     boxShadow: open ? '0 0 40px rgba(0,0,0,0.3)' : 'none',
   };
 }
+
+const SIDEBAR_WIDTH = 246;
 
 const scrim: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(11,42,32,0.5)', zIndex: 55,

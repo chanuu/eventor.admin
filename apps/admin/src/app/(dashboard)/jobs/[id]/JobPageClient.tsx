@@ -158,6 +158,9 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5 bg-gray-50 border-b border-gray-100">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
           <JobStatusForm current={job.status} steps={STATUS_STEPS} isPending={statusMutation.isPending} onStatusChange={(s) => statusMutation.mutate(s)} />
+          <span className="text-[11.5px] text-ink-muted hidden sm:inline">
+            Moves forward on its own as the agreement is signed, shoots are shot and the album is published.
+          </span>
         </div>
 
         {/* Tab nav — pills that wrap, so all seven stay reachable on a phone */}

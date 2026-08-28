@@ -17,6 +17,7 @@ export type AlbumPage =
  */
 export default function FlipAlbum({
   pages, title, onClose, musicEnabled = true, musicUrl = null,
+  autoplay = false, autoplaySeconds = 6,
 }: {
   pages: AlbumPage[];
   title: string;
@@ -25,6 +26,9 @@ export default function FlipAlbum({
   musicEnabled?: boolean;
   /** Uploaded track. When absent, the built-in generated loop is used. */
   musicUrl?: string | null;
+  /** Start turning pages on its own. */
+  autoplay?: boolean;
+  autoplaySeconds?: number;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const bookRef = useRef<HTMLDivElement | null>(null);
@@ -39,6 +43,7 @@ export default function FlipAlbum({
   const [audioOn, setAudioOn] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [immersive, setImmersive] = useState(false);
+  const [playing, setPlaying] = useState(autoplay);
 
   // ── Audio: a slow four-chord loop synthesised in the browser ──────────────
   const ctxRef = useRef<AudioContext | null>(null);
@@ -308,6 +313,31 @@ export default function FlipAlbum({
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
 
+  // Autoplay: turn a page every few seconds, and stop at the end rather than
+  // looping back to the cover.
+  useEffect(() => {
+    if (!playing || !flipRef.current) return;
+
+    const id = setInterval(() => {
+      const flip = flipRef.current;
+      if (!flip) return;
+      const current = flip.getCurrentPageIndex?.() ?? 0;
+      if (current >= flip.getPageCount() - 1) {
+        setPlaying(false);
+        return;
+      }
+      flip.flipNext();
+    }, Math.max(2, autoplaySeconds) * 1000);
+
+    return () => clearInterval(id);
+  }, [playing, autoplaySeconds, box]);
+
+  // Turning a page by hand takes over from autoplay.
+  function manualTurn(fn: 'flipNext' | 'flipPrev') {
+    setPlaying(false);
+    flipRef.current?.[fn]();
+  }
+
   // Remember the page so a rebuild can restore it.
   useEffect(() => { pageRef.current = page; }, [page]);
 
@@ -346,6 +376,10 @@ export default function FlipAlbum({
           <div style={{ fontFamily: SERIF, fontSize: 26, color: '#ffffff', marginTop: 4 }}>{title}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button onClick={() => setPlaying((p) => !p)} style={ghostPill} aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}>
+            {playing ? '❙❙ Pause' : '▶ Play'}
+          </button>
+
           {musicEnabled && (
             <button onClick={toggleAudio} style={audioBtn(audioOn)}>
               {audioOn && (
@@ -367,9 +401,9 @@ export default function FlipAlbum({
 
       {/* Book */}
       <div style={bookRow}>
-        <button onClick={() => flipRef.current?.flipPrev()} style={arrowBtn(page > 0)}>‹</button>
+        <button onClick={() => manualTurn('flipPrev')} style={arrowBtn(page > 0)}>‹</button>
         <div ref={bookRef} style={bookHost} />
-        <button onClick={() => flipRef.current?.flipNext()} style={arrowBtn(page < total - 1)}>›</button>
+        <button onClick={() => manualTurn('flipNext')} style={arrowBtn(page < total - 1)}>›</button>
       </div>
 
       {/* Footer */}
@@ -381,7 +415,7 @@ export default function FlipAlbum({
           {starts.map((start, i) => (
             <button
               key={start}
-              onClick={() => { try { flipRef.current?.turnToPage(start); } catch { /* ignore */ } }}
+              onClick={() => { setPlaying(false); try { flipRef.current?.turnToPage(start); } catch { /* ignore */ } }}
               style={dotStyle(i === activeSpread)}
               aria-label={`Go to page ${start + 1}`}
             />

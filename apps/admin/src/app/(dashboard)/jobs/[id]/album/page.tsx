@@ -10,6 +10,7 @@ import {
 import AlbumPageUploader from './AlbumPageUploader';
 import PageCaptionField from './PageCaptionField';
 import MusicUploader from './MusicUploader';
+import AlbumSharing from './AlbumSharing';
 
 type Job = { id: string; title: string; studio_id: string; event_type: string | null };
 
@@ -18,6 +19,7 @@ type Album = {
   cover_kicker: string | null; cover_title: string | null; cover_body: string | null;
   closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
   music_enabled: boolean; music_url: string | null; music_name: string | null;
+  share_token: string; is_public: boolean; autoplay: boolean; autoplay_seconds: number;
   status: string; published_at: string | null;
 };
 
@@ -43,7 +45,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
 
   const { data: albumRaw } = await supabase
     .from('albums')
-    .select('id, title, cover_kicker, cover_title, cover_body, closing_kicker, closing_title, closing_body, music_enabled, music_url, music_name, status, published_at')
+    .select('id, title, cover_kicker, cover_title, cover_body, closing_kicker, closing_title, closing_body, music_enabled, music_url, music_name, share_token, is_public, autoplay, autoplay_seconds, status, published_at')
     .eq('job_id', params.id)
     .maybeSingle();
   const album = albumRaw as Album | null;
@@ -213,6 +215,18 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
             </p>
           )}
         </div>
+
+        <AlbumSharing
+          albumId={album.id}
+          jobId={params.id}
+          studioId={job.studio_id}
+          isPublic={album.is_public}
+          shareToken={album.share_token}
+          published={published}
+          autoplay={album.autoplay}
+          autoplaySeconds={album.autoplay_seconds}
+          portalUrl={process.env.NEXT_PUBLIC_PORTAL_URL ?? 'http://localhost:3002'}
+        />
 
         {/* Pages */}
         <div style={card}>

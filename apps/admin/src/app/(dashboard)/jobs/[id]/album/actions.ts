@@ -392,3 +392,55 @@ export async function deletePage(
   revalidatePath(`/jobs/${jobId}/album`);
   revalidatePath(`/jobs/${jobId}`);
 }
+
+// ─── Public sharing & playback ───────────────────────────────────────────────
+
+/**
+ * Public sharing is deliberately a separate switch from publishing: publishing
+ * shows the album to the client, sharing lets them pass a link to anyone.
+ */
+export async function setAlbumSharing(
+  albumId: string,
+  jobId: string,
+  studioId: string,
+  isPublic: boolean,
+): Promise<{ error?: string } | void> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) {
+    return { error: 'You do not have permission to change this album.' };
+  }
+
+  const { error } = await createAdminClient()
+    .from('albums')
+    .update({ is_public: isPublic })
+    .eq('id', albumId)
+    .eq('studio_id', studioId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/jobs/${jobId}/album`);
+  revalidatePath(`/jobs/${jobId}`);
+}
+
+export async function setAlbumPlayback(
+  albumId: string,
+  jobId: string,
+  studioId: string,
+  autoplay: boolean,
+  seconds: number,
+): Promise<{ error?: string } | void> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) {
+    return { error: 'You do not have permission to change this album.' };
+  }
+
+  const { error } = await createAdminClient()
+    .from('albums')
+    .update({ autoplay, autoplay_seconds: Math.min(30, Math.max(2, seconds)) })
+    .eq('id', albumId)
+    .eq('studio_id', studioId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/jobs/${jobId}/album`);
+}

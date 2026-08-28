@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
 import LoginPage from './pages/LoginPage';
+import PublicAlbum from './pages/PublicAlbum';
 import PortalLayout from './components/PortalLayout';
 import PortalEntry from './pages/PortalEntry';
 import OverviewPage from './pages/portal/OverviewPage';
@@ -39,6 +40,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/album/:token" element={<PublicAlbum />} />
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
 
         {user ? (
