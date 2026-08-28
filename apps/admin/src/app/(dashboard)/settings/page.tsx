@@ -14,6 +14,7 @@ type Studio = {
   email: string | null;
   phone: string | null;
   logo_url: string | null;
+  portal_url: string | null;
   agreement_intro: string | null;
   agreement_terms: string | null;
 };
@@ -28,7 +29,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
   const supabase = createClient();
   const { data: studioRaw } = await supabase
     .from('studios')
-    .select('id, name, address, email, phone, logo_url, agreement_intro, agreement_terms')
+    .select('id, name, address, email, phone, logo_url, portal_url, agreement_intro, agreement_terms')
     .eq('id', staff.studio_id)
     .single();
   const studio = studioRaw as Studio | null;
@@ -89,6 +90,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
               <input name="email" type="email" defaultValue={studio.email ?? ''} className="input" placeholder="studio@example.com" />
             </Field>
           </div>
+
+          <Field label="Client portal address">
+            <input
+              name="portal_url"
+              defaultValue={studio.portal_url ?? ''}
+              className="input"
+              placeholder="https://portal.eventor.lk"
+            />
+            <p className="text-xs text-ink-muted mt-1">
+              Where your clients sign in. Used to build shareable album links — leave it blank and those
+              links will point at localhost.
+            </p>
+          </Field>
           <div>
             <button type="submit" className="btn-primary">Save settings</button>
           </div>

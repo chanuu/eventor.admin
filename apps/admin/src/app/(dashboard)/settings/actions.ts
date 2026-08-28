@@ -25,7 +25,8 @@ export async function updateStudioSettings(studioId: string, formData: FormData)
   await supabase.from('studios').update({
     name:    (formData.get('name')    as string).trim(),
     address: (formData.get('address') as string | null)?.trim() || null,
-    phone:   (formData.get('phone')   as string | null)?.trim() || null,
+    phone: (formData.get('phone')   as string | null)?.trim() || null,
+    portal_url: ((formData.get('portal_url') as string) ?? '').trim() || null,
     email:   (formData.get('email')   as string | null)?.trim() || null,
   }).eq('id', studioId);
 

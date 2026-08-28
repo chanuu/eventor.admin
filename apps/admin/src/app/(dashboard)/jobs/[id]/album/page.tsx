@@ -13,6 +13,7 @@ import MusicUploader from './MusicUploader';
 import AlbumSharing from './AlbumSharing';
 
 type Job = { id: string; title: string; studio_id: string; event_type: string | null };
+type StudioRow = { portal_url: string | null };
 
 type Album = {
   id: string; title: string | null;
@@ -49,6 +50,12 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
     .eq('job_id', params.id)
     .maybeSingle();
   const album = albumRaw as Album | null;
+
+  const { data: studioRaw } = await supabase
+    .from('studios').select('portal_url').eq('id', job.studio_id).maybeSingle();
+  const portalUrl = (studioRaw as StudioRow | null)?.portal_url?.trim()
+    || process.env.NEXT_PUBLIC_PORTAL_URL
+    || '';
 
   if (!album) {
     return (
@@ -225,7 +232,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
           published={published}
           autoplay={album.autoplay}
           autoplaySeconds={album.autoplay_seconds}
-          portalUrl={process.env.NEXT_PUBLIC_PORTAL_URL ?? 'http://localhost:3002'}
+          portalUrl={portalUrl}
         />
 
         {/* Pages */}
