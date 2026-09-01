@@ -1,3 +1,4 @@
+import { requireFeature } from '@/lib/staff';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -34,6 +35,7 @@ export default async function AlbumBuilderPage({ params, searchParams }: {
   params: { id: string };
   searchParams: { saved?: string };
 }) {
+  await requireFeature('album');
   const supabase = createClient();
 
   const { data: jobRaw } = await supabase

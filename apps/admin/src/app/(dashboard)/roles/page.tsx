@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireCapability } from '@/lib/staff';
+import { requireCapability, requireFeature } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { createRole } from './actions';
 
@@ -14,6 +14,7 @@ type RoleRow = {
 
 export default async function RolesPage({ searchParams }: { searchParams: { saved?: string } }) {
   await requireCapability('staff.manage');
+  await requireFeature('staff');
   const supabase = createClient();
 
   const { data: rolesRaw } = await supabase

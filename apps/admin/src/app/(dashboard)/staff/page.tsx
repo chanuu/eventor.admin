@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireCapability } from '@/lib/staff';
+import { requireCapability, requireFeature } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { toggleStaffActive } from './invite/actions';
 import RoleSelect from './RoleSelect';
@@ -19,6 +19,7 @@ type RoleRow = { id: string; name: string; description: string | null; is_system
 
 export default async function StaffPage() {
   const me = await requireCapability('staff.manage');
+  await requireFeature('staff');
   const supabase = createClient();
 
   const [{ data: listRaw }, { data: rolesRaw }] = await Promise.all([

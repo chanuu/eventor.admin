@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 
 import { signOut } from '@/app/(auth)/login/actions';
 import type { Capability } from '@/lib/permissions';
+import type { Feature } from '@/lib/features';
 
 const MAIN_NAV = [
   {
@@ -21,6 +22,7 @@ const MAIN_NAV = [
   {
     href: '/schedule',
     cap: 'schedule.view' as const,
+    feature: 'scheduling' as const,
     label: 'Schedule',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -32,6 +34,7 @@ const MAIN_NAV = [
   {
     href: '/jobs',
     cap: 'jobs.view' as const,
+    feature: 'jobs' as const,
     label: 'Jobs',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -42,6 +45,7 @@ const MAIN_NAV = [
   {
     href: '/clients',
     cap: 'clients.manage' as const,
+    feature: 'clients' as const,
     label: 'Clients',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -52,6 +56,7 @@ const MAIN_NAV = [
   {
     href: '/packages',
     cap: 'packages.manage' as const,
+    feature: 'jobs' as const,
     label: 'Packages',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -62,6 +67,7 @@ const MAIN_NAV = [
   {
     href: '/staff',
     cap: 'staff.manage' as const,
+    feature: 'staff' as const,
     label: 'Staff',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -73,8 +79,19 @@ const MAIN_NAV = [
 
 const SETTINGS_NAV = [
   {
+    href: '/billing',
+    cap: 'settings.manage' as const,
+    label: 'Billing',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+    ),
+  },
+  {
     href: '/roles',
     cap: 'staff.manage' as const,
+    feature: 'staff' as const,
     label: 'Roles',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -98,8 +115,10 @@ const navItem = (active: boolean) =>
   `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors
    ${active ? 'bg-white text-primary' : 'text-[#cfe4d8] hover:bg-white/10'}`;
 
-export default function Sidebar({ studioName, staffName, roleName, permissions }: {
-  studioName: string; staffName: string; roleName: string; permissions: Capability[];
+export default function Sidebar({ studioName, staffName, roleName, permissions, features, isPlatformAdmin }: {
+  studioName: string; staffName: string; roleName: string;
+  permissions: Capability[]; features: Feature[];
+  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -109,8 +128,11 @@ export default function Sidebar({ studioName, staffName, roleName, permissions }
   }
 
   // Only show what this role can actually use — the pages guard themselves too.
-  const mainNav = MAIN_NAV.filter(({ cap }) => permissions.includes(cap));
-  const settingsNav = SETTINGS_NAV.filter(({ cap }) => permissions.includes(cap));
+  const allowed = (item: { cap: Capability; feature?: Feature }) =>
+    permissions.includes(item.cap) && (!item.feature || features.includes(item.feature));
+
+  const mainNav = MAIN_NAV.filter(allowed);
+  const settingsNav = SETTINGS_NAV.filter(allowed);
 
   return (
     <aside className="w-[246px] shrink-0 bg-primary text-white flex flex-col py-[22px] h-screen sticky top-0">
@@ -146,6 +168,19 @@ export default function Sidebar({ studioName, staffName, roleName, permissions }
           </Link>
         ))}
       </div>
+
+      {isPlatformAdmin && (
+        <div className="px-3 mt-1">
+          <Link href="/platform" className={navItem(pathname.startsWith('/platform'))}>
+            <span className="w-5 flex items-center justify-center shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>
+              </svg>
+            </span>
+            <span className="flex-1">Platform</span>
+          </Link>
+        </div>
+      )}
 
       <div className="mt-4 px-[22px]">
         <div className="border-t border-white/10 pt-4">

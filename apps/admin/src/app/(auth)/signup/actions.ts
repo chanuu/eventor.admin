@@ -42,16 +42,35 @@ export async function createStudioAndAdmin(formData: FormData) {
     return { error: studioErr?.message ?? 'Could not create studio.' };
   }
 
-  // 3. Create admin staff record
+  // 3. Link to the studio's Admin role.
+  //
+  // Inserting the studio fires a trigger that seeds its four default roles;
+  // without role_id the new owner would have no permissions and be locked out
+  // of the studio they just created.
+  const { data: adminRole } = await admin
+    .from('roles')
+    .select('id')
+    .eq('studio_id', studio.id)
+    .eq('key', 'admin')
+    .maybeSingle();
+
+  if (!adminRole) {
+    await admin.auth.admin.deleteUser(user.id);
+    await admin.from('studios').delete().eq('id', studio.id);
+    return { error: 'Could not set up studio roles. Please try again.' };
+  }
+
   const { error: staffErr } = await admin.from('staff').insert({
     studio_id: studio.id,
     user_id: user.id,
     role: 'admin',
+    role_id: (adminRole as { id: string }).id,
     full_name: fullName,
   });
 
   if (staffErr) {
     await admin.auth.admin.deleteUser(user.id);
+    await admin.from('studios').delete().eq('id', studio.id);
     return { error: staffErr.message };
   }
 

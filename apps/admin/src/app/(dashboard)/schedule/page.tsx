@@ -1,3 +1,4 @@
+import { requireFeature } from '@/lib/staff';
 import { EmptyState } from '@/components/states';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
@@ -67,6 +68,7 @@ function formatTime(iso: string) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function SchedulePage({ searchParams }: { searchParams: { month?: string } }) {
+  await requireFeature('scheduling');
   const { year, month } = parseMonth(searchParams.month);
 
   const rangeStart = new Date(year, month - 1, 1).toISOString();

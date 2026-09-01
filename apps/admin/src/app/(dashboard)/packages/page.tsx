@@ -1,6 +1,6 @@
 import { EmptyState } from '@/components/states';
 import Link from "next/link";
-import { requireCapability } from '@/lib/staff';
+import { requireCapability, requireFeature } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import { togglePackageActive } from './actions';
 
@@ -16,6 +16,7 @@ type PackageRow = {
 
 export default async function PackagesPage() {
   await requireCapability('packages.manage');
+  await requireFeature('jobs');
   const supabase = createClient();
 
   const { data: raw } = await supabase

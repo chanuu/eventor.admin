@@ -1,3 +1,4 @@
+import { requireFeature } from '@/lib/staff';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -25,6 +26,7 @@ const STATUS_BADGE: Record<string, { bg: string; color: string; label: string }>
 };
 
 export default async function GalleryListPage({ params }: { params: { id: string } }) {
+  await requireFeature('gallery');
   const supabase = createClient();
 
   const { data: jobRaw } = await supabase

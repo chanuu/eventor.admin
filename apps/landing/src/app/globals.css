@@ -1,0 +1,48 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #EDEDED;
+  color: #111614;
+  font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+a { color: #0F5344; text-decoration: none; }
+a:hover { color: #8BC53F; }
+
+img { max-width: 100%; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The nav scrolls sideways on narrow screens without showing a scrollbar. */
+nav::-webkit-scrollbar { display: none; }
+
+/*
+ * Two-column sections. The reference is a desktop layout with fixed ratios;
+ * these stack below 900px so the page holds up on a phone.
+ */
+.split-13, .split-112, .split-115, .pair {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .split-13  { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+  .split-112 { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+  .split-115 { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .pair      { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* Section padding tightens on small screens. */
+@media (max-width: 640px) {
+  [id="album"], [id="galleries"], [id="crm"],
+  [id="proofing"], [id="payments"], [id="pricing"], [id="portal"] {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+  }
+}
