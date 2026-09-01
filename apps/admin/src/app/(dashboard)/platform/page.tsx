@@ -32,7 +32,10 @@ export default async function PlatformDashboard() {
           <h1 className="page-title">Platform</h1>
           <p className="breadcrumb">Every studio on Eventor</p>
         </div>
-        <Link href="/platform/plans" className="btn-primary">Package configuration →</Link>
+        <div className="flex gap-2 flex-wrap">
+          <Link href="/platform/lead-sources" className="btn-secondary">Lead sources</Link>
+          <Link href="/platform/plans" className="btn-primary">Package configuration →</Link>
+        </div>
       </div>
 
       {/* Figures across all tenants */}

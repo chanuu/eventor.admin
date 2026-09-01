@@ -52,11 +52,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       .eq('status', 'paid'),
     supabase
       .from('jobs')
-      .select('event_type, total_price, status'),
+      .select('event_type, total_price, status, lead_source'),
   ]);
 
   const paidPayments = (paidPaymentsRaw ?? []) as { amount: number; paid_at: string | null }[];
-  const jobs         = (jobsRaw ?? []) as { event_type: string | null; total_price: number; status: string }[];
+  const jobs         = (jobsRaw ?? []) as { event_type: string | null; total_price: number; status: string; lead_source: string | null }[];
   const upcoming     = (upcomingRaw ?? []) as any[];
   const payments     = (pendingPaymentsRaw ?? []) as any[];
 
@@ -99,6 +99,18 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   const statusCounts: StatusPoint[] = STATUS_ORDER
     .map((s) => ({ status: s, count: statusMap.get(s) ?? 0 }))
     .filter((s) => s.count > 0);
+
+  // ── Where enquiries come from ────────────────────────────────
+  const sourceMap = new Map<string, { count: number; value: number }>();
+  for (const j of jobs) {
+    const key = j.lead_source?.trim() || 'Not recorded';
+    const e = sourceMap.get(key) ?? { count: 0, value: 0 };
+    sourceMap.set(key, { count: e.count + 1, value: e.value + Number(j.total_price) });
+  }
+  const leadSources = Array.from(sourceMap.entries())
+    .map(([source, d]) => ({ source, ...d }))
+    .sort((a, b) => b.count - a.count);
+  const leadTotal = leadSources.reduce((s, l) => s + l.count, 0);
 
   // ── Stat cards ───────────────────────────────────────────────
   const stats = [
@@ -174,6 +186,40 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Where enquiries come from */}
+      <div className="bg-white rounded-2xl shadow-card p-5 mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h2 className="text-sm font-extrabold text-primary">Where your enquiries come from</h2>
+          <span className="text-[11.5px] text-ink-muted">{leadTotal} job{leadTotal === 1 ? '' : 's'}</span>
+        </div>
+
+        {leadSources.length === 0 ? (
+          <EmptyState compact title="No enquiries yet" description="Record a lead source on a job and the breakdown appears here." />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {leadSources.map((l) => {
+              const pct = leadTotal ? Math.round((l.count / leadTotal) * 100) : 0;
+              return (
+                <div key={l.source}>
+                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                    <span className="text-[13px] font-semibold text-ink-strong">{l.source}</span>
+                    <span className="text-[12px] text-ink-muted whitespace-nowrap">
+                      {l.count} · Rs. {Math.round(l.value).toLocaleString('en-LK')} · {pct}%
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-line-soft overflow-hidden">
+                    <div
+                      className={l.source === 'Not recorded' ? 'h-full bg-line-btn' : 'h-full bg-lime'}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Revenue chart + Job pipeline */}

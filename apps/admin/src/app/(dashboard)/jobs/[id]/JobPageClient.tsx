@@ -25,7 +25,7 @@ type Contract   = { id: string; status: string; sent_at: string | null; signed_a
 type Pkg        = { name: string; base_price: number; shoots_included: number };
 
 export type JobData = {
-  title: string; eventType: string | null; status: string; totalPrice: number; notes: string | null;
+  title: string; eventType: string | null; leadSource: string | null; status: string; totalPrice: number; notes: string | null;
   clientName: string | null; pkg: Pkg | null; jobAddons: JobAddon[]; availableAddons: AvailAddon[];
   shoots: Shoot[]; payments: Payment[]; contract: Contract | null;
 };
@@ -34,6 +34,7 @@ export type JobPageClientProps = {
   jobId: string; studioId: string;
   initialData: JobData;
   initialTab: string; savedParam: boolean;
+  leadSources: string[];
 };
 
 // ─── Browser query ────────────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
   const { data: raw, error } = await supabase
     .from('jobs')
     .select(`
-      title, event_type, status, total_price, notes,
+      title, event_type, lead_source, status, total_price, notes,
       clients(id, full_name),
       packages(name, base_price, shoots_included, package_addons(id, name, price, is_active)),
       job_addons(id, price_at_booking, quantity, package_addons(name)),
@@ -68,7 +69,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
     return a.scheduled_at.localeCompare(b.scheduled_at);
   });
   return {
-    title: r.title, eventType: r.event_type, status: r.status, totalPrice: r.total_price, notes: r.notes,
+    title: r.title, eventType: r.event_type, leadSource: r.lead_source, status: r.status, totalPrice: r.total_price, notes: r.notes,
     clientName: client?.full_name ?? null,
     pkg: pkg ? { name: pkg.name, base_price: pkg.base_price, shoots_included: pkg.shoots_included } : null,
     jobAddons: ((r.job_addons ?? []) as any[]).map((ja) => ({
@@ -105,7 +106,7 @@ const SHOOT_STATUS: Record<string, string> = { scheduled: 'Scheduled', shot: 'Sh
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam }: JobPageClientProps) {
+export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam, leadSources }: JobPageClientProps) {
   const queryClient   = useQueryClient();
   const validTab      = TABS.find((t) => t.id === initialTab)?.id ?? 'details';
   const [activeTab, setActiveTab] = useState<TabId>(validTab as TabId);
@@ -206,6 +207,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ReadField label="Title" value={job.title} />
                   <ReadField label="Event Type" value={job.eventType} />
+                  <ReadField label="Lead source" value={job.leadSource} />
                 </div>
                 <div className="mt-4">
                   <ReadField label="Notes" value={job.notes} />
@@ -384,6 +386,15 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             </FormField>
             <FormField label="Event Type">
               <input name="event_type" defaultValue={job.eventType ?? ''} placeholder="Wedding, Engagement…" className="input" />
+            </FormField>
+
+            <FormField label="Lead source">
+              <select name="lead_source" defaultValue={job.leadSource ?? ''} className="input">
+                <option value="">— Not recorded —</option>
+                {leadSources.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </FormField>
           </div>
           <FormField label="Notes">

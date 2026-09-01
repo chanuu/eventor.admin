@@ -15,6 +15,13 @@ export default async function NewJobPage() {
 
   const clients = (clientsRaw ?? []) as ClientOption[];
   const packages = (packagesRaw ?? []) as PackageOption[];
+  const { data: leadSourcesRaw } = await supabase
+    .from('lead_sources')
+    .select('id, name')
+    .eq('is_active', true)
+    .order('sort_order');
+  const leadSources = (leadSourcesRaw ?? []) as { id: string; name: string }[];
+
 
   return (
     <div className="max-w-xl">
@@ -22,7 +29,7 @@ export default async function NewJobPage() {
       <p className="breadcrumb mb-6">
         Main Menu / <Link href="/jobs" className="hover:text-[#0F3D2E]">Jobs</Link> / <span className="text-[#0F3D2E]">New</span>
       </p>
-      <NewJobForm clients={clients} packages={packages} />
+      <NewJobForm clients={clients} packages={packages} leadSources={leadSources} />
     </div>
   );
 }
