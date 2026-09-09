@@ -7,7 +7,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import sharp from 'sharp';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { uploadToS3, deleteFromS3, isS3Url, isS3Configured } from '@/lib/s3';
 
 const MAX_STORED_BYTES = 2 * 1024 * 1024;
@@ -47,9 +46,32 @@ async function compressWithinLimit(raw: Buffer): Promise<Buffer | null> {
   return smallest;
 }
 
-async function nextSortOrder(albumId: string): Promise<number> {
-  const admin = createAdminClient();
-  const { data } = await admin
+/**
+ * Confirms an album belongs to the caller's studio.
+ *
+ * Matches studio_id explicitly rather than relying on the row being visible —
+ * public_read_shared_albums exposes every published, shared album to anyone,
+ * so readability is not ownership.
+ */
+async function ownsAlbum(
+  supabase: ReturnType<typeof createClient>,
+  albumId: string,
+  studioId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('albums')
+    .select('id')
+    .eq('id', albumId)
+    .eq('studio_id', studioId)
+    .maybeSingle();
+  return !!data;
+}
+
+async function nextSortOrder(
+  supabase: ReturnType<typeof createClient>,
+  albumId: string,
+): Promise<number> {
+  const { data } = await supabase
     .from('album_pages')
     .select('sort_order')
     .eq('album_id', albumId)
@@ -64,15 +86,15 @@ export async function createAlbum(jobId: string, studioId: string, jobTitle: str
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  const { data: existing } = await admin
+  const supabase = createClient();
+  const { data: existing } = await supabase
     .from('albums')
     .select('id')
     .eq('job_id', jobId)
     .maybeSingle();
 
   if (!existing) {
-    await admin.from('albums').insert({
+    await supabase.from('albums').insert({
       job_id: jobId,
       studio_id: studioId,
       title: jobTitle,
@@ -97,8 +119,8 @@ export async function updateAlbum(
 
   const text = (key: string) => ((formData.get(key) as string) ?? '').trim() || null;
 
-  const admin = createAdminClient();
-  await admin
+  const supabase = createClient();
+  await supabase
     .from('albums')
     .update({
       title:          text('title'),
@@ -127,8 +149,8 @@ export async function setAlbumStatus(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  await admin
+  const supabase = createClient();
+  await supabase
     .from('albums')
     .update({ status, published_at: status === 'published' ? new Date().toISOString() : null })
     .eq('id', albumId)
@@ -150,13 +172,17 @@ export async function addSelectedPhotos(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
+  const supabase = createClient();
 
-  const { data: galleries } = await admin.from('galleries').select('id').eq('job_id', jobId);
+  // album_pages only constrains studio_id, so an unchecked albumId would let
+  // pages be written into another studio's album.
+  if (!(await ownsAlbum(supabase, albumId, ctx.studio_id))) return;
+
+  const { data: galleries } = await supabase.from('galleries').select('id').eq('job_id', jobId);
   const galleryIds = ((galleries ?? []) as { id: string }[]).map((g) => g.id);
   if (!galleryIds.length) return;
 
-  const { data: photos } = await admin
+  const { data: photos } = await supabase
     .from('gallery_photos')
     .select('id, caption, sort_order')
     .in('gallery_id', galleryIds)
@@ -168,7 +194,7 @@ export async function addSelectedPhotos(
   if (!rows.length) return;
 
   // Don't duplicate photos already placed in the album.
-  const { data: existing } = await admin
+  const { data: existing } = await supabase
     .from('album_pages')
     .select('gallery_photo_id')
     .eq('album_id', albumId);
@@ -176,18 +202,18 @@ export async function addSelectedPhotos(
     ((existing ?? []) as { gallery_photo_id: string | null }[]).map((r) => r.gallery_photo_id).filter(Boolean),
   );
 
-  let order = await nextSortOrder(albumId);
+  let order = await nextSortOrder(supabase, albumId);
   const toInsert = rows
     .filter((p) => !already.has(p.id))
     .map((p) => ({
       album_id: albumId,
-      studio_id: studioId,
+      studio_id: ctx.studio_id,
       gallery_photo_id: p.id,
       caption: p.caption,
       sort_order: order++,
     }));
 
-  if (toInsert.length) await admin.from('album_pages').insert(toInsert);
+  if (toInsert.length) await supabase.from('album_pages').insert(toInsert);
 
   revalidatePath(`/jobs/${jobId}/album`);
   revalidatePath(`/jobs/${jobId}`);
@@ -206,8 +232,10 @@ export async function uploadAlbumPages(
   const files = (formData.getAll('files') as File[]).filter((f) => f.size > 0);
   if (!files.length) return { error: 'Please select at least one image.', uploaded: 0 };
 
-  const admin = createAdminClient();
-  let order = await nextSortOrder(albumId);
+  const supabase = createClient();
+  if (!(await ownsAlbum(supabase, albumId, ctx.studio_id))) return { error: 'Album not found.', uploaded: 0 };
+
+  let order = await nextSortOrder(supabase, albumId);
   let uploaded = 0;
   const skipped: string[] = [];
 
@@ -227,9 +255,9 @@ export async function uploadAlbumPages(
       return { error: err instanceof Error ? err.message : 'Upload to S3 failed.', uploaded };
     }
 
-    await admin.from('album_pages').insert({
+    await supabase.from('album_pages').insert({
       album_id: albumId,
-      studio_id: studioId,
+      studio_id: ctx.studio_id,
       image_url: url,
       sort_order: order++,
     });
@@ -266,13 +294,16 @@ export async function uploadAlbumMusic(
     return { error: `“${file.name}” is over ${MAX_AUDIO_BYTES / 1024 / 1024} MB. Please use a shorter or more compressed track.` };
   }
 
-  const admin = createAdminClient();
+  const supabase = createClient();
+  if (!(await ownsAlbum(supabase, albumId, ctx.studio_id))) return { error: 'Album not found.' };
 
-  // Replace any previous track rather than accumulating files.
-  const { data: current } = await admin
+  // Replace any previous track rather than accumulating files. Scoped to this
+  // studio so the S3 delete below can never target someone else's track.
+  const { data: current } = await supabase
     .from('albums')
     .select('music_url')
     .eq('id', albumId)
+    .eq('studio_id', ctx.studio_id)
     .maybeSingle();
   const previous = (current as { music_url: string | null } | null)?.music_url ?? null;
 
@@ -287,7 +318,7 @@ export async function uploadAlbumMusic(
     return { error: err instanceof Error ? err.message : 'Upload to S3 failed.' };
   }
 
-  await admin
+  await supabase
     .from('albums')
     .update({ music_url: url, music_name: file.name, music_enabled: true })
     .eq('id', albumId)
@@ -304,19 +335,30 @@ export async function removeAlbumMusic(
   albumId: string,
   jobId: string,
   studioId: string,
-  musicUrl: string | null,
+  _musicUrl: string | null,
 ): Promise<void> {
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  await admin
+  // Read the stored URL back under RLS rather than trusting the argument, so a
+  // crafted call cannot delete an object belonging to another studio.
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('albums')
+    .select('id, music_url')
+    .eq('id', albumId)
+    .eq('studio_id', ctx.studio_id)
+    .maybeSingle();
+
+  const album = data as { id: string; music_url: string | null } | null;
+  if (!album) return;
+
+  await supabase
     .from('albums')
     .update({ music_url: null, music_name: null })
-    .eq('id', albumId)
-    .eq('studio_id', studioId);
+    .eq('id', album.id);
 
-  if (musicUrl && isS3Url(musicUrl)) await deleteFromS3(musicUrl);
+  if (album.music_url && isS3Url(album.music_url)) await deleteFromS3(album.music_url);
 
   revalidatePath(`/jobs/${jobId}/album`);
   revalidatePath(`/jobs/${jobId}`);
@@ -331,8 +373,8 @@ export async function updatePageCaption(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  await admin
+  const supabase = createClient();
+  await supabase
     .from('album_pages')
     .update({ caption: caption.trim() || null })
     .eq('id', pageId)
@@ -353,8 +395,8 @@ export async function movePage(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  const { data: pages } = await admin
+  const supabase = createClient();
+  const { data: pages } = await supabase
     .from('album_pages')
     .select('id, sort_order')
     .eq('album_id', albumId)
@@ -366,8 +408,8 @@ export async function movePage(
   if (index < 0 || swapWith < 0 || swapWith >= list.length) return;
 
   await Promise.all([
-    admin.from('album_pages').update({ sort_order: list[swapWith].sort_order }).eq('id', list[index].id),
-    admin.from('album_pages').update({ sort_order: list[index].sort_order }).eq('id', list[swapWith].id),
+    supabase.from('album_pages').update({ sort_order: list[swapWith].sort_order }).eq('id', list[index].id),
+    supabase.from('album_pages').update({ sort_order: list[index].sort_order }).eq('id', list[swapWith].id),
   ]);
 
   revalidatePath(`/jobs/${jobId}/album`);
@@ -383,11 +425,11 @@ export async function deletePage(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
+  const supabase = createClient();
   // Only remove the file when it was uploaded for the album; gallery photos are
   // shared with proofing and must survive.
   if (imageUrl && isS3Url(imageUrl)) await deleteFromS3(imageUrl);
-  await admin.from('album_pages').delete().eq('id', pageId).eq('studio_id', studioId);
+  await supabase.from('album_pages').delete().eq('id', pageId).eq('studio_id', studioId);
 
   revalidatePath(`/jobs/${jobId}/album`);
   revalidatePath(`/jobs/${jobId}`);
@@ -410,7 +452,7 @@ export async function setAlbumSharing(
     return { error: 'You do not have permission to change this album.' };
   }
 
-  const { error } = await createAdminClient()
+  const { error } = await createClient()
     .from('albums')
     .update({ is_public: isPublic })
     .eq('id', albumId)
@@ -434,7 +476,7 @@ export async function setAlbumPlayback(
     return { error: 'You do not have permission to change this album.' };
   }
 
-  const { error } = await createAdminClient()
+  const { error } = await createClient()
     .from('albums')
     .update({ autoplay, autoplay_seconds: Math.min(30, Math.max(2, seconds)) })
     .eq('id', albumId)

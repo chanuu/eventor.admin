@@ -61,6 +61,28 @@ async function requireStaff(capability: Capability = 'gallery.manage'): Promise<
   return ctx ? { studio_id: ctx.studio_id, role: ctx.roleName } : null;
 }
 
+/**
+ * Confirms a gallery belongs to the caller's studio.
+ *
+ * Note this matches on jobs.studio_id rather than trusting the row to be
+ * visible: the public_read_* policies deliberately expose shared galleries and
+ * photos to everyone, so "RLS let me read it" does not mean "it is mine".
+ * galleries carries no studio_id of its own, hence the join through jobs.
+ */
+async function ownsGallery(
+  supabase: ReturnType<typeof createClient>,
+  galleryId: string,
+  studioId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('galleries')
+    .select('id, jobs!inner(studio_id)')
+    .eq('id', galleryId)
+    .eq('jobs.studio_id', studioId)
+    .maybeSingle();
+  return !!data;
+}
+
 export async function createGallery(jobId: string, studioId: string, formData: FormData): Promise<void> {
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
@@ -72,8 +94,8 @@ export async function createGallery(jobId: string, studioId: string, formData: F
   const deadlineRaw = formData.get('selection_deadline') as string;
   const selectionDeadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null;
 
-  const admin = createAdminClient();
-  const { data } = await admin
+  const supabase = createClient();
+  const { data } = await supabase
     .from('galleries')
     .insert({ job_id: jobId, shoot_id: shootId || null, title, selection_deadline: selectionDeadline })
     .select('id')
@@ -99,9 +121,15 @@ export async function uploadPhotos(
   const validFiles = files.filter((f) => f.size > 0);
   if (!validFiles.length) return { error: 'Please select at least one image.', uploaded: 0 };
 
-  const admin = createAdminClient();
+  const supabase = createClient();
 
-  const { data: existing } = await admin
+  // The gallery_photos policy only constrains studio_id, so it would happily
+  // accept a row pointing at another studio's gallery. Check the parent first.
+  if (!(await ownsGallery(supabase, galleryId, ctx.studio_id))) {
+    return { error: 'Gallery not found.', uploaded: 0 };
+  }
+
+  const { data: existing } = await supabase
     .from('gallery_photos')
     .select('sort_order')
     .eq('gallery_id', galleryId)
@@ -144,13 +172,21 @@ export async function uploadPhotos(
       continue;
     }
 
-    await admin.from('gallery_photos').insert({
-      studio_id: studioId,
+    const { error: insertError } = await supabase.from('gallery_photos').insert({
+      studio_id: ctx.studio_id,
       gallery_id: galleryId,
       storage_path: photoUrl,
       file_name: file.name,
       sort_order: sortOrder++,
     });
+
+    if (insertError) {
+      console.error('[uploadPhotos] insert rejected', insertError);
+      uploadError = insertError.message.includes('row-level security')
+        ? 'Your plan does not include photo galleries.'
+        : insertError.message;
+      continue;
+    }
 
     uploaded++;
   }
@@ -167,7 +203,7 @@ export async function uploadPhotos(
 
 export async function deletePhoto(
   photoId: string,
-  storagePath: string,
+  _storagePath: string,
   galleryId: string,
   jobId: string,
   studioId: string,
@@ -175,14 +211,29 @@ export async function deletePhoto(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
+  // Read the row through the user's client so RLS proves it is ours, and take
+  // the storage path from the row. Deleting the caller-supplied path would let
+  // anyone erase any object in the bucket, whatever the database then says.
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('gallery_photos')
+    .select('id, storage_path')
+    .eq('id', photoId)
+    .eq('gallery_id', galleryId)
+    .eq('studio_id', ctx.studio_id)
+    .maybeSingle();
+
+  const photo = data as { id: string; storage_path: string } | null;
+  if (!photo) return;
+
   // New photos are S3 URLs; older rows are still Supabase storage paths.
-  if (isS3Url(storagePath)) {
-    await deleteFromS3(storagePath);
+  if (isS3Url(photo.storage_path)) {
+    await deleteFromS3(photo.storage_path);
   } else {
-    await admin.storage.from('gallery-photos').remove([storagePath]);
+    // Storage removal still needs the service role, but ownership is proven now.
+    await createAdminClient().storage.from('gallery-photos').remove([photo.storage_path]);
   }
-  await admin.from('gallery_photos').delete().eq('id', photoId).eq('gallery_id', galleryId);
+  await supabase.from('gallery_photos').delete().eq('id', photo.id);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
   revalidatePath(`/jobs/${jobId}`);
@@ -197,8 +248,8 @@ export async function updateGalleryStatus(
   const ctx = await requireStaff();
   if (!ctx || ctx.studio_id !== studioId) return;
 
-  const admin = createAdminClient();
-  await admin.from('galleries').update({ status }).eq('id', galleryId);
+  const supabase = createClient();
+  await supabase.from('galleries').update({ status }).eq('id', galleryId);
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
   revalidatePath(`/jobs/${jobId}`);
@@ -218,8 +269,8 @@ export async function updateGallery(
   const deadlineRaw = formData.get('selection_deadline') as string;
   const selectionDeadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null;
 
-  const admin = createAdminClient();
-  await admin
+  const supabase = createClient();
+  await supabase
     .from('galleries')
     .update({ title, selection_deadline: selectionDeadline })
     .eq('id', galleryId);

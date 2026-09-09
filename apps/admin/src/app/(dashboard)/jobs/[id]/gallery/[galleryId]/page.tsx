@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isS3Url } from '@/lib/s3';
+import { requireFeature } from '@/lib/staff';
 import { deletePhoto, updateGalleryStatus, updateGallery } from '../actions';
 import GalleryUploadForm from './GalleryUploadForm';
 
@@ -37,6 +38,10 @@ export default async function GalleryDetailPage({ params, searchParams }: {
   params: { id: string; galleryId: string };
   searchParams: { saved?: string };
 }) {
+  // The list page gates on this too, but this page hosts the uploader and is
+  // reachable directly by URL.
+  await requireFeature('gallery');
+
   const supabase = createClient();
 
   const { data: jobRaw } = await supabase
