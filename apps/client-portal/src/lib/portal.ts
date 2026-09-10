@@ -19,7 +19,7 @@ export type Payment = {
   status: string; paid_at: string | null; notes: string | null; created_at: string;
 };
 export type Photo = {
-  id: string; storage_path: string; file_name: string;
+  id: string; storage_path: string; thumb_path: string | null; file_name: string;
   is_selected: boolean; sort_order: number; caption: string | null;
 };
 export type Gallery = {
@@ -130,7 +130,7 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
              shoot_staff(staff(full_name))),
       payments(id, type, amount, method, status, paid_at, notes, created_at),
       galleries(id, title, status, shoot_id, selection_deadline, selection_submitted_at, created_at,
-                gallery_photos(id, storage_path, file_name, is_selected, sort_order, caption, is_active)),
+                gallery_photos(id, storage_path, thumb_path, file_name, is_selected, sort_order, caption, is_active)),
       contracts(id, status, content_html, signed_at, signature_data, created_at),
       flipbooks(id, storage_path, share_token, published_at, created_at),
       albums(id, title, cover_kicker, cover_title, cover_body,
@@ -173,7 +173,7 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       photos: ((g.gallery_photos ?? []) as any[])
         .filter((p) => p.is_active)
         .map((p) => ({
-          id: p.id, storage_path: p.storage_path, file_name: p.file_name,
+          id: p.id, storage_path: p.storage_path, thumb_path: p.thumb_path ?? null, file_name: p.file_name,
           is_selected: p.is_selected, sort_order: p.sort_order, caption: p.caption ?? null,
         }))
         .sort((a, b) => a.sort_order - b.sort_order),

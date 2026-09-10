@@ -20,6 +20,7 @@ type Gallery = {
 type Photo = {
   id: string;
   storage_path: string;
+  thumb_path: string | null;
   file_name: string;
   sort_order: number;
   is_selected: boolean;
@@ -27,6 +28,9 @@ type Photo = {
 };
 
 type Job = { id: string; title: string; studio_id: string };
+
+/** Photos per page in the grid. */
+const PHOTOS_PER_PAGE = 100;
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; next?: string; nextLabel?: string; nextColor?: string }> = {
   hidden:   { label: 'Hidden',   color: '#6b7280', next: 'proofing', nextLabel: 'Send to Proofing', nextColor: '#d97706' },
@@ -36,7 +40,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; next?: strin
 
 export default async function GalleryDetailPage({ params, searchParams }: {
   params: { id: string; galleryId: string };
-  searchParams: { saved?: string };
+  searchParams: { saved?: string; page?: string };
 }) {
   // The list page gates on this too, but this page hosts the uploader and is
   // reachable directly by URL.
@@ -63,14 +67,35 @@ export default async function GalleryDetailPage({ params, searchParams }: {
   if (!galleryRaw) notFound();
   const gallery = galleryRaw as Gallery;
 
-  const { data: photosRaw } = await supabase
-    .from('gallery_photos')
-    .select('id, storage_path, file_name, sort_order, is_selected, selected_at')
-    .eq('gallery_id', params.galleryId)
-    .eq('is_active', true)
-    .order('sort_order');
+  // A proofing set can run to four figures, so load a page at a time and let
+  // the database do the counting instead of pulling every row to call .length.
+  const page = Math.max(1, Number(searchParams.page ?? '1') || 1);
+  const rangeFrom = (page - 1) * PHOTOS_PER_PAGE;
+
+  const [{ data: photosRaw }, { count: totalPhotos }, { count: selectedTotal }] = await Promise.all([
+    supabase
+      .from('gallery_photos')
+      .select('id, storage_path, thumb_path, file_name, sort_order, is_selected, selected_at')
+      .eq('gallery_id', params.galleryId)
+      .eq('is_active', true)
+      .order('sort_order')
+      .range(rangeFrom, rangeFrom + PHOTOS_PER_PAGE - 1),
+    supabase
+      .from('gallery_photos')
+      .select('id', { count: 'exact', head: true })
+      .eq('gallery_id', params.galleryId)
+      .eq('is_active', true),
+    supabase
+      .from('gallery_photos')
+      .select('id', { count: 'exact', head: true })
+      .eq('gallery_id', params.galleryId)
+      .eq('is_active', true)
+      .eq('is_selected', true),
+  ]);
 
   const photos = (photosRaw ?? []) as Photo[];
+  const photoCount = totalPhotos ?? 0;
+  const pageCount = Math.max(1, Math.ceil(photoCount / PHOTOS_PER_PAGE));
 
   // S3-hosted photos store their public URL directly; legacy rows still hold a
   // Supabase storage path and need a signed URL (1 hour expiry).
@@ -89,13 +114,13 @@ export default async function GalleryDetailPage({ params, searchParams }: {
   }
 
   const statusCfg = STATUS_CONFIG[gallery.status] ?? STATUS_CONFIG.hidden;
-  const selectedCount = photos.filter((p) => p.is_selected).length;
+  const selectedCount = selectedTotal ?? 0;
   const deadlineValue = gallery.selection_deadline ? gallery.selection_deadline.slice(0, 10) : '';
 
   const updateAction = updateGallery.bind(null, gallery.id, params.id, job.studio_id);
 
   return (
-    <div style={{ maxWidth: 920 }}>
+    <div>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <Link href={`/jobs/${params.id}/gallery`} style={{ fontSize: 13, color: '#6b7280' }}>
@@ -122,7 +147,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
                   Client submitted their selection
                 </p>
                 <p style={{ fontSize: 13, color: '#3f6b2b', margin: '3px 0 0' }}>
-                  {selectedCount} of {photos.length} photo{photos.length !== 1 ? 's' : ''} chosen ·
+                  {selectedCount} of {photoCount} photo{photoCount !== 1 ? 's' : ''} chosen ·
                   {' '}{new Date(gallery.selection_submitted_at).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' })}
                 </p>
               </div>
@@ -139,7 +164,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
               </p>
               <p style={{ fontSize: 12.5, color: '#8a6a45', margin: '3px 0 0' }}>
                 {selectedCount > 0
-                  ? `They have ticked ${selectedCount} of ${photos.length} so far but have not sent the selection yet.`
+                  ? `They have ticked ${selectedCount} of ${photoCount} so far but have not sent the selection yet.`
                   : 'They have not started choosing yet.'}
               </p>
             </div>
@@ -165,7 +190,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
                 <span style={{ fontWeight: 600, color: statusCfg.color }}>{statusCfg.label}</span>
                 {gallery.status === 'proofing' && (
                   <span style={{ fontSize: 13, color: '#6b7280', marginLeft: 12 }}>
-                    {selectedCount} of {photos.length} selected by client
+                    {selectedCount} of {photoCount} selected by client
                   </span>
                 )}
                 {gallery.status === 'approved' && selectedCount > 0 && (
@@ -225,7 +250,7 @@ export default async function GalleryDetailPage({ params, searchParams }: {
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
             <h2 style={{ ...sectionHeading, marginBottom: 0 }}>
-              {photos.length} Photo{photos.length !== 1 ? 's' : ''}
+              {photoCount} Photo{photoCount !== 1 ? 's' : ''}
             </h2>
             {selectedCount > 0 && (
               <span style={{ fontSize: 12, color: '#0F3D2E', fontWeight: 600 }}>
@@ -248,10 +273,14 @@ export default async function GalleryDetailPage({ params, searchParams }: {
                     aspectRatio: '1',
                   }}
                 >
-                  {signedUrls[photo.id] ? (
+                  {photo.thumb_path || signedUrls[photo.id] ? (
                     <img
-                      src={signedUrls[photo.id]}
+                      // Falls back to the full image for rows uploaded before
+                      // thumbnails existed.
+                      src={photo.thumb_path ?? signedUrls[photo.id]}
                       alt={photo.file_name}
+                      loading="lazy"
+                      decoding="async"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : (
@@ -300,6 +329,36 @@ export default async function GalleryDetailPage({ params, searchParams }: {
             <p style={{ fontSize: 14, color: '#9ca3af', textAlign: 'center', padding: '24px 0', margin: 0 }}>
               <EmptyState compact title="No photos yet" description="Upload photos above and they will appear here for proofing." />
             </p>
+          )}
+
+          {pageCount > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 16 }}>
+              {page > 1 ? (
+                <Link
+                  href={`/jobs/${params.id}/gallery/${gallery.id}?page=${page - 1}`}
+                  style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500 }}
+                >
+                  ← Previous
+                </Link>
+              ) : (
+                <span style={{ fontSize: 13, color: '#d1d5db' }}>← Previous</span>
+              )}
+
+              <span style={{ fontSize: 12, color: '#6b7280' }}>
+                Page {page} of {pageCount}
+              </span>
+
+              {page < pageCount ? (
+                <Link
+                  href={`/jobs/${params.id}/gallery/${gallery.id}?page=${page + 1}`}
+                  style={{ fontSize: 13, color: '#0F3D2E', fontWeight: 500 }}
+                >
+                  Next →
+                </Link>
+              ) : (
+                <span style={{ fontSize: 13, color: '#d1d5db' }}>Next →</span>
+              )}
+            </div>
           )}
         </div>
 

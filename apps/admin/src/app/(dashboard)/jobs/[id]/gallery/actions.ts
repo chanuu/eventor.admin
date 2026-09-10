@@ -5,54 +5,12 @@ import type { Capability } from '@/lib/permissions';
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import sharp from 'sharp';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { uploadToS3, deleteFromS3, isS3Url, isS3Configured } from '@/lib/s3';
+import { deleteFromS3, isS3Url, isS3Configured, presignUpload, keyFromUrl } from '@/lib/s3';
 
-/** Hard ceiling for a stored proofing photo. */
-const MAX_STORED_BYTES = 2 * 1024 * 1024; // 2 MB
-/** Largest original we will accept from the browser, before compression. */
-const MAX_UPLOAD_BYTES = 40 * 1024 * 1024; // 40 MB
-
-/**
- * Compression ladder. We start at full proofing quality and only step down if the
- * result is still over 2 MB, so ordinary photos keep their quality and only the
- * very large ones get reduced.
- */
-const COMPRESSION_STEPS = [
-  { dimension: 1920, quality: 82 },
-  { dimension: 1920, quality: 72 },
-  { dimension: 1600, quality: 68 },
-  { dimension: 1400, quality: 62 },
-  { dimension: 1200, quality: 55 },
-] as const;
-
-/**
- * Resizes and compresses to JPEG, stepping the ladder down until the output fits
- * under MAX_STORED_BYTES. Returns null if the buffer isn't a readable image.
- */
-async function compressWithinLimit(raw: Buffer): Promise<Buffer | null> {
-  let smallest: Buffer | null = null;
-
-  for (const { dimension, quality } of COMPRESSION_STEPS) {
-    let out: Buffer;
-    try {
-      out = await sharp(raw)
-        .rotate()                        // honour EXIF orientation
-        .resize(dimension, dimension, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality, mozjpeg: true })
-        .toBuffer();
-    } catch {
-      return null;                       // not an image, or corrupt
-    }
-    if (out.byteLength <= MAX_STORED_BYTES) return out;
-    if (!smallest || out.byteLength < smallest.byteLength) smallest = out;
-  }
-
-  // Every step was still over the limit — keep the smallest we produced.
-  return smallest;
-}
+/** Most photos a single presign/record call will handle; the client chunks. */
+const MAX_BATCH = 200;
 
 type StaffCtx = { studio_id: string; role: string };
 
@@ -106,27 +64,96 @@ export async function createGallery(jobId: string, studioId: string, formData: F
   redirect(`/jobs/${jobId}/gallery/${(data as { id: string } | null)?.id ?? ''}`);
 }
 
-export async function uploadPhotos(
+export type UploadTicket = {
+  fullUploadUrl: string;
+  fullPublicUrl: string;
+  thumbUploadUrl: string;
+  thumbPublicUrl: string;
+};
+
+/**
+ * Issues presigned PUT URLs so the browser can upload straight to S3.
+ *
+ * Nothing but the ticket list crosses this function, which is the point: the
+ * previous design streamed every file through a server action and could not
+ * survive a large proofing set.
+ */
+export async function createUploadTickets(
   galleryId: string,
   jobId: string,
   studioId: string,
-  formData: FormData,
-): Promise<{ error?: string; uploaded: number }> {
+  count: number,
+): Promise<{ error?: string; tickets: UploadTicket[] }> {
   const ctx = await requireStaff();
-  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.', uploaded: 0 };
-
-  if (!isS3Configured()) return { error: 'Photo storage is not configured. Set the S3_* environment variables.', uploaded: 0 };
-
-  const files = formData.getAll('files') as File[];
-  const validFiles = files.filter((f) => f.size > 0);
-  if (!validFiles.length) return { error: 'Please select at least one image.', uploaded: 0 };
+  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.', tickets: [] };
+  if (!isS3Configured()) {
+    return { error: 'Photo storage is not configured. Set the S3_* environment variables.', tickets: [] };
+  }
+  if (!Number.isInteger(count) || count < 1) return { error: 'Nothing to upload.', tickets: [] };
+  if (count > MAX_BATCH) {
+    return { error: `Please upload at most ${MAX_BATCH} photos at a time.`, tickets: [] };
+  }
 
   const supabase = createClient();
-
-  // The gallery_photos policy only constrains studio_id, so it would happily
-  // accept a row pointing at another studio's gallery. Check the parent first.
   if (!(await ownsGallery(supabase, galleryId, ctx.studio_id))) {
-    return { error: 'Gallery not found.', uploaded: 0 };
+    return { error: 'Gallery not found.', tickets: [] };
+  }
+
+  try {
+    const tickets = await Promise.all(
+      Array.from({ length: count }, async () => {
+        // One id per photo, so the thumbnail sits beside its full image.
+        const base = `galleries/${ctx.studio_id}/${galleryId}/${randomUUID()}`;
+        const [full, thumb] = await Promise.all([
+          presignUpload(`${base}.jpg`, 'image/jpeg'),
+          presignUpload(`${base}_thumb.jpg`, 'image/jpeg'),
+        ]);
+        return {
+          fullUploadUrl: full.uploadUrl,
+          fullPublicUrl: full.publicUrl,
+          thumbUploadUrl: thumb.uploadUrl,
+          thumbPublicUrl: thumb.publicUrl,
+        };
+      }),
+    );
+    return { tickets };
+  } catch (err) {
+    console.error('[createUploadTickets] presign failed', err);
+    return { error: err instanceof Error ? err.message : 'Could not prepare the upload.', tickets: [] };
+  }
+}
+
+/**
+ * Records photos the browser has already put in S3, in one insert.
+ *
+ * The URLs arrive from the client, so each is checked to sit under this
+ * gallery's own prefix — otherwise this would happily store a link to anything.
+ */
+export async function recordUploadedPhotos(
+  galleryId: string,
+  jobId: string,
+  studioId: string,
+  photos: { url: string; thumbUrl: string; fileName: string }[],
+): Promise<{ error?: string; recorded: number }> {
+  const ctx = await requireStaff();
+  if (!ctx || ctx.studio_id !== studioId) return { error: 'Unauthorized.', recorded: 0 };
+  if (!Array.isArray(photos) || photos.length === 0) return { error: 'Nothing to record.', recorded: 0 };
+  if (photos.length > MAX_BATCH) return { error: 'Too many photos in one batch.', recorded: 0 };
+
+  const supabase = createClient();
+  if (!(await ownsGallery(supabase, galleryId, ctx.studio_id))) {
+    return { error: 'Gallery not found.', recorded: 0 };
+  }
+
+  // Only keys we just handed out are acceptable.
+  const prefix = `galleries/${ctx.studio_id}/${galleryId}/`;
+  const belongsHere = (url: string): boolean => {
+    const key = keyFromUrl(url);
+    return !!key && key.startsWith(prefix);
+  };
+
+  if (!photos.every((p) => belongsHere(p.url) && belongsHere(p.thumbUrl))) {
+    return { error: 'Those photos do not belong to this gallery.', recorded: 0 };
   }
 
   const { data: existing } = await supabase
@@ -137,68 +164,31 @@ export async function uploadPhotos(
     .limit(1);
 
   let sortOrder = ((existing as { sort_order: number }[] | null)?.[0]?.sort_order ?? -1) + 1;
-  let uploaded = 0;
-  let uploadError = '';
 
-  const skipped: string[] = [];
-
-  for (const file of validFiles) {
-    if (file.type && !file.type.startsWith('image/')) {
-      skipped.push(`${file.name} is not an image`);
-      continue;
-    }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      skipped.push(`${file.name} is over ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB`);
-      continue;
-    }
-
-    const rawBuffer = Buffer.from(await file.arrayBuffer());
-
-    const compressed = await compressWithinLimit(rawBuffer);
-    if (!compressed) {
-      skipped.push(`${file.name} could not be read as an image`);
-      continue;
-    }
-
-    const key = `galleries/${studioId}/${galleryId}/${randomUUID()}.jpg`;
-
-    // Photos live in S3; Supabase stores only the resulting public URL.
-    let photoUrl: string;
-    try {
-      photoUrl = await uploadToS3(key, compressed, 'image/jpeg');
-    } catch (err) {
-      console.error('[uploadPhotos] S3 upload failed', err);
-      uploadError = err instanceof Error ? err.message : 'Upload to S3 failed.';
-      continue;
-    }
-
-    const { error: insertError } = await supabase.from('gallery_photos').insert({
+  const { error } = await supabase.from('gallery_photos').insert(
+    photos.map((p) => ({
       studio_id: ctx.studio_id,
       gallery_id: galleryId,
-      storage_path: photoUrl,
-      file_name: file.name,
+      storage_path: p.url,
+      thumb_path: p.thumbUrl,
+      file_name: p.fileName.slice(0, 200),
       sort_order: sortOrder++,
-    });
+    })),
+  );
 
-    if (insertError) {
-      console.error('[uploadPhotos] insert rejected', insertError);
-      uploadError = insertError.message.includes('row-level security')
+  if (error) {
+    console.error('[recordUploadedPhotos] insert rejected', error);
+    return {
+      error: error.message.includes('row-level security')
         ? 'Your plan does not include photo galleries.'
-        : insertError.message;
-      continue;
-    }
-
-    uploaded++;
+        : error.message,
+      recorded: 0,
+    };
   }
 
   revalidatePath(`/jobs/${jobId}/gallery/${galleryId}`);
   revalidatePath(`/jobs/${jobId}`);
-
-  if (uploaded === 0) {
-    return { error: uploadError || skipped.join('; ') || 'No images could be processed.', uploaded: 0 };
-  }
-  // Some succeeded — report the rest so nothing disappears silently.
-  return skipped.length ? { uploaded, error: `Skipped: ${skipped.join('; ')}` } : { uploaded };
+  return { recorded: photos.length };
 }
 
 export async function deletePhoto(

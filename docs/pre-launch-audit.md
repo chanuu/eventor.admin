@@ -11,9 +11,9 @@ configuration. Ordered by what would hurt most in production.
 | 2 | `sms_otp_debug` table still present | Outstanding |
 | 3 | Plan changes take no payment | Outstanding |
 | 4 | Public storage is permanent | Decision needed |
-| 5 | Performance / query shapes | Outstanding |
+| 5 | Performance / query shapes | Partly done (gallery paged + indexed) |
 | 6 | Silent failures (36 of 64 actions) | Partly done |
-| 8 | **Bulk upload cannot scale past ~20 photos** | Outstanding — see §8 |
+| 8 | **Bulk upload cannot scale past ~20 photos** | **Fixed** — see §8 |
 
 ---
 
@@ -218,7 +218,7 @@ Worth stating, since the list above is all problems:
 
 ---
 
-## 8. Bulk upload cannot scale past ~20 photos — **critical**
+## 8. Bulk upload cannot scale past ~20 photos — **critical** ✅ fixed
 
 Found after the sections above, in response to "sometimes it is more than 1000
 images for proofing". This is not a slowdown — the current design **cannot
@@ -252,3 +252,26 @@ taking the grid from ~2 GB to ~20 MB.
 
 Scope: a presign action, a shared browser-side image utility, a rewritten uploader,
 a `thumb_path` migration, and lazy-loading plus pagination in both grids.
+
+### How it was fixed
+
+Uploads no longer pass through the server. `createUploadTickets` issues presigned
+PUT URLs, the browser resizes each photo with canvas and sends it straight to S3
+four at a time, and `recordUploadedPhotos` writes one batched insert. Work is
+committed in chunks of 40, so a failure late in a large set never discards the
+photos already stored.
+
+Each photo now yields two objects: the proofing image and a ~400px thumbnail
+(`gallery_photos.thumb_path`, added in migration 20260908000000). Grids read the
+thumbnail and lazy-load it; the lightbox still opens the full image. The admin
+grid pages at 100 photos and counts via the database rather than by fetching
+every row, and the portal grids use the thumbnail too.
+
+Because the browser now uploads directly, **the bucket needs a CORS rule** — see
+[s3-bucket-setup.md](s3-bucket-setup.md). Until that is applied, uploads fail.
+
+Rows uploaded before this change have no thumbnail; both grids fall back to
+`storage_path`, so old galleries keep working at their original cost.
+
+Still server-side: album page uploads (`uploadAlbumPages`), which handle far
+fewer files. Worth moving to the same flow eventually, but it is not urgent.

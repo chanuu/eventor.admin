@@ -46,7 +46,13 @@ export default function GalleryPage() {
               <div className="grid-photos" style={{ marginTop: 18 }}>
                 {g.photos.map((p) => (
                   <button key={p.id} onClick={() => setLightbox(p)} style={thumbBtn}>
-                    <img src={photoUrl(p.storage_path)} alt={p.file_name} style={thumb} />
+                    <img
+                      src={photoUrl(p.thumb_path ?? p.storage_path)}
+                      alt={p.file_name}
+                      loading="lazy"
+                      decoding="async"
+                      style={thumb}
+                    />
                   </button>
                 ))}
               </div>
