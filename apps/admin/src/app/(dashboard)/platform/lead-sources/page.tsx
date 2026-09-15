@@ -18,7 +18,7 @@ export default async function PlatformLeadSourcesPage() {
   const sources = (sourcesRaw ?? []) as SourceRow[];
 
   return (
-    <div style={{ maxWidth: 820 }}>
+    <div>
       <Link href="/platform" className="text-[13px] text-ink-muted">← Platform</Link>
       <h1 className="page-title mt-2">Lead sources</h1>
       <p className="breadcrumb mb-6">

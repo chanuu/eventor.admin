@@ -6,6 +6,7 @@ import DataTable, { type Column } from '@/components/DataTable';
 
 export type JobRow = {
   id: string;
+  job_no: number;
   title: string;
   event_type: string | null;
   status: string;
@@ -33,7 +34,10 @@ const COLUMNS: Column<JobRow>[] = [
       const client = (job.clients as { full_name: string } | null)?.full_name ?? '—';
       return (
         <div>
-          <p className="font-medium text-gray-900">{job.title}</p>
+          <p className="font-medium text-gray-900">
+            <span className="text-gray-400 font-mono text-[12.5px] mr-1.5">#{job.job_no}</span>
+            {job.title}
+          </p>
           <p className="text-xs text-gray-400 mt-0.5">
             {client}{job.event_type ? ` · ${job.event_type}` : ''}
           </p>

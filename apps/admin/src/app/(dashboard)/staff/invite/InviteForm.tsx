@@ -68,7 +68,7 @@ export default function InviteForm({ roles }: { roles: Role[] }) {
           )}
           <p className="text-xs text-ink-muted mt-1">
             Need a different set of permissions?{' '}
-            <Link href="/roles" className="font-semibold text-primary">Configure roles</Link>
+            <Link href="/settings?tab=roles" className="font-semibold text-primary">Configure roles</Link>
           </p>
         </Field>
 

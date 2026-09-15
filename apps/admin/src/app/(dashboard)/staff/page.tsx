@@ -8,6 +8,7 @@ import InviteStaffDialog from './InviteStaffDialog';
 type StaffRow = {
   id: string;
   full_name: string;
+  avatar_url: string | null;
   role_id: string | null;
   is_active: boolean;
   created_at: string;
@@ -34,7 +35,7 @@ export default async function StaffPage({
   const [{ data: listRaw }, { count: total }, { data: rolesRaw }] = await Promise.all([
     supabase
       .from('staff')
-      .select('id, full_name, role_id, is_active, created_at, user_id, roles(name)')
+      .select('id, full_name, avatar_url, role_id, is_active, created_at, user_id, roles(name)')
       .order('created_at')
       .range(rangeFrom, rangeFrom + STAFF_PER_PAGE - 1),
     supabase.from('staff').select('id', { count: 'exact', head: true }),
@@ -48,6 +49,7 @@ export default async function StaffPage({
   const rows: StaffRowData[] = list.map((s) => ({
     id: s.id,
     full_name: s.full_name,
+    avatar_url: s.avatar_url,
     role_id: s.role_id,
     role_name: s.roles?.name ?? null,
     is_active: s.is_active,
@@ -66,7 +68,7 @@ export default async function StaffPage({
         </div>
 
         <div className="flex gap-2.5 flex-wrap">
-          <Link href="/roles" className="btn-secondary">
+          <Link href="/settings?tab=roles" className="btn-secondary">
             Roles &amp; permissions
           </Link>
           <InviteStaffDialog roles={roles} />
@@ -81,7 +83,7 @@ export default async function StaffPage({
       <div className="bg-white rounded-2xl border border-line shadow-card p-6 mt-4">
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
           <h2 className="text-sm font-extrabold text-primary">Your studio&rsquo;s roles</h2>
-          <Link href="/roles" className="text-[12.5px] font-bold text-primary">
+          <Link href="/settings?tab=roles" className="text-[12.5px] font-bold text-primary">
             Configure →
           </Link>
         </div>

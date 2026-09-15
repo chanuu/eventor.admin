@@ -32,6 +32,19 @@ const MAIN_NAV = [
     ),
   },
   {
+    href: '/tasks',
+    // dashboard.view, not jobs.write: an editor must be able to reach their own
+    // queue. The page itself scopes what they see.
+    cap: 'dashboard.view' as const,
+    feature: 'tasks' as const,
+    label: 'My work',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/>
+      </svg>
+    ),
+  },
+  {
     href: '/jobs',
     cap: 'jobs.view' as const,
     feature: 'jobs' as const,
@@ -78,27 +91,6 @@ const MAIN_NAV = [
 ];
 
 const SETTINGS_NAV = [
-  {
-    href: '/billing',
-    cap: 'settings.manage' as const,
-    label: 'Billing',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/roles',
-    cap: 'staff.manage' as const,
-    feature: 'staff' as const,
-    label: 'Roles',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
-      </svg>
-    ),
-  },
   {
     href: '/settings',
     cap: 'settings.manage' as const,

@@ -34,7 +34,7 @@ export default async function PlatformPlansPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1000 }}>
+    <div>
       <Link href="/platform" className="text-[13px] text-ink-muted">← Platform</Link>
       <h1 className="page-title mt-2">Package configuration</h1>
       <p className="breadcrumb mb-6">

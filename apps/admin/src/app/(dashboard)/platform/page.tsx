@@ -26,7 +26,7 @@ export default async function PlatformDashboard() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100 }}>
+    <div>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="page-title">Platform</h1>

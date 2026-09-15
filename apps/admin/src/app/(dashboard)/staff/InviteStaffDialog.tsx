@@ -128,7 +128,7 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
               )}
               <p className="text-[11.5px] text-ink-muted">
                 Need a different set of permissions?{' '}
-                <Link href="/roles" className="font-semibold text-primary">
+                <Link href="/settings?tab=roles" className="font-semibold text-primary">
                   Configure roles
                 </Link>
               </p>

@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import Modal from '@/components/Modal';
 import JobStatusForm from './JobStatusForm';
+import JobTasksPanel, { type JobTask, type StaffOption } from './JobTasksPanel';
 import {
   updateJobStatus, updateJob,
   addJobAddon, removeJobAddon,
@@ -25,6 +26,7 @@ type Contract   = { id: string; status: string; sent_at: string | null; signed_a
 type Pkg        = { name: string; base_price: number; shoots_included: number };
 
 export type JobData = {
+  jobNo: number;
   title: string; eventType: string | null; leadSource: string | null; status: string; totalPrice: number; notes: string | null;
   clientName: string | null; pkg: Pkg | null; jobAddons: JobAddon[]; availableAddons: AvailAddon[];
   shoots: Shoot[]; payments: Payment[]; contract: Contract | null;
@@ -34,6 +36,10 @@ export type JobPageClientProps = {
   jobId: string; studioId: string;
   initialData: JobData;
   initialTab: string; savedParam: boolean;
+  tasks: JobTask[];
+  staffOptions: StaffOption[];
+  canAllocate: boolean;
+  hasTasksFeature: boolean;
   leadSources: string[];
 };
 
@@ -50,7 +56,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
   const { data: raw, error } = await supabase
     .from('jobs')
     .select(`
-      title, event_type, lead_source, status, total_price, notes,
+      job_no, title, event_type, lead_source, status, total_price, notes,
       clients(id, full_name),
       packages(name, base_price, shoots_included, package_addons(id, name, price, is_active)),
       job_addons(id, price_at_booking, quantity, package_addons(name)),
@@ -69,7 +75,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
     return a.scheduled_at.localeCompare(b.scheduled_at);
   });
   return {
-    title: r.title, eventType: r.event_type, leadSource: r.lead_source, status: r.status, totalPrice: r.total_price, notes: r.notes,
+    jobNo: r.job_no, title: r.title, eventType: r.event_type, leadSource: r.lead_source, status: r.status, totalPrice: r.total_price, notes: r.notes,
     clientName: client?.full_name ?? null,
     pkg: pkg ? { name: pkg.name, base_price: pkg.base_price, shoots_included: pkg.shoots_included } : null,
     jobAddons: ((r.job_addons ?? []) as any[]).map((ja) => ({
@@ -90,7 +96,13 @@ const TABS = [
   { id: 'contract', label: 'Contract' },
   { id: 'gallery',  label: 'Gallery'  },
   { id: 'album',    label: 'Album'    },
+  { id: 'tasks',    label: 'Tasks'    },
 ] as const;
+
+/** Tasks is a paid feature, so the tab is not always there. */
+function visibleTabs(hasTasks: boolean) {
+  return TABS.filter((t) => t.id !== 'tasks' || hasTasks);
+}
 type TabId = typeof TABS[number]['id'];
 
 const STATUS_STEPS = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
@@ -106,9 +118,9 @@ const SHOOT_STATUS: Record<string, string> = { scheduled: 'Scheduled', shot: 'Sh
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam, leadSources }: JobPageClientProps) {
+export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam, leadSources, tasks, staffOptions, canAllocate, hasTasksFeature }: JobPageClientProps) {
   const queryClient   = useQueryClient();
-  const validTab      = TABS.find((t) => t.id === initialTab)?.id ?? 'details';
+  const validTab      = visibleTabs(hasTasksFeature).find((t) => t.id === initialTab)?.id ?? 'details';
   const [activeTab, setActiveTab] = useState<TabId>(validTab as TabId);
   const [showSaved, setShowSaved] = useState(savedParam);
 
@@ -141,7 +153,10 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <div>
           <Link href="/jobs" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Jobs</Link>
           <div className="flex items-center gap-2.5 mt-1">
-            <h1 className="page-title">{job.title}</h1>
+            <h1 className="page-title">
+              <span className="font-mono text-ink-muted text-[0.8em] mr-2">#{job.jobNo}</span>
+              {job.title}
+            </h1>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[job.status] ?? STATUS_BADGE.lead}`}>
               {job.status}
             </span>
@@ -167,7 +182,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         {/* Tab nav — pills that wrap, so all seven stay reachable on a phone */}
         <div className="bg-white border-b border-line px-4 sm:px-5 py-3.5">
           <div className="flex flex-wrap gap-1.5 gap-y-2">
-            {TABS.map(({ id, label }) => {
+            {visibleTabs(hasTasksFeature).map(({ id, label }) => {
               const count  = id === 'shoots' ? job.shoots.length : id === 'payments' ? job.payments.length : 0;
               const active = activeTab === id;
               return (
@@ -369,6 +384,15 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               </p>
               <Link href={`/jobs/${jobId}/album`} className="btn-primary">Manage Album →</Link>
             </div>
+          )}
+
+          {activeTab === 'tasks' && (
+            <JobTasksPanel
+              jobId={jobId}
+              tasks={tasks}
+              staff={staffOptions}
+              canAllocate={canAllocate}
+            />
           )}
 
         </div>

@@ -20,7 +20,7 @@ export default async function JobsPage({
 
   let query = supabase
     .from('jobs')
-    .select('id, title, event_type, status, total_price, created_at, clients(full_name)', { count: 'exact' })
+    .select('id, job_no, title, event_type, status, total_price, created_at, clients(full_name)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -28,7 +28,14 @@ export default async function JobsPage({
 
   // Title only: client name lives on a joined table and cannot be filtered here.
   const term = (searchParams.q ?? '').trim();
-  if (term) query = query.ilike('title', `%${term}%`);
+  if (term) {
+    // A bare number searches the reference; "#42" and "42" both work. Anything
+    // else falls back to the title.
+    const asNumber = Number(term.replace(/^#/, ''));
+    query = Number.isInteger(asNumber) && asNumber > 0
+      ? query.or(`job_no.eq.${asNumber},title.ilike.%${term}%`)
+      : query.ilike('title', `%${term}%`);
+  }
 
   const { data: raw, count } = await query;
   const jobs       = (raw ?? []) as unknown as JobRow[];

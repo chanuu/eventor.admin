@@ -1,12 +1,15 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getStaff } from '@/lib/staff';
 import JobPageClient, { type JobData } from './JobPageClient';
+import type { JobTask, StaffOption } from './JobTasksPanel';
 
 // ─── Raw DB type ──────────────────────────────────────────────────────────────
 
 type JobFull = {
   id: string;
   studio_id: string;
+  job_no: number;
   title: string;
   event_type: string | null;
   lead_source: string | null;
@@ -49,7 +52,7 @@ export default async function JobDetailPage({ params, searchParams }: {
   const { data: raw } = await supabase
     .from('jobs')
     .select(`
-      id, studio_id, title, event_type, lead_source, status, total_price, notes, package_id,
+      id, studio_id, job_no, title, event_type, lead_source, status, total_price, notes, package_id,
       clients(id, full_name),
       packages(name, base_price, shoots_included, package_addons(id, name, price, is_active)),
       job_addons(id, price_at_booking, quantity, package_addons(name)),
@@ -84,6 +87,7 @@ export default async function JobDetailPage({ params, searchParams }: {
     .map(({ id, name, price }) => ({ id, name, price }));
 
   const initialData: JobData = {
+    jobNo:           full.job_no,
     title:           full.title,
     eventType:       full.event_type,
     leadSource:      full.lead_source,
@@ -98,6 +102,29 @@ export default async function JobDetailPage({ params, searchParams }: {
     payments:        (full.payments ?? []) as JobData['payments'],
     contract:        oneOf<any>(full.contracts),
   };
+  const me = await getStaff();
+
+  const [{ data: taskRaw }, { data: staffRaw }] = await Promise.all([
+    supabase
+      .from('job_tasks')
+      .select('id, title, notes, status, assignee_id, due_at, task_stages(name)')
+      .eq('job_id', params.id)
+      .order('sort_order'),
+    supabase.from('staff').select('id, full_name').eq('is_active', true).order('full_name'),
+  ]);
+
+  const tasks: JobTask[] = ((taskRaw ?? []) as unknown as {
+    id: string; title: string; notes: string | null; status: JobTask['status'];
+    assignee_id: string | null; due_at: string | null; task_stages: { name: string } | null;
+  }[]).map((t) => ({
+    id: t.id, title: t.title, notes: t.notes, status: t.status,
+    assignee_id: t.assignee_id, due_at: t.due_at,
+    stage_name: t.task_stages?.name ?? null,
+  }));
+
+  const staffOptions: StaffOption[] = ((staffRaw ?? []) as { id: string; full_name: string }[])
+    .map((s) => ({ id: s.id, name: s.full_name }));
+
   const { data: leadSourcesRaw } = await supabase
     .from('lead_sources')
     .select('name')
@@ -114,6 +141,10 @@ export default async function JobDetailPage({ params, searchParams }: {
       initialTab={searchParams.tab ?? 'details'}
       savedParam={!!searchParams.saved}
       leadSources={leadSources}
+      tasks={tasks}
+      staffOptions={staffOptions}
+      canAllocate={!!me?.permissions.includes('jobs.write')}
+      hasTasksFeature={!!me?.features.includes('tasks')}
     />
   );
 }

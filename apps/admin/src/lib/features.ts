@@ -13,7 +13,8 @@ export type Feature =
   | 'contracts'
   | 'payments'
   | 'scheduling'
-  | 'staff';
+  | 'staff'
+  | 'tasks';
 
 export const FEATURE_LABEL: Record<Feature, string> = {
   clients: 'Clients',
@@ -25,6 +26,7 @@ export const FEATURE_LABEL: Record<Feature, string> = {
   payments: 'Payments',
   scheduling: 'Crew scheduling',
   staff: 'Staff & roles',
+  tasks: 'Task management',
 };
 
 export type PlanRow = {
@@ -47,4 +49,5 @@ export const UPGRADE_PROMPT: Record<Feature, string> = {
   payments: 'Payment tracking is not part of your plan.',
   scheduling: 'Crew scheduling is not part of your plan.',
   staff: 'Staff and roles are not part of your plan.',
+  tasks: 'Task management is not part of your plan.',
 };

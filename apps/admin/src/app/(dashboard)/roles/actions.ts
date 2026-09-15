@@ -31,7 +31,7 @@ export async function createRole(formData: FormData): Promise<void> {
     .select('id')
     .single();
 
-  revalidatePath('/roles');
+  revalidatePath('/settings');
   const id = (data as { id: string } | null)?.id;
   if (id) redirect(`/roles/${id}`);
 }
@@ -94,7 +94,7 @@ export async function updateRole(
     );
   }
 
-  revalidatePath('/roles');
+  revalidatePath('/settings');
   revalidatePath(`/roles/${roleId}`);
   redirect('/roles?saved=1');
 }
@@ -122,6 +122,6 @@ export async function deleteRole(roleId: string): Promise<void> {
   if ((count ?? 0) > 0) return;
 
   await admin.from('roles').delete().eq('id', roleId).eq('studio_id', ctx.studio_id);
-  revalidatePath('/roles');
+  revalidatePath('/settings');
   redirect('/roles?deleted=1');
 }
