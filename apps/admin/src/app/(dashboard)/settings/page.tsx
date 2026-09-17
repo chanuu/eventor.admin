@@ -6,7 +6,6 @@ import RolesPanel from './RolesPanel';
 import { createClient } from '@/lib/supabase/server';
 import { updateStudioSettings } from './actions';
 import LogoUploadForm from './LogoUploadForm';
-import ChangePassword from './ChangePassword';
 import AgreementTerms from './AgreementTerms';
 import { buildAgreementHtml, defaultTermsText } from '@/lib/agreement';
 
@@ -176,7 +175,6 @@ export default async function SettingsPage({
         previewHtml={previewHtml}
       />
 
-        <ChangePassword />
       </div>
     </div>
   );

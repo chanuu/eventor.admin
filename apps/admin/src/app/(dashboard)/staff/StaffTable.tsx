@@ -2,7 +2,7 @@
 
 import DataTable, { type Column } from '@/components/DataTable';
 import RoleSelect from './RoleSelect';
-import AvatarUpload from './AvatarUpload';
+import Avatar from '@/components/Avatar';
 import { toggleStaffActive } from './invite/actions';
 
 export type StaffRowData = {
@@ -27,7 +27,7 @@ function buildColumns(roles: Role[]): Column<StaffRowData>[] {
       primary: true,
       render: (s) => (
         <div className="flex items-center gap-3 min-w-0">
-          <AvatarUpload staffId={s.id} name={s.full_name} url={s.avatar_url} size={40} />
+          <Avatar name={s.full_name} url={s.avatar_url} size={40} />
           <div className="min-w-0">
             <p className="font-medium text-gray-900 truncate">{s.full_name}</p>
             {s.isMe && <p className="text-xs text-gray-400 mt-0.5">you</p>}

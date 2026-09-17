@@ -35,7 +35,9 @@ S3 rejects the request if the header is not permitted.
 ## Required: bucket policy
 
 Photos are served directly by URL, so the objects must be publicly readable.
-Both prefixes are needed — `albums/*` is easy to forget:
+All three prefixes are needed — `albums/*` and `avatars/*` are easy to forget,
+and the symptom is identical either way: the upload succeeds and the image then
+renders broken.
 
 ```json
 {
@@ -48,7 +50,8 @@ Both prefixes are needed — `albums/*` is easy to forget:
       "Action": "s3:GetObject",
       "Resource": [
         "arn:aws:s3:::YOUR-BUCKET-NAME/galleries/*",
-        "arn:aws:s3:::YOUR-BUCKET-NAME/albums/*"
+        "arn:aws:s3:::YOUR-BUCKET-NAME/albums/*",
+        "arn:aws:s3:::YOUR-BUCKET-NAME/avatars/*"
       ]
     }
   ]
@@ -57,13 +60,19 @@ Both prefixes are needed — `albums/*` is easy to forget:
 
 Use the plain bucket **name** in the ARN, not the bucket ARN itself.
 
+| Prefix | Holds | Written by |
+|---|---|---|
+| `galleries/*` | proofing photos + `_thumb` derivatives | browser, presigned |
+| `albums/*` | album page images, and `albums/{studio}/{album}/music/` | server action |
+| `avatars/*` | staff profile pictures (~400px) | browser, presigned |
+
 Note this makes objects readable by anyone holding the URL, permanently —
 un-sharing an album in the app removes its link but does not revoke access to the
 underlying file. See §4 of [pre-launch-audit.md](pre-launch-audit.md).
 
 ## IAM permissions
 
-The access key needs `s3:PutObject` and `s3:DeleteObject` on the same two
+The access key needs `s3:PutObject` and `s3:DeleteObject` on the same three
 prefixes. `PutObject` is what presigning delegates to the browser — the browser
 never sees the credentials, only a signed URL that expires in 15 minutes.
 

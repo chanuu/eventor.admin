@@ -8,6 +8,7 @@ export type StaffContext = {
   id: string;
   studio_id: string;
   full_name: string;
+  avatarUrl: string | null;
   role_id: string | null;
   roleName: string;
   studioName: string;
@@ -29,7 +30,7 @@ export const getStaff = cache(async (): Promise<StaffContext | null> => {
 
   const { data } = await supabase
     .from('staff')
-    .select('id, studio_id, full_name, role_id, studios(name), roles(name, role_permissions(permission_key))')
+    .select('id, studio_id, full_name, avatar_url, role_id, studios(name), roles(name, role_permissions(permission_key))')
     .eq('user_id', user.id)
     .eq('is_active', true)
     .maybeSingle();
@@ -53,6 +54,7 @@ export const getStaff = cache(async (): Promise<StaffContext | null> => {
     id: row.id,
     studio_id: row.studio_id,
     full_name: row.full_name,
+    avatarUrl: row.avatar_url ?? null,
     role_id: row.role_id,
     roleName: role?.name ?? 'No role',
     studioName: studio?.name ?? '',

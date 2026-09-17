@@ -25,6 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           studioName={staff.studioName}
           staffName={staff.full_name}
           roleName={staff.roleName}
+          avatarUrl={staff.avatarUrl}
           permissions={staff.permissions}
           features={staff.features}
           isPlatformAdmin={platformAdmin}

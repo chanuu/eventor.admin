@@ -107,8 +107,9 @@ const navItem = (active: boolean) =>
   `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors
    ${active ? 'bg-white text-primary' : 'text-[#cfe4d8] hover:bg-white/10'}`;
 
-export default function Sidebar({ studioName, staffName, roleName, permissions, features, isPlatformAdmin }: {
+export default function Sidebar({ studioName, staffName, roleName, avatarUrl, permissions, features, isPlatformAdmin }: {
   studioName: string; staffName: string; roleName: string;
+  avatarUrl?: string | null;
   permissions: Capability[]; features: Feature[];
   isPlatformAdmin?: boolean;
 }) {
@@ -177,15 +178,28 @@ export default function Sidebar({ studioName, staffName, roleName, permissions, 
       <div className="mt-4 px-[22px]">
         <div className="border-t border-white/10 pt-4">
           <p className="text-[11px] text-[#8fae9d] uppercase tracking-wider font-bold">Signed in as</p>
-          <div className="flex items-center gap-2.5 mt-2.5">
-            <span className="w-[34px] h-[34px] rounded-full bg-lime text-primary font-extrabold text-sm flex items-center justify-center shrink-0">
-              {staffName.charAt(0).toUpperCase()}
-            </span>
+          <Link
+            href="/profile"
+            className="flex items-center gap-2.5 mt-2.5 rounded-lg -mx-1.5 px-1.5 py-1.5
+                       hover:bg-white/10 transition-colors"
+          >
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- S3 URL
+              <img
+                src={avatarUrl}
+                alt=""
+                className="w-[34px] h-[34px] rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <span className="w-[34px] h-[34px] rounded-full bg-lime text-primary font-extrabold text-sm flex items-center justify-center shrink-0">
+                {staffName.charAt(0).toUpperCase()}
+              </span>
+            )}
             <span className="min-w-0">
               <span className="block text-[12.5px] font-bold truncate">{staffName}</span>
               <span className="block text-[11px] text-[#8fae9d]">{roleName}</span>
             </span>
-          </div>
+          </Link>
           <form action={signOut}>
             <button
               type="submit"
