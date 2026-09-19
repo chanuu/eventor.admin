@@ -8,7 +8,7 @@ import {
   toggleStage,
   deleteStage,
   moveStage,
-} from '../actions';
+} from '../tasks/actions';
 
 export type Stage = {
   id: string;

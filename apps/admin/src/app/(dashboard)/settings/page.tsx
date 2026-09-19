@@ -3,6 +3,7 @@ import { getStaff } from '@/lib/staff';
 import SettingsTabs, { type SettingsTabId } from './SettingsTabs';
 import BillingPanel from './BillingPanel';
 import RolesPanel from './RolesPanel';
+import ChecklistPanel from './ChecklistPanel';
 import { createClient } from '@/lib/supabase/server';
 import { updateStudioSettings } from './actions';
 import LogoUploadForm from './LogoUploadForm';
@@ -34,9 +35,12 @@ export default async function SettingsPage({
   // lose access to Roles entirely by it moving in here.
   const canSettings = me.permissions.includes('settings.manage');
   const canRoles = me.permissions.includes('staff.manage') && me.features.includes('staff');
+  const canChecklist = me.permissions.includes('jobs.write') && me.features.includes('tasks');
 
   const available: SettingsTabId[] = [
-    ...(canSettings ? (['studio', 'billing'] as SettingsTabId[]) : []),
+    ...(canSettings ? (['studio'] as SettingsTabId[]) : []),
+    ...(canChecklist ? (['checklist'] as SettingsTabId[]) : []),
+    ...(canSettings ? (['billing'] as SettingsTabId[]) : []),
     ...(canRoles ? (['roles'] as SettingsTabId[]) : []),
   ];
   if (available.length === 0) redirect('/dashboard');
@@ -52,11 +56,9 @@ export default async function SettingsPage({
           Main Menu / <span className="text-[#0F3D2E]">Settings</span>
         </p>
         <SettingsTabs active={tab} available={available} />
-        {tab === 'billing' ? (
-          <BillingPanel searchParams={searchParams} />
-        ) : (
-          <RolesPanel searchParams={searchParams} />
-        )}
+        {tab === 'billing' && <BillingPanel searchParams={searchParams} />}
+        {tab === 'roles' && <RolesPanel searchParams={searchParams} />}
+        {tab === 'checklist' && <ChecklistPanel studioName={me.studioName} />}
       </div>
     );
   }

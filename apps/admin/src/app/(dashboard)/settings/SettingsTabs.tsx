@@ -1,9 +1,10 @@
 import Link from 'next/link';
 
-export type SettingsTabId = 'studio' | 'billing' | 'roles';
+export type SettingsTabId = 'studio' | 'checklist' | 'billing' | 'roles';
 
 export const TAB_LABEL: Record<SettingsTabId, string> = {
   studio: 'Studio',
+  checklist: 'Job checklist',
   billing: 'Billing & plan',
   roles: 'Roles & permissions',
 };

@@ -172,7 +172,7 @@ export async function createStage(formData: FormData): Promise<{ error?: string 
     return { error: error.message };
   }
 
-  revalidatePath('/tasks/stages');
+  revalidatePath('/settings');
   return {};
 }
 
@@ -203,7 +203,7 @@ export async function updateStage(
     return { error: error.message };
   }
 
-  revalidatePath('/tasks/stages');
+  revalidatePath('/settings');
   return {};
 }
 
@@ -222,7 +222,7 @@ export async function toggleStage(
     .eq('studio_id', ctx.studio_id);
 
   if (error) return { error: error.message };
-  revalidatePath('/tasks/stages');
+  revalidatePath('/settings');
   return {};
 }
 
@@ -242,7 +242,7 @@ export async function deleteStage(stageId: string): Promise<{ error?: string }> 
     .eq('studio_id', ctx.studio_id);
 
   if (error) return { error: error.message };
-  revalidatePath('/tasks/stages');
+  revalidatePath('/settings');
   return {};
 }
 
@@ -271,7 +271,7 @@ export async function moveStage(
     supabase.from('task_stages').update({ sort_order: list[i].sort_order }).eq('id', list[j].id),
   ]);
 
-  revalidatePath('/tasks/stages');
+  revalidatePath('/settings');
   return {};
 }
 
