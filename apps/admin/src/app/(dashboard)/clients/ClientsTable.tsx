@@ -16,14 +16,43 @@ const COLUMNS: Column<ClientRow>[] = [
   {
     key: 'name',
     label: 'Client',
-    render: (c) => (
-      <div className="min-w-0">
-        <p className="font-medium text-ink-strong">{c.full_name}</p>
-        <p className="text-xs text-ink-muted mt-0.5 truncate">
-          {[c.email, c.phone].filter(Boolean).join(' · ') || 'No contact details'}
-        </p>
-      </div>
-    ),
+    render: (c) => <span className="font-medium text-ink-strong">{c.full_name}</span>,
+  },
+  {
+    key: 'email',
+    label: 'Email',
+    width: '240px',
+    render: (c) =>
+      c.email ? (
+        // stopPropagation so the mail client opens instead of the row navigating.
+        <a
+          href={`mailto:${c.email}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-ink-mid hover:text-primary truncate block"
+          title={c.email}
+        >
+          {c.email}
+        </a>
+      ) : (
+        <span className="text-ink-muted">—</span>
+      ),
+  },
+  {
+    key: 'phone',
+    label: 'Phone',
+    width: '170px',
+    render: (c) =>
+      c.phone ? (
+        <a
+          href={`tel:${c.phone.replace(/s+/g, '')}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-ink-mid hover:text-primary whitespace-nowrap"
+        >
+          {c.phone}
+        </a>
+      ) : (
+        <span className="text-ink-muted">—</span>
+      ),
   },
   {
     key: 'jobs',

@@ -98,8 +98,8 @@ export default function DataTable<T extends object>({
                 key={i}
                 onClick={href ? () => router.push(href) : undefined}
                 className={`border-b border-gray-50 last:border-0 transition-colors
-                  even:bg-panel
-                  ${href ? 'cursor-pointer hover:bg-[#EDF2EF]' : ''}`}
+                  even:bg-[#F2F6F2]
+                  ${href ? 'cursor-pointer hover:bg-[#E4EEE7]' : ''}`}
               >
                 {columns.map((col) => (
                   <td
