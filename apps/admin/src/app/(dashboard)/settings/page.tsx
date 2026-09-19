@@ -1,9 +1,12 @@
-import { requireCapability, getStaff } from '@/lib/staff';
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { getStaff } from '@/lib/staff';
+import SettingsTabs, { type SettingsTabId } from './SettingsTabs';
+import BillingPanel from './BillingPanel';
+import RolesPanel from './RolesPanel';
+import ChecklistPanel from './ChecklistPanel';
+import { createClient } from '@/lib/supabase/server';
 import { updateStudioSettings } from './actions';
 import LogoUploadForm from './LogoUploadForm';
-import ChangePassword from './ChangePassword';
 import AgreementTerms from './AgreementTerms';
 import { buildAgreementHtml, defaultTermsText } from '@/lib/agreement';
 
@@ -19,8 +22,47 @@ type Studio = {
   agreement_terms: string | null;
 };
 
-export default async function SettingsPage({ searchParams }: { searchParams: { saved?: string } }) {
-  await requireCapability('settings.manage');
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: { saved?: string; tab?: string; locked?: string };
+}) {
+  const me = await getStaff();
+  if (!me) redirect('/login');
+
+  // Each tab carries its own entitlement rather than one blanket check: a custom
+  // role could hold staff.manage without settings.manage, and would otherwise
+  // lose access to Roles entirely by it moving in here.
+  const canSettings = me.permissions.includes('settings.manage');
+  const canRoles = me.permissions.includes('staff.manage') && me.features.includes('staff');
+  const canChecklist = me.permissions.includes('jobs.write') && me.features.includes('tasks');
+
+  const available: SettingsTabId[] = [
+    ...(canSettings ? (['studio'] as SettingsTabId[]) : []),
+    ...(canChecklist ? (['checklist'] as SettingsTabId[]) : []),
+    ...(canSettings ? (['billing'] as SettingsTabId[]) : []),
+    ...(canRoles ? (['roles'] as SettingsTabId[]) : []),
+  ];
+  if (available.length === 0) redirect('/dashboard');
+
+  const requested = (searchParams.tab ?? 'studio') as SettingsTabId;
+  const tab = available.includes(requested) ? requested : available[0];
+
+  if (tab !== 'studio') {
+    return (
+      <div>
+        <h1 className="page-title">Settings</h1>
+        <p className="breadcrumb mb-6">
+          Main Menu / <span className="text-[#0F3D2E]">Settings</span>
+        </p>
+        <SettingsTabs active={tab} available={available} />
+        {tab === 'billing' && <BillingPanel searchParams={searchParams} />}
+        {tab === 'roles' && <RolesPanel searchParams={searchParams} />}
+        {tab === 'checklist' && <ChecklistPanel studioName={me.studioName} />}
+      </div>
+    );
+  }
+
   // requireCapability at the top of this component already redirected anyone
   // without settings.manage, so the studio lookup can rely on that context.
   const staff = await getStaff();
@@ -56,11 +98,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
   });
 
   return (
-    <div className="max-w-xl">
+    <div>
       <h1 className="page-title">Settings</h1>
       <p className="breadcrumb mb-6">
         Main Menu / <span className="text-[#0F3D2E]">Settings</span>
       </p>
+
+      <SettingsTabs active="studio" available={available} />
+
+      <div className="max-w-2xl">
 
       {searchParams.saved && (
         <p className="text-sm text-emerald-600 mb-4">Settings saved.</p>
@@ -131,7 +177,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: { s
         previewHtml={previewHtml}
       />
 
-      <ChangePassword />
+      </div>
     </div>
   );
 }

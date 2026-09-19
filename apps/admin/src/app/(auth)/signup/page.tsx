@@ -2,13 +2,23 @@
 
 import Link from "next/link";
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createStudioAndAdmin } from './actions';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
+  const params = useSearchParams();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [studioName, setStudioName] = useState('');
+  const [studioName, setStudioName] = useState(params.get('studio') ?? '');
 
   function deriveSlug(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -30,7 +40,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Field label="Your name">
-            <input name="full_name" required style={inputStyle} placeholder="Saman Perera" />
+            <input name="full_name" required defaultValue={params.get('name') ?? ''} style={inputStyle} placeholder="Saman Perera" />
           </Field>
 
           <Field label="Studio name">
@@ -59,7 +69,7 @@ export default function SignupPage() {
           </Field>
 
           <Field label="Email">
-            <input name="email" type="email" required style={inputStyle} placeholder="saman@example.com" autoComplete="email" />
+            <input name="email" type="email" required defaultValue={params.get('email') ?? ''} style={inputStyle} placeholder="saman@example.com" autoComplete="email" />
           </Field>
 
           <Field label="Password">

@@ -7,13 +7,16 @@ import { createJob } from '../actions';
 
 type ClientOption = { id: string; full_name: string };
 type PackageOption = { id: string; name: string; base_price: number };
+type LeadSource = { id: string; name: string };
 
 export default function NewJobForm({
   clients,
   packages,
+  leadSources,
 }: {
   clients: ClientOption[];
   packages: PackageOption[];
+  leadSources: LeadSource[];
 }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,6 +46,15 @@ export default function NewJobForm({
 
       <Field label="Event type">
         <input name="event_type" className="input" placeholder="Wedding, Engagement, Corporate…" />
+      </Field>
+
+      <Field label="How did they hear about you?">
+        <select name="lead_source" className="input">
+          <option value="">— Not recorded —</option>
+          {leadSources.map((s) => (
+            <option key={s.id} value={s.name}>{s.name}</option>
+          ))}
+        </select>
       </Field>
 
       <Field label="Package">

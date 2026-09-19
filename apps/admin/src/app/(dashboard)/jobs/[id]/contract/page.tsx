@@ -1,3 +1,4 @@
+import { requireFeature } from '@/lib/staff';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -24,6 +25,7 @@ type Client = { full_name: string; email: string | null; phone: string | null };
 type Job    = { id: string; title: string; event_type: string | null; total_price: number; studio_id: string; clients: Client | null; packages: { name: string } | null };
 
 export default async function ContractPage({ params }: { params: { id: string } }) {
+  await requireFeature('contracts');
   const supabase = createClient();
 
   const { data: jobRaw } = await supabase

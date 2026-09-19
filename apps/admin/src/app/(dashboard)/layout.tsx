@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import ResultToast from '@/components/ResultToast';
 import NavProgress from '@/components/NavProgress';
 import { getStaff } from '@/lib/staff';
+import { isPlatformAdmin } from '@/lib/platform';
 import Sidebar from '@/components/Sidebar';
 import SidebarShell from '@/components/SidebarShell';
 import AppHeader from '@/components/AppHeader';
@@ -14,6 +15,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const staff = await getStaff();
   if (!staff) redirect('/login?no_access=1');
 
+  const platformAdmin = await isPlatformAdmin();
+
 
   return (
     <div className="flex h-screen bg-canvas overflow-hidden">
@@ -22,7 +25,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           studioName={staff.studioName}
           staffName={staff.full_name}
           roleName={staff.roleName}
+          avatarUrl={staff.avatarUrl}
           permissions={staff.permissions}
+          features={staff.features}
+          isPlatformAdmin={platformAdmin}
         />
       </SidebarShell>
 

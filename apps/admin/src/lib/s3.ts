@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 /**
  * S3 upload helper for gallery / proofing photos.
@@ -29,6 +30,10 @@ function getClient(): S3Client {
     client = new S3Client({
       region: REGION,
       credentials: { accessKeyId: ACCESS_KEY, secretAccessKey: SECRET_KEY },
+      // Dotted bucket names break the wildcard TLS cert on virtual-hosted-style
+      // URLs, so address them by path — the same choice publicUrlFor makes, and
+      // it must match or presigned URLs would point somewhere else entirely.
+      forcePathStyle: BUCKET.includes('.'),
     });
   }
   return client;
@@ -57,6 +62,39 @@ export async function uploadToS3(key: string, body: Buffer, contentType: string)
   }));
 
   return publicUrlFor(key);
+}
+
+/**
+ * Mints a short-lived PUT URL so the browser can send a file straight to S3.
+ *
+ * This exists because routing photos through a server action does not scale: a
+ * proofing set of 1000 images is several GB in one request body, which exceeds
+ * the platform's limit long before the function's time limit is reached. With a
+ * presigned URL the file never touches our server, so a big upload is bound only
+ * by the studio's bandwidth.
+ *
+ * Returns both the URL to PUT to and the public URL the object will have, so the
+ * caller can record it without a second round trip.
+ */
+export async function presignUpload(
+  key: string,
+  contentType: string,
+  expiresInSeconds = 900,
+): Promise<{ uploadUrl: string; publicUrl: string }> {
+  if (!isS3Configured()) throw new Error('S3 is not configured. Set the S3_* environment variables.');
+
+  const uploadUrl = await getSignedUrl(
+    getClient(),
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+    { expiresIn: expiresInSeconds },
+  );
+
+  return { uploadUrl, publicUrl: publicUrlFor(key) };
 }
 
 /** True for values that are already full URLs (S3-era rows) vs. legacy Supabase storage paths. */

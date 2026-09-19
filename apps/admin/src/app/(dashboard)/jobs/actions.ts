@@ -41,6 +41,7 @@ export async function createJob(formData: FormData) {
       package_id: packageId,
       title: (formData.get('title') as string).trim(),
       event_type: (formData.get('event_type') as string).trim() || null,
+      lead_source: ((formData.get('lead_source') as string) ?? '').trim() || null,
       total_price: totalPrice,
       notes: (formData.get('notes') as string).trim() || null,
     })
@@ -64,6 +65,7 @@ export async function updateJob(id: string, studioId: string, formData: FormData
     .update({
       title: (formData.get('title') as string).trim(),
       event_type: (formData.get('event_type') as string).trim() || null,
+      lead_source: ((formData.get('lead_source') as string) ?? '').trim() || null,
       notes: (formData.get('notes') as string).trim() || null,
     })
     .eq('id', id)

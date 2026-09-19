@@ -39,9 +39,9 @@ export default async function RoleDetailPage({ params }: { params: { roleId: str
   const members = role.staff ?? [];
 
   return (
-    <div style={{ maxWidth: 820 }}>
+    <div>
       <div style={{ marginBottom: 20 }}>
-        <Link href="/roles" style={{ fontSize: 13, color: '#8b968f' }}>← Roles</Link>
+        <Link href="/settings?tab=roles" style={{ fontSize: 13, color: '#8b968f' }}>← Roles</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
           <h1 className="page-title">{role.name}</h1>
           {role.is_system && (

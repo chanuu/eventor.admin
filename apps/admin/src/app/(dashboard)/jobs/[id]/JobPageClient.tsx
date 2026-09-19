@@ -8,7 +8,9 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import Modal from '@/components/Modal';
+import DataTable, { type Column } from '@/components/DataTable';
 import JobStatusForm from './JobStatusForm';
+import JobTasksPanel, { type JobTask, type StaffOption } from './JobTasksPanel';
 import {
   updateJobStatus, updateJob,
   addJobAddon, removeJobAddon,
@@ -25,7 +27,8 @@ type Contract   = { id: string; status: string; sent_at: string | null; signed_a
 type Pkg        = { name: string; base_price: number; shoots_included: number };
 
 export type JobData = {
-  title: string; eventType: string | null; status: string; totalPrice: number; notes: string | null;
+  jobRef: string;
+  title: string; eventType: string | null; leadSource: string | null; status: string; totalPrice: number; notes: string | null;
   clientName: string | null; pkg: Pkg | null; jobAddons: JobAddon[]; availableAddons: AvailAddon[];
   shoots: Shoot[]; payments: Payment[]; contract: Contract | null;
 };
@@ -34,6 +37,11 @@ export type JobPageClientProps = {
   jobId: string; studioId: string;
   initialData: JobData;
   initialTab: string; savedParam: boolean;
+  tasks: JobTask[];
+  staffOptions: StaffOption[];
+  canAllocate: boolean;
+  hasTasksFeature: boolean;
+  leadSources: string[];
 };
 
 // ─── Browser query ────────────────────────────────────────────────────────────
@@ -49,7 +57,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
   const { data: raw, error } = await supabase
     .from('jobs')
     .select(`
-      title, event_type, status, total_price, notes,
+      job_ref, title, event_type, lead_source, status, total_price, notes,
       clients(id, full_name),
       packages(name, base_price, shoots_included, package_addons(id, name, price, is_active)),
       job_addons(id, price_at_booking, quantity, package_addons(name)),
@@ -68,7 +76,7 @@ async function fetchJob(jobId: string): Promise<JobData> {
     return a.scheduled_at.localeCompare(b.scheduled_at);
   });
   return {
-    title: r.title, eventType: r.event_type, status: r.status, totalPrice: r.total_price, notes: r.notes,
+    jobRef: r.job_ref, title: r.title, eventType: r.event_type, leadSource: r.lead_source, status: r.status, totalPrice: r.total_price, notes: r.notes,
     clientName: client?.full_name ?? null,
     pkg: pkg ? { name: pkg.name, base_price: pkg.base_price, shoots_included: pkg.shoots_included } : null,
     jobAddons: ((r.job_addons ?? []) as any[]).map((ja) => ({
@@ -89,7 +97,13 @@ const TABS = [
   { id: 'contract', label: 'Contract' },
   { id: 'gallery',  label: 'Gallery'  },
   { id: 'album',    label: 'Album'    },
+  { id: 'tasks',    label: 'Tasks'    },
 ] as const;
+
+/** Tasks is a paid feature, so the tab is not always there. */
+function visibleTabs(hasTasks: boolean) {
+  return TABS.filter((t) => t.id !== 'tasks' || hasTasks);
+}
 type TabId = typeof TABS[number]['id'];
 
 const STATUS_STEPS = ['lead', 'quoted', 'contracted', 'active', 'editing', 'proofing', 'delivered', 'archived'];
@@ -105,9 +119,9 @@ const SHOOT_STATUS: Record<string, string> = { scheduled: 'Scheduled', shot: 'Sh
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam }: JobPageClientProps) {
+export default function JobPageClient({ jobId, studioId, initialData, initialTab, savedParam, leadSources, tasks, staffOptions, canAllocate, hasTasksFeature }: JobPageClientProps) {
   const queryClient   = useQueryClient();
-  const validTab      = TABS.find((t) => t.id === initialTab)?.id ?? 'details';
+  const validTab      = visibleTabs(hasTasksFeature).find((t) => t.id === initialTab)?.id ?? 'details';
   const [activeTab, setActiveTab] = useState<TabId>(validTab as TabId);
   const [showSaved, setShowSaved] = useState(savedParam);
 
@@ -133,6 +147,142 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
   const totalPaid  = job.payments.filter((p) => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
   const balanceDue = job.totalPrice - totalPaid;
 
+  // Defined here rather than at module scope so the Mark paid button can reach
+  // the mutation. JobPageClient is already a client component, so render
+  // functions never cross the server boundary.
+  const paymentColumns: Column<Payment>[] = [
+    {
+      key: 'type',
+      label: 'Payment',
+      primary: true,
+      render: (p) => (
+        <div className="min-w-0">
+          <p className="font-medium text-gray-900 capitalize">{p.type}</p>
+          <p className="text-xs text-gray-400 mt-0.5 truncate">
+            {p.method}
+            {p.notes ? ` · ${p.notes}` : ''}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'paid_at',
+      label: 'Date',
+      width: '150px',
+      render: (p) => (
+        <span className="text-gray-700 whitespace-nowrap">
+          {p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-LK', { dateStyle: 'medium' }) : '—'}
+        </span>
+      ),
+    },
+    {
+      key: 'amount',
+      label: 'Amount',
+      width: '160px',
+      align: 'right',
+      render: (p) => (
+        <span className="font-bold text-gray-900 whitespace-nowrap">
+          LKR {p.amount.toLocaleString('en-LK')}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      width: '130px',
+      align: 'right',
+      render: (p) =>
+        p.status === 'paid' ? (
+          <span className="pill-good">Paid</span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => markPaidMutation.mutate(p.id)}
+            disabled={markPaidMutation.isPending}
+            className="pill-pending hover:opacity-80 transition-opacity border-0 cursor-pointer disabled:opacity-50"
+          >
+            Mark paid
+          </button>
+        ),
+    },
+  ];
+
+  const shootColumns: Column<Shoot>[] = [
+    {
+      key: 'shoot_type',
+      label: 'Shoot',
+      primary: true,
+      render: (sh) => (
+        <div className="min-w-0">
+          <p className="font-medium text-gray-900">{sh.shoot_type ?? 'Shoot'}</p>
+          <p className="text-xs text-gray-400 mt-0.5 truncate">
+            {sh.scheduled_at
+              ? new Date(sh.scheduled_at).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' })
+              : 'Not scheduled'}
+            {sh.venue ? ` · ${sh.venue}` : ''}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      width: '150px',
+      render: (sh) => <span className="pill-neutral">{SHOOT_STATUS[sh.status] ?? sh.status}</span>,
+    },
+    {
+      key: 'open',
+      label: '',
+      width: '110px',
+      align: 'right',
+      hideOnCard: true,
+      render: () => (
+        <span className="text-[13px] font-medium text-[#0F3D2E] whitespace-nowrap">Details →</span>
+      ),
+    },
+  ];
+
+  const addonColumns: Column<JobAddon>[] = [
+    {
+      key: 'addonName',
+      label: 'Add-on',
+      primary: true,
+      render: (ja) => (
+        <span className="font-medium text-gray-900">
+          {ja.addonName}
+          {ja.quantity > 1 && <span className="text-gray-400"> ×{ja.quantity}</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'price',
+      label: 'Price',
+      width: '160px',
+      align: 'right',
+      render: (ja) => (
+        <span className="font-bold text-gray-900 whitespace-nowrap">
+          LKR {(ja.price_at_booking * ja.quantity).toLocaleString('en-LK')}
+        </span>
+      ),
+    },
+    {
+      key: 'remove',
+      label: '',
+      width: '100px',
+      align: 'right',
+      render: (ja) => (
+        <button
+          type="button"
+          onClick={() => removeAddonMutation.mutate(ja.id)}
+          disabled={removeAddonMutation.isPending}
+          className="text-xs text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+        >
+          Remove
+        </button>
+      ),
+    },
+  ];
+
   return (
     <div>
       {/* ── Page heading ── */}
@@ -140,7 +290,10 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <div>
           <Link href="/jobs" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Jobs</Link>
           <div className="flex items-center gap-2.5 mt-1">
-            <h1 className="page-title">{job.title}</h1>
+            <h1 className="page-title">
+              <span className="font-mono text-ink-muted text-[0.8em] mr-2">{job.jobRef}</span>
+              {job.title}
+            </h1>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[job.status] ?? STATUS_BADGE.lead}`}>
               {job.status}
             </span>
@@ -166,7 +319,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         {/* Tab nav — pills that wrap, so all seven stay reachable on a phone */}
         <div className="bg-white border-b border-line px-4 sm:px-5 py-3.5">
           <div className="flex flex-wrap gap-1.5 gap-y-2">
-            {TABS.map(({ id, label }) => {
+            {visibleTabs(hasTasksFeature).map(({ id, label }) => {
               const count  = id === 'shoots' ? job.shoots.length : id === 'payments' ? job.payments.length : 0;
               const active = activeTab === id;
               return (
@@ -206,6 +359,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ReadField label="Title" value={job.title} />
                   <ReadField label="Event Type" value={job.eventType} />
+                  <ReadField label="Lead source" value={job.leadSource} />
                 </div>
                 <div className="mt-4">
                   <ReadField label="Notes" value={job.notes} />
@@ -223,22 +377,11 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                     <span className="text-gray-400 ml-3">{job.pkg.shoots_included} shoot{job.pkg.shoots_included !== 1 ? 's' : ''} included</span>
                   </p>
 
-                  {job.jobAddons.length > 0 && (
-                    <div className="flex flex-col gap-2 mb-4">
-                      {job.jobAddons.map((ja) => (
-                        <div key={ja.id} className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 rounded-xl">
-                          <span className="flex-1 text-sm text-gray-700">{ja.addonName} ×{ja.quantity}</span>
-                          <span className="text-sm font-semibold text-gray-900">LKR {(ja.price_at_booking * ja.quantity).toLocaleString()}</span>
-                          <button type="button" onClick={() => removeAddonMutation.mutate(ja.id)} disabled={removeAddonMutation.isPending}
-                            className="text-xs text-red-500 hover:text-red-700 transition-colors">Remove</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {job.jobAddons.length === 0 && (
-                    <EmptyState compact title="No add-ons yet" description="Extras you add appear here and are included in the job total." />
-                  )}
+                  <DataTable
+                    columns={addonColumns}
+                    rows={job.jobAddons}
+                    emptyMessage="No add-ons yet. Extras you add appear here and are included in the job total."
+                  />
 
                   <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
                     <span className="text-base font-bold text-gray-900">Total: LKR {job.totalPrice.toLocaleString()}</span>
@@ -254,31 +397,12 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
               <SectionHeader title="Shoots"
                 action={<button type="button" onClick={() => setOpenModal('shoot')} className="btn-primary">+ Add Shoot</button>} />
 
-              {job.shoots.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  {job.shoots.map((shoot) => (
-                    <div key={shoot.id} className="flex items-center gap-3 px-4 py-3 border border-gray-100 rounded-xl hover:border-gray-200 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800">{shoot.shoot_type ?? 'Shoot'}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {shoot.scheduled_at
-                            ? new Date(shoot.scheduled_at).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' })
-                            : 'Not scheduled'}
-                          {shoot.venue ? ` · ${shoot.venue}` : ''}
-                        </p>
-                      </div>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full whitespace-nowrap">
-                        {SHOOT_STATUS[shoot.status] ?? shoot.status}
-                      </span>
-                      <Link href={`/jobs/${jobId}/shoots/${shoot.id}`} className="text-xs font-medium text-[#0F3D2E] hover:underline shrink-0">Details</Link>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border-2 border-dashed border-line">
-                  <EmptyState compact title="No shoots scheduled" description="Add a shoot to plan the dates, venues and crew for this job." />
-                </div>
-              )}
+              <DataTable
+                columns={shootColumns}
+                rows={job.shoots}
+                getRowHref={(sh) => `/jobs/${jobId}/shoots/${sh.id}`}
+                emptyMessage="No shoots scheduled. Add one to plan the dates, venues and crew for this job."
+              />
             </div>
           )}
 
@@ -294,32 +418,11 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                 <StatBox label="Balance Due" value={`LKR ${balanceDue.toLocaleString()}`}  color={balanceDue > 0 ? 'text-red-500' : 'text-emerald-600'} />
               </div>
 
-              {job.payments.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  {job.payments.map((p) => (
-                    <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 rounded-xl">
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-gray-800 capitalize">{p.type}</span>
-                        <span className="text-xs text-gray-400 ml-2">{p.method}</span>
-                        {p.notes   && <span className="text-xs text-gray-400 ml-2">{p.notes}</span>}
-                        {p.paid_at && <span className="text-xs text-gray-400 ml-2">{new Date(p.paid_at).toLocaleDateString('en-LK')}</span>}
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900">LKR {p.amount.toLocaleString()}</span>
-                      {p.status === 'paid'
-                        ? <span className="text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full">Paid</span>
-                        : <button type="button" onClick={() => markPaidMutation.mutate(p.id)} disabled={markPaidMutation.isPending}
-                            className="text-xs bg-amber-50 text-amber-700 font-semibold px-2.5 py-1 rounded-full hover:bg-amber-100 transition-colors border-0 cursor-pointer">
-                            Mark paid
-                          </button>
-                      }
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border-2 border-dashed border-line">
-                  <EmptyState compact title="No payments recorded" description="Record an advance or balance payment to track what is owed." />
-                </div>
-              )}
+              <DataTable
+                columns={paymentColumns}
+                rows={job.payments}
+                emptyMessage="No payments recorded. Record an advance or balance payment to track what is owed."
+              />
             </div>
           )}
 
@@ -369,6 +472,15 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             </div>
           )}
 
+          {activeTab === 'tasks' && (
+            <JobTasksPanel
+              jobId={jobId}
+              tasks={tasks}
+              staff={staffOptions}
+              canAllocate={canAllocate}
+            />
+          )}
+
         </div>
       </div>
 
@@ -384,6 +496,15 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
             </FormField>
             <FormField label="Event Type">
               <input name="event_type" defaultValue={job.eventType ?? ''} placeholder="Wedding, Engagement…" className="input" />
+            </FormField>
+
+            <FormField label="Lead source">
+              <select name="lead_source" defaultValue={job.leadSource ?? ''} className="input">
+                <option value="">— Not recorded —</option>
+                {leadSources.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </FormField>
           </div>
           <FormField label="Notes">

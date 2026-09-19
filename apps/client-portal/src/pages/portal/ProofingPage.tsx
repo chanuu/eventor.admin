@@ -209,7 +209,13 @@ export default function ProofingPage() {
                         title="View larger"
                         style={thumbButton}
                       >
-                        <img src={photoUrl(p.storage_path)} alt={p.file_name} style={thumbImg} />
+                        <img
+                          src={photoUrl(p.thumb_path ?? p.storage_path)}
+                          alt={p.file_name}
+                          loading="lazy"
+                          decoding="async"
+                          style={thumbImg}
+                        />
                       </button>
                       <button
                         onClick={() => toggle(p.id)}

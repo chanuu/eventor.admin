@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { requireCapability } from '@/lib/staff';
+import { requireCapability, requireFeature } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import Pagination from '@/components/Pagination';
 import SearchInput from '@/components/SearchInput';
@@ -13,6 +13,7 @@ export default async function ClientsPage({
   searchParams: { q?: string; page?: string };
 }) {
   await requireCapability('clients.manage');
+  await requireFeature('clients');
   const supabase = createClient();
 
   const term = (searchParams.q ?? '').trim();

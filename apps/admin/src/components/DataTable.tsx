@@ -97,9 +97,9 @@ export default function DataTable<T extends object>({
               <tr
                 key={i}
                 onClick={href ? () => router.push(href) : undefined}
-                onMouseEnter={href ? (e) => { e.currentTarget.style.background = '#f9fafb'; } : undefined}
-                onMouseLeave={href ? (e) => { e.currentTarget.style.background = ''; } : undefined}
-                className={`border-b border-gray-50 last:border-0 transition-colors ${href ? 'cursor-pointer' : ''}`}
+                className={`border-b border-gray-50 last:border-0 transition-colors
+                  even:bg-[#F2F6F2]
+                  ${href ? 'cursor-pointer hover:bg-[#E4EEE7]' : ''}`}
               >
                 {columns.map((col) => (
                   <td
