@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getStaff, requireFeature } from '@/lib/staff';
 import { createClient } from '@/lib/supabase/server';
 import TaskBoard, { type BoardTask } from './TaskBoard';
+import BoardFilters, { type BoardView } from './BoardFilters';
 
 type Row = {
   id: string;
@@ -11,7 +12,7 @@ type Row = {
   due_at: string | null;
   job_id: string;
   assignee_id: string | null;
-  jobs: { job_no: number; title: string } | null;
+  jobs: { job_ref: string; title: string; status: string } | null;
   task_stages: { name: string } | null;
   staff: { full_name: string; avatar_url: string | null } | null;
 };
@@ -19,7 +20,7 @@ type Row = {
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: { scope?: string };
+  searchParams: { scope?: string; view?: string; from?: string; to?: string };
 }) {
   await requireFeature('tasks');
 
@@ -30,17 +31,42 @@ export default async function TasksPage({
   const canSeeAll = staff.permissions.includes('jobs.write');
   const scope = canSeeAll && searchParams.scope === 'studio' ? 'studio' : 'mine';
 
+  const VIEWS: BoardView[] = ['pending', '3d', '7d', 'custom', 'all'];
+  const view: BoardView = VIEWS.includes(searchParams.view as BoardView)
+    ? (searchParams.view as BoardView)
+    : 'pending';
+
   const supabase = createClient();
 
+  // !inner so the job's own status can be filtered on, not just read.
   let query = supabase
     .from('job_tasks')
     .select(
-      'id, title, status, due_at, job_id, assignee_id, jobs(job_no, title), task_stages(name), staff(full_name, avatar_url)',
+      'id, title, status, due_at, job_id, assignee_id, jobs!inner(job_ref, title, status), task_stages(name), staff(full_name, avatar_url)',
     )
     .order('due_at', { ascending: true, nullsFirst: false })
     .order('sort_order');
 
   if (scope === 'mine') query = query.eq('assignee_id', staff.id);
+
+  if (view === 'pending') {
+    // Finished work is the main source of clutter once a studio has run a few
+    // hundred jobs, so the default hides it.
+    query = query.not('jobs.status', 'in', '("delivered","archived")');
+  } else if (view === '3d' || view === '7d') {
+    // Overdue work still matters, so this is an upper bound only — no lower one.
+    const until = new Date();
+    until.setHours(23, 59, 59, 999);
+    until.setDate(until.getDate() + (view === '3d' ? 3 : 7));
+    query = query.lte('due_at', until.toISOString());
+  } else if (view === 'custom') {
+    if (searchParams.from) query = query.gte('due_at', new Date(searchParams.from).toISOString());
+    if (searchParams.to) {
+      const end = new Date(searchParams.to);
+      end.setHours(23, 59, 59, 999); // inclusive of the chosen day
+      query = query.lte('due_at', end.toISOString());
+    }
+  }
 
   const { data } = await query;
 
@@ -67,7 +93,7 @@ export default async function TasksPage({
     status: r.status,
     due_at: r.due_at,
     job_id: r.job_id,
-    job_no: r.jobs?.job_no ?? 0,
+    job_ref: r.jobs?.job_ref ?? '',
     job_title: r.jobs?.title ?? 'Untitled job',
     stage_name: r.task_stages?.name ?? null,
     assignee_name: r.staff?.full_name ?? null,
@@ -119,9 +145,17 @@ export default async function TasksPage({
             >
               Whole studio
             </Link>
-            <Link href="/tasks/stages" className="btn-secondary">Job checklist</Link>
+            <Link href="/settings?tab=checklist" className="btn-secondary">Job checklist</Link>
           </div>
         )}
+      </div>
+
+      <div className="mb-4">
+        <BoardFilters
+          view={view}
+          from={searchParams.from ?? ''}
+          to={searchParams.to ?? ''}
+        />
       </div>
 
       {tasks.length === 0 ? (

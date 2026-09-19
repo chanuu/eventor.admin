@@ -9,7 +9,7 @@ import type { JobTask, StaffOption } from './JobTasksPanel';
 type JobFull = {
   id: string;
   studio_id: string;
-  job_no: number;
+  job_ref: string;
   title: string;
   event_type: string | null;
   lead_source: string | null;
@@ -52,7 +52,7 @@ export default async function JobDetailPage({ params, searchParams }: {
   const { data: raw } = await supabase
     .from('jobs')
     .select(`
-      id, studio_id, job_no, title, event_type, lead_source, status, total_price, notes, package_id,
+      id, studio_id, job_ref, title, event_type, lead_source, status, total_price, notes, package_id,
       clients(id, full_name),
       packages(name, base_price, shoots_included, package_addons(id, name, price, is_active)),
       job_addons(id, price_at_booking, quantity, package_addons(name)),
@@ -87,7 +87,7 @@ export default async function JobDetailPage({ params, searchParams }: {
     .map(({ id, name, price }) => ({ id, name, price }));
 
   const initialData: JobData = {
-    jobNo:           full.job_no,
+    jobRef:          full.job_ref,
     title:           full.title,
     eventType:       full.event_type,
     leadSource:      full.lead_source,

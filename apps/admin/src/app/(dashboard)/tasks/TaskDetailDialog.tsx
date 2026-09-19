@@ -128,7 +128,7 @@ export default function TaskDetailDialog({
                   href={`/jobs/${task.job_id}`}
                   className="text-[13px] text-primary hover:underline"
                 >
-                  <span className="font-mono text-ink-muted">#{task.job_no}</span>{' '}
+                  <span className="font-mono text-ink-muted">{task.job_ref}</span>{' '}
                   {task.job_title}
                 </Link>
                 {task.stage_name && (

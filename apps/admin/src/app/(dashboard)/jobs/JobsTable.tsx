@@ -6,7 +6,7 @@ import DataTable, { type Column } from '@/components/DataTable';
 
 export type JobRow = {
   id: string;
-  job_no: number;
+  job_ref: string;
   title: string;
   event_type: string | null;
   status: string;
@@ -28,22 +28,41 @@ const STATUS_STYLES: Record<string, string> = {
 
 const COLUMNS: Column<JobRow>[] = [
   {
+    key: 'job_ref',
+    label: 'Ref',
+    width: '110px',
+    // Not primary: the mobile card should be headed by the job, with the
+    // reference as a labelled field beneath it.
+    render: (job) => (
+      <span className="font-mono text-[13px] font-semibold text-ink-mid whitespace-nowrap">
+        {job.job_ref}
+      </span>
+    ),
+  },
+  {
     key: 'title',
     label: 'Job',
+    primary: true,
     render: (job) => {
       const client = (job.clients as { full_name: string } | null)?.full_name ?? '—';
       return (
-        <div>
-          <p className="font-medium text-gray-900">
-            <span className="text-gray-400 font-mono text-[12.5px] mr-1.5">#{job.job_no}</span>
-            {job.title}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {client}{job.event_type ? ` · ${job.event_type}` : ''}
-          </p>
+        <div className="min-w-0">
+          <p className="font-medium text-gray-900 truncate">{job.title}</p>
+          <p className="text-xs text-gray-400 mt-0.5 truncate">{client}</p>
         </div>
       );
     },
+  },
+  {
+    key: 'event_type',
+    label: 'Event',
+    width: '160px',
+    render: (job) =>
+      job.event_type ? (
+        <span className="text-gray-700 capitalize">{job.event_type}</span>
+      ) : (
+        <span className="text-ink-muted">—</span>
+      ),
   },
   {
     key: 'status',
