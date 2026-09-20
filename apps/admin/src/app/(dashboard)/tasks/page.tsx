@@ -145,7 +145,6 @@ export default async function TasksPage({
             >
               Whole studio
             </Link>
-            <Link href="/settings?tab=checklist" className="btn-secondary">Job checklist</Link>
           </div>
         )}
       </div>

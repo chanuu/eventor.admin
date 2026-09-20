@@ -210,19 +210,42 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
   const shootColumns: Column<Shoot>[] = [
     {
       key: 'shoot_type',
-      label: 'Shoot',
+      label: 'Event type',
       primary: true,
       render: (sh) => (
-        <div className="min-w-0">
-          <p className="font-medium text-gray-900">{sh.shoot_type ?? 'Shoot'}</p>
-          <p className="text-xs text-gray-400 mt-0.5 truncate">
-            {sh.scheduled_at
-              ? new Date(sh.scheduled_at).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' })
-              : 'Not scheduled'}
-            {sh.venue ? ` · ${sh.venue}` : ''}
-          </p>
-        </div>
+        <span className="font-medium text-gray-900">{sh.shoot_type ?? 'Shoot'}</span>
       ),
+    },
+    {
+      key: 'scheduled_at',
+      label: 'Date',
+      width: '200px',
+      render: (sh) =>
+        sh.scheduled_at ? (
+          <div className="min-w-0">
+            <p className="text-gray-700 whitespace-nowrap">
+              {new Date(sh.scheduled_at).toLocaleDateString('en-LK', { dateStyle: 'medium' })}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">
+              {new Date(sh.scheduled_at).toLocaleTimeString('en-LK', { timeStyle: 'short' })}
+            </p>
+          </div>
+        ) : (
+          <span className="text-ink-muted">Not scheduled</span>
+        ),
+    },
+    {
+      key: 'venue',
+      label: 'Location',
+      width: '220px',
+      render: (sh) =>
+        sh.venue ? (
+          <span className="text-gray-700 truncate block" title={sh.venue}>
+            {sh.venue}
+          </span>
+        ) : (
+          <span className="text-ink-muted">—</span>
+        ),
     },
     {
       key: 'status',
