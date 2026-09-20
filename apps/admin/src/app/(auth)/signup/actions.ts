@@ -4,6 +4,12 @@ import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * Plan a brand-new studio starts on. Must match a key in the `plans` table.
+ * Change this when a trial or a paid onboarding flow exists.
+ */
+const DEFAULT_PLAN_KEY = 'solo';
+
 export async function createStudioAndAdmin(formData: FormData) {
   const fullName   = (formData.get('full_name') as string).trim();
   const email      = (formData.get('email') as string).trim();
@@ -74,8 +80,22 @@ export async function createStudioAndAdmin(formData: FormData) {
     return { error: staffErr.message };
   }
 
-  // 4. Create default subscription (basic, active)
-  await admin.from('subscriptions').insert({ studio_id: studio.id, plan: 'basic', status: 'active' });
+  // 4. Create the default subscription.
+  //
+  // plan_key is what actually matters: has_feature() joins plan_features on it,
+  // so a NULL leaves the studio with no features at all and the whole app looks
+  // broken. The legacy `plan` enum is set alongside it for compatibility.
+  const { error: subError } = await admin.from('subscriptions').insert({
+    studio_id: studio.id,
+    plan_key: DEFAULT_PLAN_KEY,
+    plan: 'basic',
+    status: 'active',
+  });
+
+  if (subError) {
+    console.error('[signup] subscription insert failed', subError);
+    return { error: 'Could not set up your plan. Please try again.' };
+  }
 
   // 5. Sign in with the regular client so session cookies are set
   const supabase = createClient();
