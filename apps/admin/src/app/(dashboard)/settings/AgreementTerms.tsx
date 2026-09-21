@@ -40,7 +40,7 @@ export default function AgreementTerms({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-sm font-extrabold text-primary">Agreement terms</h2>
-          <p className="text-[12.5px] text-ink-muted mt-1">
+          <p className="text-xs text-ink-muted mt-1">
             The clauses that appear in every agreement you send. The letterhead, client details and
             signature block are generated automatically.
           </p>
@@ -72,17 +72,17 @@ export default function AgreementTerms({
             rows={12}
             value={termsText}
             onChange={(e) => setTermsText(e.target.value)}
-            className="input h-auto py-2.5 leading-relaxed font-mono text-[12.5px]"
+            className="input h-auto py-2.5 leading-relaxed font-mono text-xs"
           />
-          <p className="text-[12px] text-ink-muted mt-1">
+          <p className="text-xs text-ink-muted mt-1">
             {clauseCount} clause{clauseCount === 1 ? '' : 's'}. They are numbered automatically.
             Write <code className="bg-panel px-1 rounded">{'{studio}'}</code> to insert your studio
             name ({studioName || 'your studio'}).
           </p>
         </div>
 
-        {error && <p className="text-[12.5px] text-red-600">{error}</p>}
-        {saved && <p className="text-[12.5px] text-green-700 font-semibold">Agreement terms saved.</p>}
+        {error && <p className="text-xs text-red-600">{error}</p>}
+        {saved && <p className="text-xs text-green-700 font-semibold">Agreement terms saved.</p>}
 
         <div className="flex gap-2 flex-wrap">
           <button type="submit" disabled={saving} className="btn-primary">
@@ -97,7 +97,7 @@ export default function AgreementTerms({
           </button>
         </div>
 
-        <p className="text-[12px] text-ink-muted leading-relaxed">
+        <p className="text-xs text-ink-muted leading-relaxed">
           Changes apply to agreements created from now on. Agreements already sent or signed keep the
           wording they were issued with.
         </p>

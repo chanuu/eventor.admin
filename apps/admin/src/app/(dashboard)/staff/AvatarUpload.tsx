@@ -123,13 +123,13 @@ export default function AvatarUpload({
         <button
           type="button"
           onClick={remove}
-          className="text-[11px] text-ink-muted hover:text-red-600"
+          className="text-xs text-ink-muted hover:text-red-600"
         >
           Remove
         </button>
       )}
 
-      {error && <span className="text-[11px] text-red-600">{error}</span>}
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }

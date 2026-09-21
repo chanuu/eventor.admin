@@ -60,8 +60,8 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
         {sent ? (
           <div className="p-6 flex flex-col gap-4">
             <div>
-              <p className="text-[15px] font-semibold text-ink-strong">Invite sent</p>
-              <p className="text-[13px] text-ink-mid mt-1">
+              <p className="text-sm font-semibold text-ink-strong">Invite sent</p>
+              <p className="text-sm text-ink-mid mt-1">
                 They will receive an email to set up their account. They appear in the list as
                 soon as they accept.
               </p>
@@ -78,7 +78,7 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="staff-name" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="staff-name" className="text-sm font-medium text-ink-strong">
                 Full name <span className="text-red-500">*</span>
               </label>
               <input
@@ -92,7 +92,7 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="staff-email" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="staff-email" className="text-sm font-medium text-ink-strong">
                 Email address <span className="text-red-500">*</span>
               </label>
               <input
@@ -106,7 +106,7 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="staff-role" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="staff-role" className="text-sm font-medium text-ink-strong">
                 Role <span className="text-red-500">*</span>
               </label>
               <select
@@ -124,9 +124,9 @@ export default function InviteStaffDialog({ roles }: { roles: Role[] }) {
                 ))}
               </select>
               {selected?.description && (
-                <p className="text-[11.5px] text-ink-muted">{selected.description}</p>
+                <p className="text-xs text-ink-muted">{selected.description}</p>
               )}
-              <p className="text-[11.5px] text-ink-muted">
+              <p className="text-xs text-ink-muted">
                 Need a different set of permissions?{' '}
                 <Link href="/settings?tab=roles" className="font-semibold text-primary">
                   Configure roles

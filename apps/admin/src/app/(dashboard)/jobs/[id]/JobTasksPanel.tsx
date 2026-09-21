@@ -93,11 +93,11 @@ export default function JobTasksPanel({
         <div className="flex items-center gap-2.5">
           <span
             aria-hidden
-            className="h-8 w-8 rounded-lg bg-lime-soft text-lime-text grid place-items-center text-[14px]"
+            className="h-8 w-8 rounded-lg bg-lime-soft text-lime-text grid place-items-center text-sm"
           >
             ☑
           </span>
-          <h2 className="text-[16px] font-extrabold text-ink-strong">Job checklist</h2>
+          <h2 className="text-base font-extrabold text-ink-strong">Job checklist</h2>
         </div>
 
         <Link href="/tasks?scope=studio" className="btn-secondary">
@@ -113,7 +113,7 @@ export default function JobTasksPanel({
 
       {tasks.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-line px-6 py-10 text-center">
-          <p className="text-[13.5px] text-ink-mid">
+          <p className="text-sm text-ink-mid">
             No tasks on this job yet. Pull in your studio&rsquo;s list below.
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function JobTasksPanel({
                 {/* Read-only marker — status is changed on the board, not here. */}
                 <span
                   aria-hidden
-                  className={`shrink-0 h-8 w-8 rounded-lg grid place-items-center text-[15px]
+                  className={`shrink-0 h-8 w-8 rounded-lg grid place-items-center text-sm
                     ${isDone
                       ? 'bg-[#8BC53F] text-white'
                       : 'bg-white border border-line'}`}
@@ -143,13 +143,13 @@ export default function JobTasksPanel({
 
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`text-[14px] font-bold leading-snug ${
+                    className={`text-sm font-bold leading-snug ${
                       isDone ? 'text-ink-muted line-through' : 'text-ink-strong'
                     }`}
                   >
                     {t.title}
                   </p>
-                  <p className="text-[12.5px] text-ink-muted mt-0.5 truncate">
+                  <p className="text-xs text-ink-muted mt-0.5 truncate">
                     {nameOf(t.assignee_id)}
                     {due && ` · due ${due}`}
                   </p>
@@ -161,7 +161,7 @@ export default function JobTasksPanel({
                   <button
                     type="button"
                     onClick={() => openEdit(t)}
-                    className="btn-secondary text-[12px] h-8 px-3 shrink-0"
+                    className="btn-secondary text-xs h-8 px-3 shrink-0"
                   >
                     Edit
                   </button>
@@ -173,7 +173,7 @@ export default function JobTasksPanel({
       )}
 
       <div className="flex items-center justify-between gap-3 flex-wrap mt-4 pt-4 border-t border-line-soft">
-        <p className="text-[11.5px] text-ink-muted">
+        <p className="text-xs text-ink-muted">
           Status is changed on the board — this list is read-only.
         </p>
         {canAllocate && (
@@ -181,7 +181,7 @@ export default function JobTasksPanel({
             type="button"
             onClick={sync}
             disabled={busy}
-            className="text-[12px] font-semibold text-primary disabled:opacity-50"
+            className="text-xs font-semibold text-primary disabled:opacity-50"
           >
             {busy ? 'Checking…' : 'Sync with checklist'}
           </button>
@@ -195,10 +195,10 @@ export default function JobTasksPanel({
         width="max-w-md"
       >
         <div className="p-6 flex flex-col gap-4">
-          {editing?.notes && <p className="text-[13px] text-ink-mid">{editing.notes}</p>}
+          {editing?.notes && <p className="text-sm text-ink-mid">{editing.notes}</p>}
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="alloc-staff" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="alloc-staff" className="text-sm font-medium text-ink-strong">
               Allocated to
             </label>
             <select
@@ -217,7 +217,7 @@ export default function JobTasksPanel({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="alloc-due" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="alloc-due" className="text-sm font-medium text-ink-strong">
               Deadline
             </label>
             <input
@@ -227,7 +227,7 @@ export default function JobTasksPanel({
               value={dueAt}
               onChange={(e) => setDueAt(e.target.value)}
             />
-            <p className="text-[11.5px] text-ink-muted">
+            <p className="text-xs text-ink-muted">
               Leave empty for no deadline.
             </p>
           </div>

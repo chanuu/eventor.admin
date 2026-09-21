@@ -83,7 +83,7 @@ export default async function StaffPage({
       <div className="bg-white rounded-2xl border border-line shadow-card p-6 mt-4">
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
           <h2 className="text-sm font-extrabold text-primary">Your studio&rsquo;s roles</h2>
-          <Link href="/settings?tab=roles" className="text-[12.5px] font-bold text-primary">
+          <Link href="/settings?tab=roles" className="text-xs font-bold text-primary">
             Configure →
           </Link>
         </div>
@@ -91,15 +91,15 @@ export default async function StaffPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-3.5">
           {roles.map((r) => (
             <div key={r.id} className="bg-panel border border-line-soft rounded-xl p-3.5">
-              <div className="text-[13px] font-bold text-ink-strong">{r.name}</div>
-              <p className="text-[12.5px] text-ink-mid mt-1.5 leading-relaxed">
+              <div className="text-sm font-bold text-ink-strong">{r.name}</div>
+              <p className="text-xs text-ink-mid mt-1.5 leading-relaxed">
                 {r.description ?? 'No description.'}
               </p>
             </div>
           ))}
         </div>
 
-        <p className="text-[12px] text-ink-muted mt-3.5 leading-relaxed">
+        <p className="text-xs text-ink-muted mt-3.5 leading-relaxed">
           Permissions are enforced by the database as well as the interface, so a hidden page
           cannot be reached by typing its address. At least one active member must always keep
           &ldquo;Manage staff and roles&rdquo;.

@@ -91,7 +91,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                 aria-label="Move earlier"
                 disabled={i === 0 || busy !== null}
                 onClick={() => run(stage.id, () => moveStage(stage.id, 'up'))}
-                className="btn-secondary h-7 w-7 p-0 text-[11px] disabled:opacity-30"
+                className="btn-secondary h-7 w-7 p-0 text-xs disabled:opacity-30"
               >
                 ↑
               </button>
@@ -100,7 +100,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                 aria-label="Move later"
                 disabled={i === stages.length - 1 || busy !== null}
                 onClick={() => run(stage.id, () => moveStage(stage.id, 'down'))}
-                className="btn-secondary h-7 w-7 p-0 text-[11px] disabled:opacity-30"
+                className="btn-secondary h-7 w-7 p-0 text-xs disabled:opacity-30"
               >
                 ↓
               </button>
@@ -119,12 +119,12 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                 defaultValue={stage.description ?? ''}
                 placeholder="What this involves…"
                 aria-label="Description"
-                className="input text-[13px]"
+                className="input text-sm"
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                     Usually done by
                   </span>
                   <select
@@ -142,7 +142,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                 </label>
 
                 <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                     When done, move the job to
                   </span>
                   <select
@@ -162,7 +162,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
           </div>
 
           <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t border-line-soft">
-            <span className="text-[11.5px] text-ink-muted">
+            <span className="text-xs text-ink-muted">
               On {stage.task_count} job{stage.task_count !== 1 ? 's' : ''}
             </span>
 
@@ -171,7 +171,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                 type="button"
                 disabled={busy !== null}
                 onClick={() => run(stage.id, () => toggleStage(stage.id, !stage.is_active))}
-                className="btn-secondary text-[12px] h-8 px-3"
+                className="btn-secondary text-xs h-8 px-3"
               >
                 {stage.is_active ? 'Turn off' : 'Turn on'}
               </button>
@@ -187,11 +187,11 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
                     run(stage.id, () => deleteStage(stage.id));
                   }
                 }}
-                className="btn-danger text-[12px] h-8 px-3"
+                className="btn-danger text-xs h-8 px-3"
               >
                 Remove
               </button>
-              <button type="submit" disabled={busy !== null} className="btn-primary text-[12px] h-8 px-3">
+              <button type="submit" disabled={busy !== null} className="btn-primary text-xs h-8 px-3">
                 {busy === stage.id ? 'Saving…' : 'Save'}
               </button>
             </div>
@@ -201,7 +201,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
 
       {stages.length === 0 && (
         <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-10 text-center">
-          <p className="text-[13.5px] text-ink-mid">
+          <p className="text-sm text-ink-mid">
             No tasks in the checklist yet. Add the first one below.
           </p>
         </div>
@@ -212,11 +212,11 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
           <h2 className="text-sm font-extrabold text-primary">Add a task</h2>
 
           <input name="name" required autoFocus placeholder="Task name" className="input font-semibold" />
-          <input name="description" placeholder="What this involves…" className="input text-[13px]" />
+          <input name="description" placeholder="What this involves…" className="input text-sm" />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                 Usually done by
               </span>
               <select name="default_role_id" className="input">
@@ -230,7 +230,7 @@ export default function StagesEditor({ stages, roles }: { stages: Stage[]; roles
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                 When finished, move job to
               </span>
               <select name="advances_job_to" className="input">

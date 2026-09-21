@@ -126,13 +126,13 @@ export default function TaskDetailDialog({
               <div className="min-w-0">
                 <Link
                   href={`/jobs/${task.job_id}`}
-                  className="text-[13px] text-primary hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   <span className="font-mono text-ink-muted">{task.job_ref}</span>{' '}
                   {task.job_title}
                 </Link>
                 {task.stage_name && (
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted mt-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mt-1">
                     {task.stage_name}
                   </p>
                 )}
@@ -142,27 +142,27 @@ export default function TaskDetailDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1.5">
+                <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1.5">
                   Allocated to
                 </p>
                 <div className="flex items-center gap-2">
                   <Avatar name={task.assignee_name} url={task.assignee_avatar} size={26} />
-                  <span className="text-[13px] text-ink-body truncate">
+                  <span className="text-sm text-ink-body truncate">
                     {task.assignee_name ?? 'Unassigned'}
                   </span>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1.5">
+                <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1.5">
                   Deadline
                 </p>
-                <p className="text-[13px] text-ink-body">{dueLabel}</p>
+                <p className="text-sm text-ink-body">{dueLabel}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1.5">
                 Move to
               </p>
               <div className="flex gap-1.5 flex-wrap">
@@ -184,14 +184,14 @@ export default function TaskDetailDialog({
 
           {/* Clarifications */}
           <div className="p-6 flex flex-col gap-3">
-            <h3 className="text-[13px] font-extrabold text-ink-strong">
+            <h3 className="text-sm font-extrabold text-ink-strong">
               Comments {comments.length > 0 && `(${comments.length})`}
             </h3>
 
             {loading ? (
-              <p className="text-[12.5px] text-ink-muted">Loading…</p>
+              <p className="text-xs text-ink-muted">Loading…</p>
             ) : comments.length === 0 ? (
-              <p className="text-[12.5px] text-ink-muted">
+              <p className="text-xs text-ink-muted">
                 No comments yet. Ask a question here and it stays with the task.
               </p>
             ) : (
@@ -201,21 +201,21 @@ export default function TaskDetailDialog({
                     <Avatar name={c.author_name} url={c.author_avatar} size={28} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className="text-[12.5px] font-bold text-ink-strong">
+                        <span className="text-xs font-bold text-ink-strong">
                           {c.author_name ?? 'Former staff'}
                         </span>
-                        <span className="text-[11px] text-ink-muted">{when(c.created_at)}</span>
+                        <span className="text-xs text-ink-muted">{when(c.created_at)}</span>
                         {c.is_mine && (
                           <button
                             type="button"
                             onClick={() => remove(c.id)}
-                            className="text-[11px] text-ink-muted hover:text-red-600 ml-auto"
+                            className="text-xs text-ink-muted hover:text-red-600 ml-auto"
                           >
                             Delete
                           </button>
                         )}
                       </div>
-                      <p className="text-[13px] text-ink-body whitespace-pre-wrap mt-0.5">
+                      <p className="text-sm text-ink-body whitespace-pre-wrap mt-0.5">
                         {c.body}
                       </p>
                     </div>
@@ -232,13 +232,13 @@ export default function TaskDetailDialog({
                 onChange={(e) => setBody(e.target.value)}
                 rows={2}
                 placeholder="Ask for clarification…"
-                className="input h-auto py-2 resize-y text-[13px]"
+                className="input h-auto py-2 resize-y text-sm"
               />
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={posting || !body.trim()}
-                  className="btn-primary text-[12.5px] h-9 px-4 disabled:opacity-50"
+                  className="btn-primary text-xs h-9 px-4 disabled:opacity-50"
                 >
                   {posting ? 'Posting…' : 'Comment'}
                 </button>

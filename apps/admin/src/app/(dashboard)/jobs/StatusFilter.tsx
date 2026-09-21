@@ -14,7 +14,7 @@ export default function StatusFilter({ statuses, current }: {
 
   return (
     <label className="flex items-center gap-2 min-w-0">
-      <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted shrink-0 hidden sm:inline">
+      <span className="text-xs font-bold uppercase tracking-wider text-ink-muted shrink-0 hidden sm:inline">
         Status
       </span>
       <select

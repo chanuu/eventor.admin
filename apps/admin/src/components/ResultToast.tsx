@@ -56,7 +56,7 @@ export default function ResultToast() {
       <Lottie kind={msg.kind} size={52} loop={false} />
       <div className="min-w-0">
         <p className="text-sm font-bold text-primary">{msg.title}</p>
-        <p className="text-[12.5px] text-ink-muted mt-0.5">{msg.body}</p>
+        <p className="text-xs text-ink-muted mt-0.5">{msg.body}</p>
       </div>
     </div>
   );

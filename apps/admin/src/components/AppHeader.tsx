@@ -20,7 +20,7 @@ export default function AppHeader({ studioName }: Props) {
       {/* Studio badge */}
       <div className="flex items-center gap-2 bg-lime-soft border border-lime-border rounded-full px-3 sm:px-3.5 py-1.5 min-w-0">
         <span className="w-[7px] h-[7px] rounded-full bg-lime animate-pulseDot shrink-0" />
-        <span className="text-[11.5px] font-bold text-lime-text truncate max-w-[40vw] sm:max-w-none">
+        <span className="text-xs font-bold text-lime-text truncate max-w-[40vw] sm:max-w-none">
           {studioName || 'Your studio'}
         </span>
       </div>

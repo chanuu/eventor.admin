@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export type BoardView = 'pending' | '3d' | '7d' | 'custom' | 'all';
@@ -13,6 +13,17 @@ const PRESETS: { key: BoardView; label: string; hint: string }[] = [
   { key: 'all', label: 'Everything', hint: 'No filter' },
 ];
 
+/** Two-tone ring that spins — sized to sit inside a filter button. */
+function Spinner() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-3.5 w-3.5 rounded-full border-2 border-current
+                 border-t-transparent animate-spin"
+    />
+  );
+}
+
 export default function BoardFilters({
   view,
   from,
@@ -22,6 +33,9 @@ export default function BoardFilters({
   from: string;
   to: string;
 }) {
+  // Filtering runs on the server, so a click has nothing to show for itself
+  // until the payload comes back. useTransition gives us that window.
+  const [pending, startTransition] = useTransition();
   const [showRange, setShowRange] = useState(view === 'custom');
   const [fromDate, setFromDate] = useState(from);
   const [toDate, setToDate] = useState(to);
@@ -36,7 +50,7 @@ export default function BoardFilters({
       if (v === null || v === '') qs.delete(k);
       else qs.set(k, v);
     }
-    router.push(`${pathname}?${qs.toString()}`);
+    startTransition(() => router.push(`${pathname}?${qs.toString()}`));
   }
 
   function pick(key: BoardView) {
@@ -59,12 +73,16 @@ export default function BoardFilters({
               key={p.key}
               type="button"
               title={p.hint}
+              disabled={pending}
               onClick={() => pick(p.key)}
-              className={`rounded-lg px-3 h-8 text-[12.5px] font-semibold transition-colors border
+              className={`rounded-md px-3.5 h-9 text-sm font-semibold transition-colors border
+                inline-flex items-center gap-2 disabled:cursor-wait
                 ${active
                   ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-ink-mid border-line hover:border-primary hover:text-primary'}`}
+                  : 'bg-white text-ink-mid border-line hover:border-primary hover:text-primary'}
+                ${pending && !active ? 'opacity-50' : ''}`}
             >
+              {pending && active && <Spinner />}
               {p.label}
             </button>
           );
@@ -74,36 +92,36 @@ export default function BoardFilters({
       {showRange && (
         <div className="flex items-end gap-2 flex-wrap bg-white border border-line rounded-xl p-3">
           <label className="flex flex-col gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
               From
             </span>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="input h-9 text-[13px]"
+              className="input h-9 text-sm"
             />
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
               To
             </span>
             <input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="input h-9 text-[13px]"
+              className="input h-9 text-sm"
             />
           </label>
 
           <button
             type="button"
-            disabled={!fromDate && !toDate}
+            disabled={pending || (!fromDate && !toDate)}
             onClick={() => go({ view: 'custom', from: fromDate || null, to: toDate || null })}
-            className="btn-primary text-[12.5px] h-9 px-4 disabled:opacity-50"
+            className="btn-primary text-xs h-9 px-4 disabled:opacity-50"
           >
-            Apply
+            {pending ? 'Filtering…' : 'Apply'}
           </button>
 
           {view === 'custom' && (
@@ -115,7 +133,7 @@ export default function BoardFilters({
                 setShowRange(false);
                 go({ view: null, from: null, to: null });
               }}
-              className="text-[12px] text-ink-muted hover:text-primary h-9"
+              className="text-xs text-ink-muted hover:text-primary h-9"
             >
               Clear
             </button>

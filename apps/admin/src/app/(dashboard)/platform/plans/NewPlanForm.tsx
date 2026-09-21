@@ -30,7 +30,7 @@ export default function NewPlanForm() {
           {pending ? 'Creating…' : 'Create package'}
         </button>
       </form>
-      {error && <p className="text-[12.5px] text-red-600 mt-3">{error}</p>}
+      {error && <p className="text-xs text-red-600 mt-3">{error}</p>}
     </>
   );
 }

@@ -53,10 +53,10 @@ export default async function ProfilePage() {
               size={72}
             />
             <div className="min-w-0">
-              <p className="text-[13px] text-ink-body">
+              <p className="text-sm text-ink-body">
                 Click the picture to choose a new one.
               </p>
-              <p className="text-[11.5px] text-ink-muted mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 Resized in your browser before upload — any size works.
               </p>
             </div>
@@ -73,28 +73,28 @@ export default async function ProfilePage() {
 
           <div className="border-t border-line-soft mt-5 pt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1">
                 Email
               </p>
-              <p className="text-[13px] text-ink-body break-all">
+              <p className="text-sm text-ink-body break-all">
                 {auth.user?.email ?? '—'}
               </p>
             </div>
             <div>
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1">
                 Role
               </p>
-              <p className="text-[13px] text-ink-body">{me.roleName}</p>
+              <p className="text-sm text-ink-body">{me.roleName}</p>
             </div>
             <div>
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted mb-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-1">
                 Studio
               </p>
-              <p className="text-[13px] text-ink-body">{me.studioName}</p>
+              <p className="text-sm text-ink-body">{me.studioName}</p>
             </div>
           </div>
 
-          <p className="text-[11.5px] text-ink-muted mt-4">
+          <p className="text-xs text-ink-muted mt-4">
             Your email and role are set by whoever manages staff — ask them if either needs
             changing.
           </p>

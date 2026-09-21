@@ -19,7 +19,7 @@ export default function Pagination({ page, totalPages, pathname, params = {} }: 
   const range = buildRange(page, totalPages);
 
   return (
-    <div className="flex items-center gap-1 mt-6">
+    <div className="flex items-center gap-2 mt-6">
       <NavBtn href={page > 1 ? href(page - 1) : null} label="‹" />
       {range.map((p, i) =>
         p === '...' ? (
@@ -28,10 +28,10 @@ export default function Pagination({ page, totalPages, pathname, params = {} }: 
           <a
             key={p}
             href={href(p as number)}
-            className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-colors
+            className={`w-10 h-10 flex items-center justify-center rounded-md text-sm transition-colors
               ${p === page
-                ? 'bg-[#0F3D2E] text-white font-semibold'
-                : 'text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
+                ? 'border-2 border-primary text-primary font-bold'
+                : 'text-ink-mid border border-line hover:bg-panel'}`}
           >
             {p}
           </a>
@@ -45,13 +45,13 @@ export default function Pagination({ page, totalPages, pathname, params = {} }: 
 function NavBtn({ href, label }: { href: string | null; label: string }) {
   if (!href) {
     return (
-      <span className="w-8 h-8 flex items-center justify-center rounded-lg text-sm text-gray-300 border border-gray-100">
+      <span className="w-10 h-10 flex items-center justify-center rounded-md text-sm text-ink-muted/40 border border-line-soft">
         {label}
       </span>
     );
   }
   return (
-    <Link href={href} className="w-8 h-8 flex items-center justify-center rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors">
+    <Link href={href} className="w-10 h-10 flex items-center justify-center rounded-md text-sm text-ink-mid border border-line hover:bg-panel transition-colors">
       {label}
     </Link>
   );

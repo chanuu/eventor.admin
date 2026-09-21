@@ -33,7 +33,7 @@ export default function ProfileForm({ fullName }: { fullName: string }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="full_name" className="text-[13px] font-medium text-ink-strong">
+        <label htmlFor="full_name" className="text-sm font-medium text-ink-strong">
           Display name <span className="text-red-500">*</span>
         </label>
         <input
@@ -47,7 +47,7 @@ export default function ProfileForm({ fullName }: { fullName: string }) {
           }}
           className="input"
         />
-        <p className="text-[11.5px] text-ink-muted">
+        <p className="text-xs text-ink-muted">
           Shown on task cards, in comments and to your colleagues.
         </p>
       </div>
@@ -59,7 +59,7 @@ export default function ProfileForm({ fullName }: { fullName: string }) {
           {saving ? 'Saving…' : 'Save changes'}
         </button>
         {saved && !dirty && (
-          <span className="text-[12.5px] text-green-700 font-semibold">Saved.</span>
+          <span className="text-xs text-green-700 font-semibold">Saved.</span>
         )}
       </div>
     </form>

@@ -34,7 +34,7 @@ const COLUMNS: Column<JobRow>[] = [
     // Not primary: the mobile card should be headed by the job, with the
     // reference as a labelled field beneath it.
     render: (job) => (
-      <span className="font-mono text-[13px] font-semibold text-ink-mid whitespace-nowrap">
+      <span className="font-mono text-sm font-semibold text-ink-mid whitespace-nowrap">
         {job.job_ref}
       </span>
     ),

@@ -33,7 +33,7 @@ export default function CreateAgreementButton({
       <button onClick={run} disabled={pending} className={className}>
         {pending ? 'Working…' : label}
       </button>
-      {error && <p className="text-[12.5px] text-red-700 mt-2">{error}</p>}
+      {error && <p className="text-xs text-red-700 mt-2">{error}</p>}
     </>
   );
 }

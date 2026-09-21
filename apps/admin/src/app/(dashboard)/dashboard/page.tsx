@@ -165,8 +165,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
       {searchParams.denied && (
         <div className="mb-5 rounded-xl border border-[#F3D9BC] bg-[#FFF3E6] px-4 py-3">
-          <p className="text-[13px] font-bold text-[#a8631f]">You don’t have access to that page</p>
-          <p className="text-[12.5px] text-[#8a6a45] mt-0.5">
+          <p className="text-sm font-bold text-[#a8631f]">You don’t have access to that page</p>
+          <p className="text-xs text-[#8a6a45] mt-0.5">
             Ask a studio admin if you need it added to your role.
           </p>
         </div>
@@ -181,7 +181,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              {s.sub && <p className="text-[10px] text-gray-400">{s.sub}</p>}
+              {s.sub && <p className="text-xs text-gray-400">{s.sub}</p>}
               <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       <div className="bg-white rounded-2xl shadow-card p-5 mb-4">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
           <h2 className="text-sm font-extrabold text-primary">Where your enquiries come from</h2>
-          <span className="text-[11.5px] text-ink-muted">{leadTotal} job{leadTotal === 1 ? '' : 's'}</span>
+          <span className="text-xs text-ink-muted">{leadTotal} job{leadTotal === 1 ? '' : 's'}</span>
         </div>
 
         {leadSources.length === 0 ? (
@@ -204,8 +204,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
               return (
                 <div key={l.source}>
                   <div className="flex items-center justify-between gap-3 mb-1.5">
-                    <span className="text-[13px] font-semibold text-ink-strong">{l.source}</span>
-                    <span className="text-[12px] text-ink-muted whitespace-nowrap">
+                    <span className="text-sm font-semibold text-ink-strong">{l.source}</span>
+                    <span className="text-xs text-ink-muted whitespace-nowrap">
                       {l.count} · Rs. {Math.round(l.value).toLocaleString('en-LK')} · {pct}%
                     </span>
                   </div>

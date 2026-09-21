@@ -28,20 +28,17 @@ export default function ClientEditForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}
-    >
+    <form onSubmit={handleSubmit} className="card flex flex-col gap-5">
       <Field label="Full name" required>
-        <input name="full_name" required defaultValue={client.full_name} style={inputStyle} />
+        <input name="full_name" required defaultValue={client.full_name} className="input" />
       </Field>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Email">
-          <input name="email" type="email" defaultValue={client.email ?? ''} style={inputStyle} />
+          <input name="email" type="email" defaultValue={client.email ?? ''} className="input" />
         </Field>
         <Field label="Phone">
-          <input name="phone" defaultValue={client.phone ?? ''} style={inputStyle} />
+          <input name="phone" defaultValue={client.phone ?? ''} className="input" />
         </Field>
       </div>
 
@@ -50,12 +47,12 @@ export default function ClientEditForm({
           name="notes"
           rows={3}
           defaultValue={client.notes ?? ''}
-          style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }}
+          className="input h-auto py-2 resize-y"
         />
       </Field>
 
       <div>
-        <button type="submit" disabled={loading} style={primaryBtn}>
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Saving…' : 'Save changes'}
         </button>
       </div>
@@ -65,14 +62,12 @@ export default function ClientEditForm({
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
+    <div>
+      <label className="form-label">
+        {label}
+        {required && <span className="form-req"> *</span>}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { height: 36, borderRadius: 6, border: '1px solid #d1d5db', padding: '0 12px', fontSize: 14, width: '100%', boxSizing: 'border-box' };
-const primaryBtn: React.CSSProperties = { height: 36, borderRadius: 6, background: '#0F3D2E', color: '#fff', border: 'none', fontWeight: 500, cursor: 'pointer', padding: '0 18px', fontSize: 14 };

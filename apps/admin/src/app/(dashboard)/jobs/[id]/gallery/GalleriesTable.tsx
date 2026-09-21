@@ -66,7 +66,7 @@ const COLUMNS: Column<GalleryRow>[] = [
     align: 'right',
     hideOnCard: true,
     render: () => (
-      <span className="text-[13px] font-medium text-[#0F3D2E] whitespace-nowrap">Open →</span>
+      <span className="text-sm font-medium text-[#0F3D2E] whitespace-nowrap">Open →</span>
     ),
   },
 ];

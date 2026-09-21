@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import DataTable, { type Column } from '@/components/DataTable';
+import { RowActions, RowActionLink, RowActionButton } from '@/components/RowActions';
 import { togglePackageActive } from './actions';
 
 export type PackageRow = {
@@ -63,22 +64,19 @@ const COLUMNS: Column<PackageRow>[] = [
   {
     key: 'actions',
     label: '',
-    width: '170px',
+    width: '110px',
     align: 'right',
     render: (pkg) => (
-      <div className="flex items-center gap-2 justify-end">
-        <Link
-          href={`/packages/${pkg.id}/edit`}
-          className="text-[13px] font-medium text-[#0F3D2E] whitespace-nowrap"
-        >
-          Edit
-        </Link>
+      <RowActions>
+        <RowActionLink href={`/packages/${pkg.id}/edit`} icon="edit" label="Edit package" />
         <form action={togglePackageActive.bind(null, pkg.id, !pkg.is_active)}>
-          <button type="submit" className="btn-secondary text-[12px] h-8 px-3">
-            {pkg.is_active ? 'Deactivate' : 'Activate'}
-          </button>
+          <RowActionButton
+            type="submit"
+            icon="power"
+            label={pkg.is_active ? 'Deactivate package' : 'Activate package'}
+          />
         </form>
-      </div>
+      </RowActions>
     ),
   },
 ];

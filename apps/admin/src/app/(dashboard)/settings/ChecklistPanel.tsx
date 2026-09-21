@@ -34,14 +34,14 @@ export default async function ChecklistPanel({ studioName }: { studioName: strin
 
   return (
     <div className="max-w-3xl">
-      <p className="text-[13px] text-ink-mid mb-5">
+      <p className="text-sm text-ink-mid mb-5">
         The tasks every new job at {studioName} starts with. Yours to arrange however the
         studio actually works.
       </p>
 
       <ChecklistEditor stages={stages} roles={roles} />
 
-      <p className="text-[12px] text-ink-muted mt-4 leading-relaxed">
+      <p className="text-xs text-ink-muted mt-4 leading-relaxed">
         Every new job is created with this list, unassigned and with no deadlines — you
         allocate the work on the job&rsquo;s Tasks tab. Changes here only affect jobs created
         afterwards; existing jobs pick up new items via <strong>Sync with checklist</strong>.

@@ -44,7 +44,7 @@ export default async function PlatformDashboard() {
           <div key={s.label} className="bg-white rounded-2xl border border-line shadow-card p-5">
             <div className="label-xs">{s.label}</div>
             <div className="text-2xl font-extrabold text-primary mt-2">{s.value}</div>
-            {s.sub && <div className="text-[11.5px] text-ink-muted mt-1">{s.sub}</div>}
+            {s.sub && <div className="text-xs text-ink-muted mt-1">{s.sub}</div>}
           </div>
         ))}
       </div>
@@ -59,7 +59,7 @@ export default async function PlatformDashboard() {
           <thead>
             <tr className="border-b border-line bg-panel">
               {['Studio', 'Plan', 'Staff', 'Clients', 'Jobs', 'Albums', 'Photos', 'Joined'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-ink-muted whitespace-nowrap">
+                <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-ink-muted whitespace-nowrap">
                   {h}
                 </th>
               ))}
@@ -69,8 +69,8 @@ export default async function PlatformDashboard() {
             {tenants.map((t) => (
               <tr key={t.studio_id} className="border-b border-line-soft last:border-0">
                 <td className="px-4 py-3.5">
-                  <div className="text-[13.5px] font-semibold text-ink-strong">{t.name}</div>
-                  <div className="text-[11px] text-ink-muted mt-0.5">
+                  <div className="text-sm font-semibold text-ink-strong">{t.name}</div>
+                  <div className="text-xs text-ink-muted mt-0.5">
                     {t.last_job_at
                       ? `Last job ${new Date(t.last_job_at).toLocaleDateString('en-LK', { dateStyle: 'medium' })}`
                       : 'No jobs yet'}
@@ -83,29 +83,29 @@ export default async function PlatformDashboard() {
                     <span className="pill-pending">No plan</span>
                   )}
                   {t.price_lkr != null && (
-                    <div className="text-[11px] text-ink-muted mt-1">
+                    <div className="text-xs text-ink-muted mt-1">
                       Rs. {t.price_lkr.toLocaleString('en-LK')}/mo
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-body">{t.staff_count}</td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-body">{t.client_count}</td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-body">{t.job_count}</td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-body">
+                <td className="px-4 py-3.5 text-sm text-ink-body">{t.staff_count}</td>
+                <td className="px-4 py-3.5 text-sm text-ink-body">{t.client_count}</td>
+                <td className="px-4 py-3.5 text-sm text-ink-body">{t.job_count}</td>
+                <td className="px-4 py-3.5 text-sm text-ink-body">
                   {t.album_count}
                   {t.published_album_count > 0 && (
                     <span className="text-ink-muted"> ({t.published_album_count} live)</span>
                   )}
                 </td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-body">{t.photo_count.toLocaleString('en-LK')}</td>
-                <td className="px-4 py-3.5 text-[13px] text-ink-muted whitespace-nowrap">
+                <td className="px-4 py-3.5 text-sm text-ink-body">{t.photo_count.toLocaleString('en-LK')}</td>
+                <td className="px-4 py-3.5 text-sm text-ink-muted whitespace-nowrap">
                   {new Date(t.created_at).toLocaleDateString('en-LK', { dateStyle: 'medium' })}
                 </td>
               </tr>
             ))}
             {tenants.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-[13px] text-ink-muted">
+                <td colSpan={8} className="px-4 py-10 text-center text-sm text-ink-muted">
                   No studios have signed up yet.
                 </td>
               </tr>

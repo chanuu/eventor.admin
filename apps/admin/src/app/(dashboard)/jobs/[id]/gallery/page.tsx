@@ -76,7 +76,7 @@ export default async function GalleryListPage({
     <div>
       <div className="flex items-start justify-between gap-3 flex-wrap mb-6">
         <div>
-          <Link href={`/jobs/${params.id}`} className="text-[13px] text-ink-muted">
+          <Link href={`/jobs/${params.id}`} className="text-sm text-ink-muted">
             ← {job.title}
           </Link>
           <h1 className="page-title mt-2">Galleries</h1>

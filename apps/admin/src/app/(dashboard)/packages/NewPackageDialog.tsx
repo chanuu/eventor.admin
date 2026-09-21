@@ -42,7 +42,7 @@ export default function NewPackageDialog() {
       <Modal open={open} onClose={close} title="New package" width="max-w-lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="pkg-name" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="pkg-name" className="text-sm font-medium text-ink-strong">
               Package name <span className="text-red-500">*</span>
             </label>
             <input
@@ -56,7 +56,7 @@ export default function NewPackageDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="pkg-description" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="pkg-description" className="text-sm font-medium text-ink-strong">
               Description
             </label>
             <textarea
@@ -70,7 +70,7 @@ export default function NewPackageDialog() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="pkg-price" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="pkg-price" className="text-sm font-medium text-ink-strong">
                 Base price (LKR) <span className="text-red-500">*</span>
               </label>
               <input
@@ -86,7 +86,7 @@ export default function NewPackageDialog() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="pkg-shoots" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="pkg-shoots" className="text-sm font-medium text-ink-strong">
                 Shoots included
               </label>
               <input
@@ -100,7 +100,7 @@ export default function NewPackageDialog() {
             </div>
           </div>
 
-          <p className="text-[11.5px] text-ink-muted">
+          <p className="text-xs text-ink-muted">
             Add-ons are set up on the package once it exists.
           </p>
 

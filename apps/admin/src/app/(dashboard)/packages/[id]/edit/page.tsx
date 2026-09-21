@@ -52,7 +52,7 @@ export default async function EditPackagePage({ params, searchParams }: {
       <h1 className="page-title flex items-center gap-2.5">
         {pkg.name}
         {!pkg.is_active && (
-          <span className="text-[11px] font-medium bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Inactive</span>
+          <span className="text-xs font-medium bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Inactive</span>
         )}
       </h1>
       <p className="breadcrumb mb-6">
@@ -113,7 +113,7 @@ export default async function EditPackagePage({ params, searchParams }: {
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-medium text-gray-800">{addon.name}</span>
                       {!addon.is_active && (
-                        <span className="text-[11px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Inactive</span>
+                        <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Inactive</span>
                       )}
                     </div>
                     {addon.description && (

@@ -117,7 +117,7 @@ export default async function TasksPage({
       <div className="flex items-start justify-between gap-3 flex-wrap mb-6">
         <div>
           <h1 className="page-title">{scope === 'mine' ? 'My work' : 'Studio board'}</h1>
-          <div className="flex items-center gap-3 flex-wrap text-[12.5px] mt-1">
+          <div className="flex items-center gap-3 flex-wrap text-xs mt-1">
             <span className="flex items-center gap-1.5 font-semibold text-ink-strong">
               <span className="h-2 w-2 rounded-full bg-[#8BC53F]" aria-hidden />
               {open} open
@@ -145,7 +145,6 @@ export default async function TasksPage({
             >
               Whole studio
             </Link>
-            <Link href="/settings?tab=checklist" className="btn-secondary">Job checklist</Link>
           </div>
         )}
       </div>
@@ -160,10 +159,10 @@ export default async function TasksPage({
 
       {tasks.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-line bg-white px-6 py-12 text-center">
-          <p className="text-[14px] font-semibold text-ink-strong">
+          <p className="text-sm font-semibold text-ink-strong">
             {scope === 'mine' ? 'Nothing assigned to you' : 'No tasks yet'}
           </p>
-          <p className="text-[13px] text-ink-muted mt-1.5">
+          <p className="text-sm text-ink-muted mt-1.5">
             {canSeeAll
               ? 'Create a task and allocate it to whoever is doing the work.'
               : 'Work allocated to you will appear here.'}

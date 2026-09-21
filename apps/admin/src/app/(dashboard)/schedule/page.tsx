@@ -272,7 +272,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: { m
                   {/* Date block */}
                   <div className="text-center w-10 shrink-0">
                     <p className="text-xs font-bold text-gray-900">{dt.toLocaleDateString('en-LK', { day: '2-digit' })}</p>
-                    <p className="text-[10px] text-gray-400 uppercase">{dt.toLocaleDateString('en-LK', { weekday: 'short' })}</p>
+                    <p className="text-xs text-gray-400 uppercase">{dt.toLocaleDateString('en-LK', { weekday: 'short' })}</p>
                   </div>
 
                   {/* Details */}
