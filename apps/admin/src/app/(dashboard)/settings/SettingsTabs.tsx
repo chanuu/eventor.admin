@@ -33,7 +33,7 @@ export default function SettingsTabs({
           <Link
             key={id}
             href={id === 'studio' ? '/settings' : `/settings?tab=${id}`}
-            className={`rounded-lg px-3.5 h-9 inline-flex items-center text-[13px] font-semibold
+            className={`rounded-lg px-3.5 h-9 inline-flex items-center text-sm font-semibold
               transition-colors
               ${isActive
                 ? 'bg-primary text-white'

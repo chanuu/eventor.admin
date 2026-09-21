@@ -75,18 +75,18 @@ export default async function ContractPage({ params }: { params: { id: string } 
 
 
   return (
-    <div style={{ maxWidth: 960 }}>
-      <div style={{ marginBottom: 24 }}>
-        <Link href={`/jobs/${params.id}`} style={{ fontSize: 13, color: '#6b7280' }}>← {job.title}</Link>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>Contract</h1>
+    <div>
+      <div className="mb-6">
+        <Link href={`/jobs/${params.id}`} className="text-sm text-ink-muted">← {job.title}</Link>
+        <h1 className="page-title mt-2">Contract</h1>
       </div>
 
       {!contract ? (
-        <div style={{ background: '#fff', border: '1px solid #E7EAE5', borderRadius: 16, padding: 40, textAlign: 'center' }}>
-          <p style={{ fontSize: 14, color: '#5b6660', marginBottom: 6 }}>
+        <div className="card text-center py-10">
+          <p className="text-base font-semibold text-ink-body mb-1.5">
             No agreement for this job yet.
           </p>
-          <p style={{ fontSize: 12.5, color: '#8b968f', marginBottom: 22, maxWidth: 420, marginInline: 'auto', lineHeight: 1.6 }}>
+          <p className="text-sm text-ink-muted mb-6 max-w-md mx-auto leading-relaxed">
             It is generated from your studio details, this job, the client and the package —
             then sent to the client to read and sign in their portal.
           </p>

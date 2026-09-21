@@ -36,7 +36,7 @@ export default function ChangePassword() {
   return (
     <div className="bg-white rounded-2xl border border-line shadow-card p-6 mt-4">
       <h2 className="text-sm font-extrabold text-primary">Password</h2>
-      <p className="text-[12.5px] text-ink-muted mt-1 mb-4">
+      <p className="text-xs text-ink-muted mt-1 mb-4">
         Change the password you use to sign in to the studio admin.
       </p>
 
@@ -56,9 +56,9 @@ export default function ChangePassword() {
           value={confirm} onChange={(e) => setConfirm(e.target.value)}
         />
 
-        {mismatch && <p className="text-[12.5px] text-[#a8631f]">Both passwords must match.</p>}
-        {error && <p className="text-[12.5px] text-red-600">{error}</p>}
-        {done && <p className="text-[12.5px] text-green-700 font-semibold">Password updated.</p>}
+        {mismatch && <p className="text-xs text-[#a8631f]">Both passwords must match.</p>}
+        {error && <p className="text-xs text-red-600">{error}</p>}
+        {done && <p className="text-xs text-green-700 font-semibold">Password updated.</p>}
 
         <div>
           <button type="submit" disabled={!canSubmit} className="btn-primary" style={{ opacity: canSubmit ? 1 : 0.55 }}>

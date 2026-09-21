@@ -5,11 +5,12 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--font-sans), Nunito, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
   color: #16241d;
   background: #F6F8F5;
+  -webkit-font-smoothing: antialiased;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -48,48 +49,80 @@ img, video { max-width: 100%; height: auto; }
 }
 
 @layer components {
+  /* ── Forms ──────────────────────────────────────────────────────────────
+     Spark pairs a semibold label above a light-filled, thin-bordered field.
+     Fields are taller and text is a touch larger than the old Eventor styling,
+     which makes long data-entry sessions easier. */
   .input {
-    @apply w-full h-10 border border-line-btn rounded-lg px-3 text-sm text-ink-strong
-           bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary
+    @apply w-full h-11 border border-line-btn rounded-md px-3 text-sm text-ink-strong
+           bg-[#FDFDFD] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary
            placeholder-ink-muted transition-colors;
   }
+  /* Label that sits above a field. */
+  .form-label {
+    @apply block text-sm font-semibold text-ink-strong mb-2;
+  }
+  /* Required marker, used inside .form-label */
+  .form-req { @apply text-red-500; }
+  .form-error { @apply text-xs text-red-500 mt-1; }
+  .form-hint  { @apply text-xs text-ink-muted mt-1; }
+
+  /* ── Buttons ────────────────────────────────────────────────────────────
+     Spark buttons are wider (px-6), semibold rather than extra-bold, and use
+     the same restrained radius as fields. */
   .btn-primary {
-    @apply bg-primary text-white rounded-lg px-5 h-10 text-[12.5px] font-bold
-           hover:bg-primary-dark transition-colors cursor-pointer border-0 inline-flex items-center justify-center;
+    @apply bg-primary text-white rounded-md px-6 h-11 text-sm font-semibold
+           hover:bg-primary-dark transition-colors cursor-pointer border-0
+           inline-flex items-center justify-center gap-2 disabled:opacity-50;
   }
   .btn-secondary {
-    @apply bg-white text-ink-strong rounded-lg px-5 h-10 text-[12.5px] font-bold
-           border border-line-btn hover:bg-panel transition-colors cursor-pointer inline-flex items-center justify-center;
+    @apply bg-white text-ink-strong rounded-md px-6 h-11 text-sm font-semibold
+           border border-line-btn hover:bg-panel transition-colors cursor-pointer
+           inline-flex items-center justify-center gap-2 disabled:opacity-50;
   }
   .btn-accent {
-    @apply bg-lime text-primary rounded-lg px-5 h-10 text-[12.5px] font-bold
-           hover:brightness-95 transition-all cursor-pointer border-0 inline-flex items-center justify-center;
+    @apply bg-lime text-primary rounded-md px-6 h-11 text-sm font-semibold
+           hover:brightness-95 transition-all cursor-pointer border-0
+           inline-flex items-center justify-center gap-2 disabled:opacity-50;
   }
   .btn-danger {
-    @apply bg-white text-red-600 rounded-lg px-5 h-10 text-[12.5px] font-bold
-           border border-red-200 hover:bg-red-50 transition-colors cursor-pointer inline-flex items-center justify-center;
+    @apply bg-white text-red-600 rounded-md px-6 h-11 text-sm font-semibold
+           border border-red-200 hover:bg-red-50 transition-colors cursor-pointer
+           inline-flex items-center justify-center gap-2 disabled:opacity-50;
   }
+
+  /* ── Surfaces ───────────────────────────────────────────────────────────
+     Flatter than before: a clear border instead of a soft shadow. */
   .card {
-    @apply bg-white rounded-2xl border border-line shadow-card p-6;
+    @apply bg-white rounded-md border border-line p-6;
   }
+
+  /* ── Page furniture ─────────────────────────────────────────────────────
+     Spark leads with a large bold title over a quiet subtitle. */
   .page-title {
-    @apply text-lg font-extrabold text-primary;
+    @apply text-2xl font-bold text-primary;
   }
   .breadcrumb {
-    @apply text-[12.5px] text-ink-muted mt-0.5;
+    @apply text-sm font-medium text-ink-muted mt-1;
+  }
+  /* Heading inside a card or a form section. */
+  .section-title {
+    @apply text-base font-bold text-ink-strong;
   }
   .section-label {
-    @apply text-[9px] font-bold text-ink-muted uppercase tracking-widest;
+    @apply text-xs font-bold text-ink-muted uppercase tracking-widest;
   }
-  /* Small uppercase field/section label used across cards */
   .label-xs {
-    @apply text-[11px] font-bold text-ink-muted uppercase tracking-wider;
+    @apply text-xs font-semibold text-ink-muted uppercase tracking-wide;
   }
-  /* Status pills */
+
+  /* ── Status pills ───────────────────────────────────────────────────────
+     Softer than the old extra-bold uppercase treatment. */
   .pill {
-    @apply text-[10.5px] font-extrabold uppercase tracking-wide rounded-full px-2.5 py-1 whitespace-nowrap;
+    @apply text-xs font-semibold rounded-md px-2.5 py-1 whitespace-nowrap inline-flex items-center;
   }
   .pill-good    { @apply pill bg-lime-soft text-lime-text; }
   .pill-pending { @apply pill bg-[#FFF3E6] text-[#a8631f]; }
   .pill-neutral { @apply pill bg-[#EFF3F6] text-[#4d6274]; }
 }
+

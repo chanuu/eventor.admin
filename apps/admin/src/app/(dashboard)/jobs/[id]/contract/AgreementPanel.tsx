@@ -62,10 +62,10 @@ export default function AgreementPanel(props: Props) {
         {/* Status */}
         <div className="flex items-center justify-between flex-wrap gap-3 px-5 sm:px-6 py-4 bg-panel border-b border-line">
           <div className="flex items-center gap-3 min-w-0">
-            <span className={`text-[11px] font-extrabold uppercase tracking-wide rounded-full border px-2.5 py-1 ${s.cls}`}>
+            <span className={`text-xs font-extrabold uppercase tracking-wide rounded-full border px-2.5 py-1 ${s.cls}`}>
               {s.label}
             </span>
-            <span className="text-[12.5px] text-ink-muted">{s.note}</span>
+            <span className="text-xs text-ink-muted">{s.note}</span>
           </div>
 
           <div className="flex gap-2 flex-wrap">
@@ -80,7 +80,7 @@ export default function AgreementPanel(props: Props) {
         </div>
 
         {error && (
-          <p className="px-5 sm:px-6 py-3 text-[12.5px] text-red-700 bg-red-50 border-b border-red-100">
+          <p className="px-5 sm:px-6 py-3 text-xs text-red-700 bg-red-50 border-b border-red-100">
             {error}
           </p>
         )}
@@ -100,8 +100,8 @@ export default function AgreementPanel(props: Props) {
 
           {status === 'sent' && (
             <div className="mt-5 rounded-xl border border-[#F3D9BC] bg-[#FFF3E6] px-4 py-3.5">
-              <p className="text-[13.5px] font-bold text-[#a8631f]">Waiting on {clientName || 'the client'}</p>
-              <p className="text-[12.5px] text-[#8a6a45] mt-1 leading-relaxed">
+              <p className="text-sm font-bold text-[#a8631f]">Waiting on {clientName || 'the client'}</p>
+              <p className="text-xs text-[#8a6a45] mt-1 leading-relaxed">
                 They can now read and sign it in their portal under <strong>Agreement</strong>. Signing
                 is instant — this page shows the date and their name as soon as they accept. Nothing
                 further is needed from you.
@@ -111,10 +111,10 @@ export default function AgreementPanel(props: Props) {
 
           {isSigned && (
             <div className="mt-5 rounded-xl border border-lime-border bg-lime-soft px-4 py-3.5">
-              <p className="text-[13.5px] font-bold text-primary">
+              <p className="text-sm font-bold text-primary">
                 Signed by {signatureData || clientName}
               </p>
-              <p className="text-[12.5px] text-lime-text mt-1">
+              <p className="text-xs text-lime-text mt-1">
                 Accepted on {when(signedAt)}. The client typed their full name as an electronic
                 signature; this record is read-only from here on.
               </p>
@@ -140,7 +140,7 @@ export default function AgreementPanel(props: Props) {
           </div>
 
           {isDraft && (
-            <p className="text-[12px] text-ink-muted mt-3 leading-relaxed">
+            <p className="text-xs text-ink-muted mt-3 leading-relaxed">
               Regenerating rebuilds the document from the job, client, package and studio details as they
               are now. Only drafts can be regenerated.
             </p>
@@ -163,7 +163,7 @@ function Fact({ label, value, highlight }: { label: string; value: string; highl
   return (
     <div className="bg-panel border border-line-soft rounded-xl px-4 py-3.5">
       <div className="label-xs">{label}</div>
-      <div className={`text-[14px] mt-1.5 ${highlight ? 'font-bold text-primary' : 'font-semibold text-ink-strong'}`}>
+      <div className={`text-sm mt-1.5 ${highlight ? 'font-bold text-primary' : 'font-semibold text-ink-strong'}`}>
         {value}
       </div>
     </div>

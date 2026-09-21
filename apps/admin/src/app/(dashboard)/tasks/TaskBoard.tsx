@@ -96,11 +96,11 @@ function TaskCard({
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[14.5px] font-bold text-ink-strong leading-snug">{task.title}</p>
+          <p className="text-sm font-bold text-ink-strong leading-snug">{task.title}</p>
           <Link
             href={`/jobs/${task.job_id}`}
             onClick={onJobClick}
-            className="text-[12.5px] text-ink-mid hover:text-primary block mt-0.5 truncate"
+            className="text-xs text-ink-mid hover:text-primary block mt-0.5 truncate"
           >
             <span className="font-mono text-ink-muted">{task.job_ref}</span> {task.job_title}
           </Link>
@@ -109,7 +109,7 @@ function TaskCard({
       </div>
 
       {task.stage_name && (
-        <span className="inline-block mt-2.5 text-[10.5px] font-bold uppercase tracking-wider
+        <span className="inline-block mt-2.5 text-xs font-bold uppercase tracking-wider
                          text-ink-mid bg-panel border border-line-soft rounded-md px-2 py-1">
           {task.stage_name}
         </span>
@@ -117,7 +117,7 @@ function TaskCard({
 
       {d && (
         <div className="mt-2">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] ${d.cls}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs ${d.cls}`}>
             <span aria-hidden>{d.icon}</span>
             {d.label}
           </span>
@@ -135,10 +135,10 @@ function TaskCard({
             />
           </div>
           <div className="flex items-center justify-between mt-1.5">
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-xs text-ink-muted">
               {pct === 100 ? 'Job complete' : `${pct}% of job`}
             </span>
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-xs text-ink-muted">
               {task.job_done}/{task.job_total}
             </span>
           </div>
@@ -320,7 +320,7 @@ export default function TaskBoard({ tasks }: { tasks: BoardTask[] }) {
               <div className={`p-3 transition-colors ${isOver ? 'bg-panel' : 'bg-white'}`}>
                 <header className="flex items-center gap-2 mb-3">
                   <span className={`pill ${col.pill}`}>{col.label}</span>
-                  <span className="text-[11.5px] text-ink-muted border border-line rounded-full px-2 py-0.5">
+                  <span className="text-xs text-ink-muted border border-line rounded-full px-2 py-0.5">
                     {cards.length}
                   </span>
                 </header>
@@ -364,8 +364,8 @@ export default function TaskBoard({ tasks }: { tasks: BoardTask[] }) {
                                         mx-auto mb-2 text-ink-muted">
                           ✓
                         </div>
-                        <p className="text-[12.5px] font-semibold text-ink-mid">Nothing here</p>
-                        <p className="text-[11.5px] text-ink-muted mt-0.5">
+                        <p className="text-xs font-semibold text-ink-mid">Nothing here</p>
+                        <p className="text-xs text-ink-muted mt-0.5">
                           Drop a card to move it in
                         </p>
                       </div>
@@ -391,7 +391,7 @@ export default function TaskBoard({ tasks }: { tasks: BoardTask[] }) {
 
       <TaskDetailDialog task={detail} onClose={() => setDetail(null)} />
 
-      <p className="text-[11.5px] text-ink-muted flex items-center gap-1.5">
+      <p className="text-xs text-ink-muted flex items-center gap-1.5">
         <span aria-hidden>↔</span>
         Drag a card to change its status, or click one to open it and leave a comment.
       </p>

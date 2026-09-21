@@ -41,17 +41,17 @@ export default async function BillingPanel({
     <div>
       {locked && (
         <div className="mb-5 rounded-xl border border-[#F3D9BC] bg-[#FFF3E6] px-4 py-3.5">
-          <p className="text-[13px] font-bold text-[#a8631f]">
+          <p className="text-sm font-bold text-[#a8631f]">
             {UPGRADE_PROMPT[locked] ?? 'That feature is not part of your plan.'}
           </p>
-          <p className="text-[12.5px] text-[#8a6a45] mt-1">
+          <p className="text-xs text-[#8a6a45] mt-1">
             Choose a plan below that includes {FEATURE_LABEL[locked] ?? 'it'} to switch it on.
           </p>
         </div>
       )}
 
       {searchParams.saved && (
-        <p className="text-[13px] text-green-700 font-semibold mb-4">Plan updated.</p>
+        <p className="text-sm text-green-700 font-semibold mb-4">Plan updated.</p>
       )}
 
       {/* What the studio has today */}
@@ -63,7 +63,7 @@ export default async function BillingPanel({
               {current?.name ?? staff?.planName ?? 'No plan'}
             </div>
             {current && (
-              <div className="text-[13px] text-ink-muted mt-1">
+              <div className="text-sm text-ink-muted mt-1">
                 Rs. {current.price_lkr.toLocaleString('en-LK')} / month · {current.description}
               </div>
             )}
@@ -82,15 +82,15 @@ export default async function BillingPanel({
                 className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3
                   ${on ? 'bg-lime-soft border-lime-border' : 'bg-panel border-line-soft'}`}
               >
-                <span className={`text-[13px] font-extrabold ${on ? 'text-lime-text' : 'text-ink-muted'}`}>
+                <span className={`text-sm font-extrabold ${on ? 'text-lime-text' : 'text-ink-muted'}`}>
                   {on ? '✓' : '—'}
                 </span>
                 <span className="min-w-0">
-                  <span className={`block text-[13px] font-semibold ${on ? 'text-ink-strong' : 'text-ink-muted'}`}>
+                  <span className={`block text-sm font-semibold ${on ? 'text-ink-strong' : 'text-ink-muted'}`}>
                     {f.label}
                   </span>
                   {f.description && (
-                    <span className="block text-[11.5px] text-ink-muted mt-0.5">{f.description}</span>
+                    <span className="block text-xs text-ink-muted mt-0.5">{f.description}</span>
                   )}
                 </span>
               </div>
@@ -101,7 +101,7 @@ export default async function BillingPanel({
 
       {/* Plans */}
       <h2 className="text-sm font-extrabold text-primary mt-8 mb-1">Change plan</h2>
-      <p className="text-[12.5px] text-ink-muted mb-4">
+      <p className="text-xs text-ink-muted mb-4">
         Switching takes effect immediately. Your data is never deleted when you move to a smaller plan —
         anything outside the new plan simply becomes read-only.
       </p>
@@ -121,7 +121,7 @@ export default async function BillingPanel({
         ))}
       </div>
 
-      <p className="text-[12px] text-ink-muted mt-5 leading-relaxed">
+      <p className="text-xs text-ink-muted mt-5 leading-relaxed">
         Prices are in LKR and billed monthly. No payment provider is connected yet, so changing plan here
         updates your access immediately without taking payment.
       </p>

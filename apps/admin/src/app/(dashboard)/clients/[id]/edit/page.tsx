@@ -31,21 +31,19 @@ export default async function EditClientPage({ params, searchParams }: {
   const updateAction = updateClient.bind(null, client.id, client.studio_id);
 
   return (
-    <div style={{ maxWidth: 520 }}>
-      <div style={{ marginBottom: 24 }}>
-        <Link href="/clients" style={{ fontSize: 13, color: '#6b7280' }}>← Clients</Link>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginTop: 8 }}>{client.full_name}</h1>
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <Link href="/clients" className="text-sm text-ink-muted">← Clients</Link>
+        <h1 className="page-title mt-2">{client.full_name}</h1>
         {searchParams.saved && (
-          <p style={{ fontSize: 13, color: '#16a34a', marginTop: 4 }}>Changes saved.</p>
+          <p className="text-sm text-green-700 font-semibold mt-1">Changes saved.</p>
         )}
       </div>
 
       <ClientEditForm client={client} updateAction={updateAction} />
 
-      <div style={{ marginTop: 20 }}>
-        <Link           href={`/jobs?client=${client.id}`}
-          style={{ fontSize: 13, color: '#0F3D2E' }}
-        >
+      <div className="mt-5">
+        <Link href={`/jobs?client=${client.id}`} className="text-sm font-semibold text-primary">
           View jobs for this client →
         </Link>
       </div>

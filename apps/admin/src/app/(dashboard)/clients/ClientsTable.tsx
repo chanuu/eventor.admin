@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import DataTable, { type Column } from '@/components/DataTable';
+import { RowActions, RowActionLink } from '@/components/RowActions';
 
 export type ClientRow = {
   id: string;
@@ -78,18 +78,14 @@ const COLUMNS: Column<ClientRow>[] = [
   },
   {
     key: 'actions',
-    label: 'Actions',
-    align: 'center',
+    label: '',
+    align: 'right',
     width: '90px',
     hideOnCard: true,   // the whole card already opens the client
     render: (c) => (
-      <Link
-        href={`/clients/${c.id}/edit`}
-        onClick={(e) => e.stopPropagation()}
-        className="text-primary hover:text-primary-dark font-semibold text-[13px]"
-      >
-        Edit
-      </Link>
+      <RowActions>
+        <RowActionLink href={`/clients/${c.id}/edit`} icon="edit" label="Edit client" />
+      </RowActions>
     ),
   },
 ];

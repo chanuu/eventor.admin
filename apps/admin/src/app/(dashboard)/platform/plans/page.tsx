@@ -35,7 +35,7 @@ export default async function PlatformPlansPage() {
 
   return (
     <div>
-      <Link href="/platform" className="text-[13px] text-ink-muted">← Platform</Link>
+      <Link href="/platform" className="text-sm text-ink-muted">← Platform</Link>
       <h1 className="page-title mt-2">Package configuration</h1>
       <p className="breadcrumb mb-6">
         Prices and included features for every package offered on Eventor.
@@ -60,7 +60,7 @@ export default async function PlatformPlansPage() {
       {/* New package */}
       <div className="bg-white rounded-2xl border border-line shadow-card p-6 mt-4">
         <h2 className="text-sm font-extrabold text-primary">New package</h2>
-        <p className="text-[12.5px] text-ink-muted mt-1 mb-4">
+        <p className="text-xs text-ink-muted mt-1 mb-4">
           Created hidden from new studios — pick its features and tick “Offered to new studios” when it is ready.
         </p>
         <NewPlanForm />

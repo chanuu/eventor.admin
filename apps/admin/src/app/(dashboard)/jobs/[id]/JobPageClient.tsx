@@ -260,7 +260,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
       align: 'right',
       hideOnCard: true,
       render: () => (
-        <span className="text-[13px] font-medium text-[#0F3D2E] whitespace-nowrap">Details →</span>
+        <span className="text-sm font-medium text-[#0F3D2E] whitespace-nowrap">Details →</span>
       ),
     },
   ];
@@ -334,7 +334,7 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
         <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5 bg-gray-50 border-b border-gray-100">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</span>
           <JobStatusForm current={job.status} steps={STATUS_STEPS} isPending={statusMutation.isPending} onStatusChange={(s) => statusMutation.mutate(s)} />
-          <span className="text-[11.5px] text-ink-muted hidden sm:inline">
+          <span className="text-xs text-ink-muted hidden sm:inline">
             Moves forward on its own as the agreement is signed, shoots are shot and the album is published.
           </span>
         </div>
@@ -350,14 +350,14 @@ export default function JobPageClient({ jobId, studioId, initialData, initialTab
                   key={id}
                   onClick={() => setActiveTab(id as TabId)}
                   className={`flex items-center gap-2 whitespace-nowrap rounded-[10px] border px-4 sm:px-[18px] py-[11px]
-                    text-[13.5px] font-bold transition-colors
+                    text-sm font-bold transition-colors
                     ${active
                       ? 'bg-primary text-white border-primary'
                       : 'bg-panel text-ink-mid border-line hover:bg-lime-soft'}`}
                 >
                   <span>{label}</span>
                   {count > 0 && (
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-extrabold
                       ${active ? 'bg-lime text-primary' : 'bg-line-soft text-ink-mid'}`}>
                       {count}
                     </span>
@@ -649,7 +649,7 @@ function ContractBadge({ status }: { status: string }) {
 function StatBox({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div>
-      <p className="text-[11px] text-gray-400 uppercase tracking-wide">{label}</p>
+      <p className="text-xs text-gray-400 uppercase tracking-wide">{label}</p>
       <p className={`text-base font-bold mt-0.5 ${color ?? 'text-gray-900'}`}>{value}</p>
     </div>
   );

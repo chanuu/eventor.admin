@@ -29,10 +29,10 @@ export default function DataTable<T extends object>({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-line bg-white
+      <div className="rounded-md border-2 border-dashed border-line bg-white
                       flex flex-col items-center text-center px-6 pt-6 pb-10">
         <Lottie kind="empty" size={190} />
-        <div className="text-[13.5px] text-ink-mid -mt-2">{emptyMessage}</div>
+        <div className="text-sm text-ink-mid -mt-2">{emptyMessage}</div>
       </div>
     );
   }
@@ -54,14 +54,14 @@ export default function DataTable<T extends object>({
             <Card
               key={i}
               {...(href ? { href } : {})}
-              className={`block bg-white border border-line rounded-2xl p-4 ${href ? 'active:bg-panel' : ''}`}
+              className={`block bg-white border border-line rounded-md p-4 ${href ? 'active:bg-panel' : ''}`}
             >
-              <div className="text-[15px] text-ink-strong">{primary.render(row)}</div>
+              <div className="text-sm text-ink-strong">{primary.render(row)}</div>
 
               <div className="mt-3 pt-3 border-t border-line-soft flex flex-col gap-2">
                 {secondary.map((col) => (
                   <div key={col.key} className="flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted shrink-0">
+                    <span className="text-xs font-bold uppercase tracking-wider text-ink-muted shrink-0">
                       {col.label}
                     </span>
                     <span className="text-sm text-ink-body text-right min-w-0">{col.render(row)}</span>
@@ -74,15 +74,15 @@ export default function DataTable<T extends object>({
       </div>
 
       {/* ── Desktop: the table ── */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-line">
+      <div className="hidden md:block overflow-x-auto rounded-md border border-line bg-white">
       <table className="w-full border-collapse min-w-[640px]">
         <thead>
-          <tr className="border-b border-gray-100">
+          <tr className="border-b border-line bg-[#F5F7F4]">
             {columns.map((col) => (
               <th
                 key={col.key}
                 style={{ width: col.width }}
-                className={`px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap bg-white
+                className={`px-5 py-3.5 text-sm font-bold text-ink-strong whitespace-nowrap
                   ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
               >
                 {col.label}
@@ -97,14 +97,13 @@ export default function DataTable<T extends object>({
               <tr
                 key={i}
                 onClick={href ? () => router.push(href) : undefined}
-                className={`border-b border-gray-50 last:border-0 transition-colors
-                  even:bg-[#F2F6F2]
-                  ${href ? 'cursor-pointer hover:bg-[#E4EEE7]' : ''}`}
+                className={`border-b border-line-soft last:border-0 transition-colors
+                  ${href ? 'cursor-pointer hover:bg-[#F5F7F4]' : ''}`}
               >
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-5 py-3.5 text-sm text-gray-700 align-middle
+                    className={`px-5 py-3.5 text-sm text-ink-body align-middle
                       ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                   >
                     {col.render(row)}

@@ -35,14 +35,27 @@ const config: Config = {
         panel:  '#FAFBF9',
         due:    '#c2703c',
       },
-      fontFamily: {
-        sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+      // Everything a size up. Overriding the scale lifts every text-sm / text-xs
+      // in the app at once, rather than editing each page.
+      fontSize: {
+        xs:   ['0.8125rem', { lineHeight: '1.15rem' }],  // 13px (was 12)
+        sm:   ['0.9375rem', { lineHeight: '1.4rem'  }],  // 15px (was 14)
+        base: ['1.0625rem', { lineHeight: '1.6rem'  }],  // 17px (was 16)
+        lg:   ['1.1875rem', { lineHeight: '1.7rem'  }],  // 19px (was 18)
+        xl:   ['1.375rem',  { lineHeight: '1.85rem' }],  // 22px (was 20)
+        '2xl':['1.625rem',  { lineHeight: '2.1rem'  }],  // 26px (was 24)
       },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'Nunito', 'system-ui', 'sans-serif'],
+      },
+      // Spark is noticeably flatter than the old Eventor styling — corners are
+      // restrained rather than pill-like. Changing the scale restyles every
+      // rounded-* in the app without touching each file.
       borderRadius: {
-        lg: '9px',
-        xl: '12px',
-        '2xl': '16px',
-        '3xl': '20px',
+        lg: '6px',
+        xl: '8px',
+        '2xl': '10px',
+        '3xl': '12px',
       },
       boxShadow: {
         card: '0 1px 3px 0 rgba(15,61,46,0.05), 0 1px 2px -1px rgba(15,61,46,0.04)',

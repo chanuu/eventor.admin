@@ -104,7 +104,7 @@ const SETTINGS_NAV = [
 ];
 
 const navItem = (active: boolean) =>
-  `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors
+  `flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors
    ${active ? 'bg-white text-primary' : 'text-[#cfe4d8] hover:bg-white/10'}`;
 
 export default function Sidebar({ studioName, staffName, roleName, avatarUrl, permissions, features, isPlatformAdmin }: {
@@ -136,7 +136,7 @@ export default function Sidebar({ studioName, staffName, roleName, avatarUrl, pe
         </span>
         <span className="min-w-0">
           <span className="block font-bold text-sm leading-tight truncate">{studioName || 'Eventor'}</span>
-          <span className="block text-[10.5px] text-[#8fae9d] tracking-wider">STUDIO ADMIN</span>
+          <span className="block text-xs text-[#8fae9d] tracking-wider">STUDIO ADMIN</span>
         </span>
       </Link>
 
@@ -177,7 +177,7 @@ export default function Sidebar({ studioName, staffName, roleName, avatarUrl, pe
 
       <div className="mt-4 px-[22px]">
         <div className="border-t border-white/10 pt-4">
-          <p className="text-[11px] text-[#8fae9d] uppercase tracking-wider font-bold">Signed in as</p>
+          <p className="text-xs text-[#8fae9d] uppercase tracking-wider font-bold">Signed in as</p>
           <Link
             href="/profile"
             className="flex items-center gap-2.5 mt-2.5 rounded-lg -mx-1.5 px-1.5 py-1.5
@@ -196,8 +196,8 @@ export default function Sidebar({ studioName, staffName, roleName, avatarUrl, pe
               </span>
             )}
             <span className="min-w-0">
-              <span className="block text-[12.5px] font-bold truncate">{staffName}</span>
-              <span className="block text-[11px] text-[#8fae9d]">{roleName}</span>
+              <span className="block text-xs font-bold truncate">{staffName}</span>
+              <span className="block text-xs text-[#8fae9d]">{roleName}</span>
             </span>
           </Link>
           <form action={signOut}>

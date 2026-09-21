@@ -3,6 +3,7 @@
 import DataTable, { type Column } from '@/components/DataTable';
 import RoleSelect from './RoleSelect';
 import Avatar from '@/components/Avatar';
+import { RowActions, RowActionButton } from '@/components/RowActions';
 import { toggleStaffActive } from './invite/actions';
 
 export type StaffRowData = {
@@ -73,13 +74,17 @@ function buildColumns(roles: Role[]): Column<StaffRowData>[] {
       align: 'right',
       render: (s) =>
         s.isMe ? (
-          <span className="text-gray-300 text-[13px]">—</span>
+          <span className="text-gray-300 text-sm">—</span>
         ) : (
-          <form action={toggleStaffActive.bind(null, s.id, !s.is_active)} className="flex justify-end">
-            <button type="submit" className="btn-secondary text-[12px] h-8 px-3">
-              {s.is_active ? 'Deactivate' : 'Activate'}
-            </button>
-          </form>
+          <RowActions>
+            <form action={toggleStaffActive.bind(null, s.id, !s.is_active)}>
+              <RowActionButton
+                type="submit"
+                icon="power"
+                label={s.is_active ? 'Deactivate member' : 'Activate member'}
+              />
+            </form>
+          </RowActions>
         ),
     },
   ];

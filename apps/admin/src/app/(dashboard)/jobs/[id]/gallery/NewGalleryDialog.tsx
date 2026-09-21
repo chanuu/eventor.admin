@@ -37,7 +37,7 @@ export default function NewGalleryDialog({
       <Modal open={open} onClose={() => setOpen(false)} title="New gallery" width="max-w-lg">
         <form action={action} className="flex flex-col gap-4 p-6">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="gallery-title" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="gallery-title" className="text-sm font-medium text-ink-strong">
               Gallery title <span className="text-red-500">*</span>
             </label>
             <input
@@ -52,7 +52,7 @@ export default function NewGalleryDialog({
 
           {shoots.length > 0 && (
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="gallery-shoot" className="text-[13px] font-medium text-ink-strong">
+              <label htmlFor="gallery-shoot" className="text-sm font-medium text-ink-strong">
                 Link to shoot <span className="text-ink-muted font-normal">(optional)</span>
               </label>
               <select id="gallery-shoot" name="shoot_id" className="input">
@@ -70,11 +70,11 @@ export default function NewGalleryDialog({
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="gallery-deadline" className="text-[13px] font-medium text-ink-strong">
+            <label htmlFor="gallery-deadline" className="text-sm font-medium text-ink-strong">
               Selection deadline <span className="text-ink-muted font-normal">(optional)</span>
             </label>
             <input id="gallery-deadline" name="selection_deadline" type="date" className="input" />
-            <p className="text-[11.5px] text-ink-muted">
+            <p className="text-xs text-ink-muted">
               Shown to the client as the date their choices are due.
             </p>
           </div>
