@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { HERO_SLIDES, IMG } from '@/lib/content';
+import { HERO_SLIDES, IMG, T } from '@/lib/content';
 
 /**
- * Hero slider. Advances every 7 seconds until the visitor takes control, at
- * which point it stops rather than fighting them — as in the design.
+ * Hero: a badge, a heavy headline, two calls to action, and the work itself.
+ *
+ * The reference leads with a near-black headline and spends its colour on the
+ * buttons, so the image carries the warmth rather than the type. Slides still
+ * advance every seven seconds until the visitor takes control, at which point
+ * they stop rather than fighting them.
  */
 export default function Hero({ signInHref }: { signInHref: string }) {
   const [index, setIndex] = useState(0);
@@ -23,99 +27,118 @@ export default function Hero({ signInHref }: { signInHref: string }) {
     setIndex((i + HERO_SLIDES.length) % HERO_SLIDES.length);
   }
 
-  const slide = HERO_SLIDES[index];
-
   return (
-    <div style={{ position: 'relative', background: '#EDEDED', minHeight: 620, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-      {/* Cross-fading image stack, masked into the copy on the left */}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '64%' }}>
-        {HERO_SLIDES.map((s, i) => (
-          <div
-            key={s.key}
+    <section style={{ background: T.canvas, padding: '72px 28px 88px' }}>
+      <div
+        className="split-115"
+        style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gap: 56, alignItems: 'center' }}
+      >
+        {/* Copy */}
+        <div>
+          <span
             style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: `url(${s.url ?? IMG(s.image!, 1600)})`,
-              backgroundSize: 'cover',
-              backgroundPosition: s.pos,
-              filter: s.color ? 'none' : 'grayscale(1) contrast(1.05)',
-              transition: 'opacity 0.9s ease',
-              opacity: i === index ? 1 : 0,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: T.tint, color: T.brand,
+              fontSize: 13, fontWeight: 700, borderRadius: 999, padding: '7px 14px',
             }}
-          />
-        ))}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#EDEDED 0%,rgba(237,237,237,0.86) 24%,rgba(237,237,237,0) 58%)' }} />
-      </div>
+          >
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: T.brand }} />
+            Built for Sri Lankan studios
+          </span>
 
-      <div style={{ position: 'relative', maxWidth: 1160, margin: '0 auto', padding: '86px 32px 74px', width: '100%', boxSizing: 'border-box' }}>
-        <div key={slide.key} style={{ maxWidth: 560, animation: 'riseIn 0.6s ease both' }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 2.4, textTransform: 'uppercase', color: '#0F5344' }}>
-            {slide.kicker}
-          </div>
-          <div style={{ fontSize: 'clamp(34px,4.4vw,54px)', fontWeight: 800, lineHeight: 1.1, marginTop: 20, letterSpacing: -1 }}>
-            {slide.titleA} <span style={{ color: '#0F5344' }}>{slide.titleAccent}</span><br />{slide.titleB}
-          </div>
-          <div style={{ fontSize: 15.5, color: '#4c554f', lineHeight: 1.7, marginTop: 18, maxWidth: 460 }}>
-            {slide.body}
-          </div>
+          <h1
+            style={{
+              fontSize: 'clamp(38px, 5vw, 60px)', fontWeight: 800, lineHeight: 1.08,
+              letterSpacing: '-0.03em', color: T.ink, margin: '22px 0 0',
+            }}
+          >
+            Run your whole studio
+            <br />
+            from one place
+          </h1>
 
-          {slide.chips && (
-            <div style={{ display: 'flex', gap: 9, marginTop: 22, flexWrap: 'wrap' }}>
-              {slide.chips.map((c) => (
-                <div key={c} style={{ background: '#ffffff', border: '1px solid #DEE1DF', fontSize: 12, fontWeight: 600, color: '#2b332f', padding: '8px 14px', whiteSpace: 'nowrap' }}>
-                  {c}
-                </div>
-              ))}
-            </div>
-          )}
+          <p
+            style={{
+              fontSize: 17, lineHeight: 1.7, color: T.mid, margin: '20px 0 0', maxWidth: 520,
+            }}
+          >
+            Bookings, agreements, proofing galleries, flip-through albums, payments and the crew
+            calendar — together, so nothing lives in a WhatsApp thread or a spreadsheet.
+          </p>
 
-          {slide.koko && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 24, background: '#ffffff', border: '1px solid #DEE1DF', padding: '16px 20px', maxWidth: 430, flexWrap: 'wrap' }}>
-              <div style={{ background: '#111614', color: '#ffffff', fontSize: 13, fontWeight: 800, letterSpacing: 0.5, padding: '8px 14px' }}>koko</div>
-              <div style={{ flex: 1, minWidth: 150 }}>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>3 × Rs. 50,000 interest free</div>
-                <div style={{ fontSize: 11.5, color: '#6b736e', marginTop: 2 }}>On a Rs. 150,000 wedding package</div>
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: 14, marginTop: 30, flexWrap: 'wrap' }}>
-            <a href={slide.key === 'album' ? signInHref : slide.ctaHref} style={{ background: '#0F5344', color: '#ffffff', fontSize: 14, fontWeight: 600, padding: '16px 32px' }}>
-              {slide.cta}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 30 }}>
+            <a
+              href="/get-started"
+              style={{
+                background: T.gradient, color: T.white,
+                fontSize: 15, fontWeight: 600, borderRadius: 10, padding: '14px 26px',
+                boxShadow: '0 1px 2px rgba(233,30,120,0.24)',
+              }}
+            >
+              Start free
             </a>
-            <a href={slide.altHref} style={{ border: '1px solid #B9BEBB', color: '#111614', fontSize: 14, fontWeight: 600, padding: '16px 32px' }}>
-              {slide.alt}
+            <a
+              href={signInHref}
+              style={{
+                background: T.white, color: T.body, border: `1px solid ${T.line}`,
+                fontSize: 15, fontWeight: 600, borderRadius: 10, padding: '14px 26px',
+              }}
+            >
+              See pricing
             </a>
           </div>
+
+          <p style={{ fontSize: 13.5, color: T.muted, marginTop: 16 }}>
+            Free while you set up · No card required
+          </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 22, marginTop: 44, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: 9 }}>
+        {/* The work */}
+        <div
+          style={{
+            position: 'relative', borderRadius: 16, overflow: 'hidden',
+            aspectRatio: '4 / 3', border: `1px solid ${T.line}`,
+            boxShadow: '0 6px 20px rgba(17,24,39,0.07)',
+          }}
+        >
+          {HERO_SLIDES.map((s, i) => (
+            <div
+              key={s.key}
+              aria-hidden={i !== index}
+              style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: `url(${s.url ?? IMG(s.image!, 1400)})`,
+                backgroundSize: 'cover',
+                backgroundPosition: s.pos,
+                opacity: i === index ? 1 : 0,
+                transition: 'opacity 900ms ease',
+              }}
+            />
+          ))}
+
+          {/* Slide picker */}
+          <div
+            style={{
+              position: 'absolute', left: 16, bottom: 16,
+              display: 'flex', gap: 7,
+            }}
+          >
             {HERO_SLIDES.map((s, i) => (
               <button
                 key={s.key}
                 onClick={() => goTo(i)}
-                title={s.label}
-                aria-label={s.label}
+                aria-label={`Show image ${i + 1}`}
+                aria-current={i === index}
                 style={{
-                  width: i === index ? 30 : 10, height: 10, border: 'none', padding: 0, cursor: 'pointer',
-                  transition: 'width 0.3s ease, background 0.3s ease',
-                  background: i === index ? '#0F5344' : '#C4C9C6',
+                  width: i === index ? 22 : 8, height: 8, borderRadius: 999, border: 0,
+                  background: i === index ? T.white : 'rgba(255,255,255,0.55)',
+                  cursor: 'pointer', padding: 0, transition: 'width 250ms ease',
                 }}
               />
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => goTo(index - 1)} aria-label="Previous" style={arrow}>‹</button>
-            <button onClick={() => goTo(index + 1)} aria-label="Next" style={arrow}>›</button>
-          </div>
-          <div style={{ fontSize: 12, color: '#6b736e', letterSpacing: 0.5 }}>{slide.label}</div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
-
-const arrow: React.CSSProperties = {
-  width: 38, height: 38, border: '1px solid #B9BEBB', background: 'transparent',
-  color: '#111614', fontSize: 16, cursor: 'pointer', fontFamily: 'inherit',
-};

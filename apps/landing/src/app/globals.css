@@ -2,14 +2,14 @@
 
 body {
   margin: 0;
-  background: #EDEDED;
-  color: #111614;
-  font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: #F7F7F9;
+  color: #111827;
+  font-family: Inter, system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   overflow-x: hidden;
 }
 
-a { color: #0F5344; text-decoration: none; }
-a:hover { color: #8BC53F; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: #E91E78; }
 
 img { max-width: 100%; }
 
@@ -45,4 +45,23 @@ nav::-webkit-scrollbar { display: none; }
     padding-top: 60px !important;
     padding-bottom: 60px !important;
   }
+}
+
+/*
+ * The strip under the hero scrolls its pills continuously. The track holds two
+ * identical runs and shifts by exactly half, so the loop has no seam.
+ */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
 }

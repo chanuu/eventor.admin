@@ -1,9 +1,78 @@
 /**
- * Landing page content, ported from the Eventor Landing design.
- * Copy, ordering and imagery match the reference exactly.
+ * Landing page content and theme.
+ *
+ * The look follows the Affooh design language — magenta running into coral,
+ * pure-grey neutrals, generous corners — matching the admin app so the two
+ * read as one product. The words stay Eventor's own: this sells a photography
+ * studio platform, not a general-purpose company OS.
  */
 
-export const ACCENT = '#0F5344';
+/** One place for every colour on the page; the sections only reference these. */
+export const T = {
+  brand: '#E91E78',
+  brandDark: '#C8155F',
+  coral: '#FB5B3C',
+  gradient: 'linear-gradient(90deg, #E91E78 0%, #FB5B3C 100%)',
+  tint: '#FDE9F2',
+
+  ink: '#111827',
+  body: '#374151',
+  mid: '#6B7280',
+  muted: '#9CA3AF',
+
+  line: '#ECECEF',
+  lineSoft: '#F3F4F6',
+  canvas: '#F7F7F9',
+  panel: '#FAFAFB',
+  white: '#FFFFFF',
+  dark: '#111827',
+} as const;
+
+/** Kept for anything still reaching for the old name. */
+export const ACCENT = T.brand;
+
+/** The scrolling strip under the hero. */
+export const MARQUEE = [
+  'One studio, one system',
+  'Albums clients actually open',
+  'Proofing without the message threads',
+  'Deposits chased automatically',
+  'Crew scheduling',
+  'Signed agreements, stored',
+];
+
+export const SOCIAL_PROOF = [
+  'Amaya Studios',
+  'Silver Lens',
+  'Kandy Weddings',
+  'Frame & Co.',
+  'Ocean Light',
+];
+
+export const STATS = [
+  { figure: '1,200+', label: 'Events managed' },
+  { figure: '60%', label: 'Less admin per booking' },
+  { figure: '4 hrs', label: 'Saved per event' },
+];
+
+export const FAQ = [
+  {
+    q: 'Who is Eventor for?',
+    a: 'Photography and videography studios in Sri Lanka — from a single photographer keeping track of bookings, to a multi-branch studio running a crew and a full calendar.',
+  },
+  {
+    q: 'Can my clients use it without an account?',
+    a: 'Yes. Galleries and albums open from a link in any browser, and agreements can be read and signed without signing up. Clients only get a portal login if you invite them.',
+  },
+  {
+    q: 'What happens to my photos?',
+    a: 'Originals stay yours. Proofing galleries are stored at web resolution for the client to choose from; you keep the masters and deliver them however you already do.',
+  },
+  {
+    q: 'Can I change plan later?',
+    a: 'Any time, up or down. Nothing is deleted when you move to a smaller plan — anything outside it simply becomes read-only until you upgrade again.',
+  },
+];
 
 export const IMG = (id: string, w = 600) =>
   `https://images.unsplash.com/${id}?w=${w}&q=80&auto=format&fit=crop`;
@@ -104,7 +173,7 @@ export const PIPELINE = [
   { name: 'Randula & Sanduni', meta: 'Wedding · 12 May', stage: 'Signed', bg: '#EAF3E2', fg: '#3f6b2b' },
   { name: 'Dinuka Fernando', meta: 'Corporate · 3 Jun', stage: 'Proposal', bg: '#FDF0E2', fg: '#a8631f' },
   { name: 'Kavindi & Sahan', meta: 'Engagement · 21 Jun', stage: 'Deposit due', bg: '#FDF0E2', fg: '#a8631f' },
-  { name: 'Methmi Silva', meta: 'Birthday · 2 Jul', stage: 'Enquiry', bg: '#EDEFEC', fg: '#5b6360' },
+  { name: 'Methmi Silva', meta: 'Birthday · 2 Jul', stage: 'Enquiry', bg: '#F3F4F6', fg: '#374151' },
   { name: 'Tharindu & Nadee', meta: 'Wedding · 19 Jul', stage: 'Signed', bg: '#EAF3E2', fg: '#3f6b2b' },
 ];
 
@@ -115,15 +184,15 @@ export const PROOF_POINTS = [
 ];
 
 export const PAYMENT_ROWS = [
-  { label: 'Booking deposit (30%)', meta: 'Paid 14 Mar · bank transfer', amount: 'Rs. 45,000', icon: '✓', bg: '#8BC53F', fg: '#0F3D2E', border: 'none' },
+  { label: 'Booking deposit (30%)', meta: 'Paid 14 Mar · bank transfer', amount: 'Rs. 45,000', icon: '✓', bg: '#FB5B3C', fg: '#0F3D2E', border: 'none' },
   { label: 'Balance payment (70%)', meta: 'Due 5 May · reminder scheduled', amount: 'Rs. 105,000', icon: '!', bg: '#FDF0E2', fg: '#a8631f', border: '2px solid #F3D9BC' },
-  { label: 'Album add-on', meta: 'Requested by client', amount: 'Rs. 28,000', icon: '+', bg: '#ffffff', fg: '#8b938f', border: '2px solid #E4E7E5' },
+  { label: 'Album add-on', meta: 'Requested by client', amount: 'Rs. 28,000', icon: '+', bg: '#ffffff', fg: '#9CA3AF', border: '2px solid #E4E7E5' },
 ];
 
 export const SCHEDULE_ROWS = [
-  { date: '2 Apr', title: 'Pre-shoot session', meta: 'Diyatha Uyana · 4:00 PM', crew: '1 crew', bg: '#EDEFEC', fg: '#5b6360' },
+  { date: '2 Apr', title: 'Pre-shoot session', meta: 'Diyatha Uyana · 4:00 PM', crew: '1 crew', bg: '#F3F4F6', fg: '#374151' },
   { date: '12 May', title: 'Wedding day coverage', meta: 'Water’s Edge · 9:00 AM', crew: '3 crew', bg: '#EAF3E2', fg: '#3f6b2b' },
-  { date: '18 May', title: 'Editing deadline', meta: 'Gallery cull & retouch', crew: 'Studio', bg: '#EDEFEC', fg: '#5b6360' },
+  { date: '18 May', title: 'Editing deadline', meta: 'Gallery cull & retouch', crew: 'Studio', bg: '#F3F4F6', fg: '#374151' },
   { date: '3 Jun', title: 'Corporate shoot', meta: 'Cinnamon Grand · 10:00 AM', crew: '2 crew', bg: '#FDF0E2', fg: '#a8631f' },
 ];
 
