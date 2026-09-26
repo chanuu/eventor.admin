@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { HERO_SLIDES, IMG, T } from '@/lib/content';
+import { HERO_SLIDES, T } from '@/lib/content';
 
 /**
  * Hero: a badge, a heavy headline, two calls to action, and the work itself.
@@ -30,8 +30,8 @@ export default function Hero({ signInHref }: { signInHref: string }) {
   return (
     <section style={{ background: T.canvas, padding: '72px 28px 88px' }}>
       <div
-        className="split-115"
-        style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gap: 56, alignItems: 'center' }}
+        className="split-hero"
+        style={{ maxWidth: 1220, margin: '0 auto', display: 'grid', gap: 48, alignItems: 'center' }}
       >
         {/* Copy */}
         <div>
@@ -96,18 +96,20 @@ export default function Hero({ signInHref }: { signInHref: string }) {
         {/* The work */}
         <div
           style={{
-            position: 'relative', borderRadius: 16, overflow: 'hidden',
-            aspectRatio: '4 / 3', border: `1px solid ${T.line}`,
-            boxShadow: '0 6px 20px rgba(17,24,39,0.07)',
+            position: 'relative', borderRadius: 18, overflow: 'hidden',
+            aspectRatio: '5 / 4', border: `1px solid ${T.line}`,
+            boxShadow: '0 14px 40px rgba(17,24,39,0.13)',
           }}
         >
           {HERO_SLIDES.map((s, i) => (
             <div
               key={s.key}
+              role="img"
+              aria-label={s.alt}
               aria-hidden={i !== index}
               style={{
                 position: 'absolute', inset: 0,
-                backgroundImage: `url(${s.url ?? IMG(s.image!, 1400)})`,
+                backgroundImage: `url(${s.url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: s.pos,
                 opacity: i === index ? 1 : 0,

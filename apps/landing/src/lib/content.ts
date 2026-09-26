@@ -149,51 +149,40 @@ export const THUMBS = [
   'photo-1478146896981-b80fe463b330', 'photo-1509927083803-4bd519298ac4',
 ];
 
+/**
+ * The hero's rotating images.
+ *
+ * Real studio work rather than stock: these are the photographs a
+ * photographer would judge the product by. Each carries its own focal point,
+ * because the frame crops to fill and the subjects sit at different heights.
+ */
 export type HeroSlide = {
-  key: string; label: string; kicker: string;
-  titleA: string; titleAccent: string; titleB: string;
-  body: string;
-  chips?: string[];
-  koko?: boolean;
-  cta: string; ctaHref: string; alt: string; altHref: string;
-  url?: string; image?: string; pos: string; color?: boolean;
+  key: string;
+  /** Described for anyone who cannot see it. */
+  alt: string;
+  url: string;
+  /** background-position — keeps the subject in frame as the crop changes. */
+  pos: string;
 };
 
 export const HERO_SLIDES: HeroSlide[] = [
   {
-    key: 'album', label: 'Virtual album',
-    kicker: 'First photography CRM in Sri Lanka',
-    titleA: 'Create', titleAccent: 'Modern', titleB: 'Client Virtual Album',
-    body: 'One platform for your studio, your clients and your bookings — albums, proofing, agreements, payments and schedules in a single place.',
-    cta: 'Subscribe Now', ctaHref: '#pricing', alt: 'See a live album', altHref: '#album',
-    url: '/assets/hero-ceremony.jpg', pos: 'center 30%', color: true,
+    key: 'reading-water',
+    alt: 'A couple seated in shallow water, each reading a book',
+    url: '/assets/hero/reading-water.jpg',
+    pos: 'center 42%',
   },
   {
-    key: 'features', label: 'Everything included',
-    kicker: 'One subscription',
-    titleA: 'Everything Your', titleAccent: 'Studio', titleB: 'Runs On',
-    body: 'Stop stitching together spreadsheets, chat threads and drives. Eventor covers the whole job from first enquiry to delivered album.',
-    chips: ['Studio CRM', 'Photo proofing', 'Virtual album', 'Payments', 'Crew scheduling', 'Cloud storage'],
-    cta: 'Explore features', ctaHref: '#crm', alt: 'See pricing', altHref: '#pricing',
-    image: 'photo-1519741497674-611481863552', pos: 'center 35%',
+    key: 'silhouette-dusk',
+    alt: 'A couple in silhouette against a backlit sheet at dusk',
+    url: '/assets/hero/silhouette-dusk.jpg',
+    pos: 'center 62%',
   },
   {
-    key: 'agreement', label: 'Agreement management',
-    kicker: 'Agreement management',
-    titleA: 'Send, Sign And', titleAccent: 'Store', titleB: 'Every Agreement',
-    body: 'Build the contract once, send it as a link, and let clients read the package, payment terms and cancellation policy before tapping accept. Signed copies stay in their portal.',
-    chips: ['Reusable templates', 'Tap-to-sign', 'Sinhala & English', 'Auto PDF copy'],
-    cta: 'View an agreement', ctaHref: '#portal', alt: 'See the portal', altHref: '#portal',
-    image: 'photo-1450101499163-c8848c66ca85', pos: 'center',
-  },
-  {
-    key: 'koko', label: 'Pay later with Koko',
-    kicker: 'Flexible client payments',
-    titleA: 'Book Now,', titleAccent: 'Pay Later', titleB: 'With Koko',
-    body: 'Let couples split any package into three interest-free instalments at checkout. You get paid up front by Koko — the client pays over time.',
-    koko: true,
-    cta: 'Enable Koko', ctaHref: '#payments', alt: 'Payment options', altHref: '#payments',
-    image: 'photo-1522673607200-164d1b6ce486', pos: 'center 30%',
+    key: 'lanterns-forest',
+    alt: 'A couple carrying lanterns through a dark forest',
+    url: '/assets/hero/lanterns-forest.jpg',
+    pos: 'center 62%',
   },
 ];
 
