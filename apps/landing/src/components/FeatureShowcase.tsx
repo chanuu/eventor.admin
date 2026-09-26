@@ -24,12 +24,20 @@ export default function FeatureShowcase() {
         <h2
           style={{
             fontSize: 'clamp(30px, 4vw, 46px)', fontWeight: 800, letterSpacing: '-0.03em',
-            lineHeight: 1.12, color: T.ink, textAlign: 'center', margin: 0, maxWidth: 820,
-            marginInline: 'auto',
+            lineHeight: 1.12, color: T.ink, textAlign: 'center', margin: 0,
           }}
         >
-          Stop stitching it together — book, shoot and deliver in one place.
+          Less admin. More photography.
         </h2>
+        <p
+          style={{
+            fontSize: 17.5, lineHeight: 1.65, color: T.mid, textAlign: 'center',
+            margin: '16px auto 0', maxWidth: 680,
+          }}
+        >
+          Bring bookings, clients, contracts, workflows and galleries together in one smart
+          photography CRM.
+        </p>
 
         {/* Tabs */}
         <div
@@ -68,11 +76,11 @@ export default function FeatureShowcase() {
 
         {/* Panel */}
         <div
-          className="split-115"
+          className="split-tour"
           id={`panel-${feature.key}`}
           role="tabpanel"
           aria-labelledby={`tab-${feature.key}`}
-          style={{ display: 'grid', gap: 48, alignItems: 'center', marginTop: 48 }}
+          style={{ display: 'grid', gap: 44, alignItems: 'center', marginTop: 48 }}
         >
           {/* Browser mock */}
           <div
