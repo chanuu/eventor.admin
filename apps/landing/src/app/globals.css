@@ -116,3 +116,46 @@ nav::-webkit-scrollbar { display: none; }
   .faq-mark, .faq-mark .bar { transition: none; }
   .faq[open] .faq-answer { animation: none; }
 }
+
+/* ── Hero call to action ────────────────────────────────────────
+   A slow double-beat with a glow that rings out of the edge, so the button
+   draws the eye without nagging. Long rest between beats — a fast loop
+   reads as an error state rather than an invitation.
+
+   The shadow lives here rather than inline because an animation has to own
+   the property outright to animate it. */
+.cta-beat {
+  position: relative;
+  box-shadow: 0 2px 10px rgba(233, 30, 120, 0.32);
+  animation: ctaBeat 3.2s ease-in-out infinite, ctaGlow 3.2s ease-out infinite;
+  transition: filter 180ms ease, transform 180ms ease;
+}
+
+@keyframes ctaBeat {
+  0%   { transform: scale(1); }
+  5%   { transform: scale(1.045); }
+  11%  { transform: scale(1); }
+  16%  { transform: scale(1.025); }
+  22%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ctaGlow {
+  0%   { box-shadow: 0 2px 10px rgba(233, 30, 120, 0.32), 0 0 0 0 rgba(233, 30, 120, 0.45); }
+  5%   { box-shadow: 0 8px 24px rgba(233, 30, 120, 0.48), 0 0 0 7px rgba(233, 30, 120, 0.12); }
+  30%  { box-shadow: 0 2px 10px rgba(233, 30, 120, 0.32), 0 0 0 18px rgba(233, 30, 120, 0); }
+  100% { box-shadow: 0 2px 10px rgba(233, 30, 120, 0.32), 0 0 0 0 rgba(233, 30, 120, 0); }
+}
+
+/* Hovering is the visitor taking over, so the beat stops and the glow holds. */
+.cta-beat:hover {
+  animation-play-state: paused;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(233, 30, 120, 0.46);
+}
+.cta-beat:active { transform: translateY(0) scale(0.99); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-beat { animation: none; }
+}

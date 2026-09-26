@@ -69,13 +69,13 @@ export default function Hero({ signInHref }: { signInHref: string }) {
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 30 }}>
             <a
               href="/get-started"
+              className="cta-beat"
               style={{
                 background: T.gradient, color: T.white,
                 fontSize: 15, fontWeight: 600, borderRadius: 10, padding: '14px 26px',
-                boxShadow: '0 1px 2px rgba(233,30,120,0.24)',
               }}
             >
-              Start free
+              Let&rsquo;s get started
             </a>
             <a
               href={signInHref}
