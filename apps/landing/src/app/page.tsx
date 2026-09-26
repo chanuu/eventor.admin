@@ -437,12 +437,24 @@ export default function LandingPage() {
             {FAQ.map((f) => (
               <details
                 key={f.q}
+                className="faq"
                 style={{ background: T.white, border: `1px solid ${T.line}`, borderRadius: 14, padding: '18px 22px' }}
               >
-                <summary style={{ fontSize: 16, fontWeight: 700, color: T.ink, cursor: 'pointer', listStyle: 'none' }}>
+                <summary
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+                    fontSize: 16, fontWeight: 700, color: T.ink, cursor: 'pointer',
+                  }}
+                >
                   {f.q}
+                  <span className="faq-mark" aria-hidden>
+                    <span className="bar" />
+                    <span className="bar v" />
+                  </span>
                 </summary>
-                <p style={{ fontSize: 14.5, color: T.mid, lineHeight: 1.75, margin: '12px 0 0' }}>{f.a}</p>
+                <p className="faq-answer" style={{ fontSize: 14.5, color: T.mid, lineHeight: 1.75, margin: '12px 0 0' }}>
+                  {f.a}
+                </p>
               </details>
             ))}
           </div>

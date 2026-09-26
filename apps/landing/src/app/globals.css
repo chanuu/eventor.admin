@@ -65,3 +65,52 @@ nav::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; }
 }
+
+/* ── FAQ accordion ──────────────────────────────────────────────
+   Native <details>, so it still opens with JavaScript off. The marker is
+   two bars: the upright one rotates flat as the item opens, turning the
+   plus into a minus, while the whole marker turns with it. */
+.faq summary { list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+
+.faq-mark {
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: #FDE9F2;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms ease;
+}
+.faq summary:hover .faq-mark { background: #FBD2E4; }
+
+.faq-mark .bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 2px;
+  border-radius: 2px;
+  background: #E91E78;
+  transform: translate(-50%, -50%);
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* The upright bar of the plus. */
+.faq-mark .bar.v { transform: translate(-50%, -50%) rotate(90deg); }
+
+/* Open: the marker turns a half circle and the upright bar lies flat, so the
+   two bars overlap as a single minus. */
+.faq[open] .faq-mark { transform: rotate(180deg); }
+.faq[open] .faq-mark .bar.v { transform: translate(-50%, -50%) rotate(0deg); }
+
+/* The answer arrives rather than appearing. */
+.faq[open] .faq-answer { animation: faqIn 240ms ease both; }
+@keyframes faqIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-mark, .faq-mark .bar { transition: none; }
+  .faq[open] .faq-answer { animation: none; }
+}
