@@ -55,6 +55,66 @@ export const STATS = [
   { figure: '4 hrs', label: 'Saved per event' },
 ];
 
+/**
+ * The tabbed feature showcase: a browser mock holding a real screen from the
+ * app, with what it does beside it.
+ *
+ * These are actual screenshots rather than illustrations, which is the point —
+ * a studio deciding whether to switch wants to see the thing itself. Add a tab
+ * by adding an entry and dropping its PNG in public/assets/features.
+ */
+export type Feature = {
+  key: string;
+  tab: string;
+  url: string;
+  image: string;
+  heading: string;
+  body: string;
+  points: string[];
+};
+
+export const FEATURES: Feature[] = [
+  {
+    key: 'dashboard',
+    tab: 'Dashboard',
+    url: 'app.eventor.lk/dashboard',
+    image: '/assets/features/dashboard.png',
+    heading: 'Know exactly where the studio stands',
+    body: 'Open it in the morning and the whole business is on one screen — what is booked, what has been paid, and what needs attention before it becomes a problem.',
+    points: [
+      'Revenue and enquiry sources at a glance',
+      'A funnel showing how far jobs get, and where they stall',
+      'Upcoming shoots and unpaid balances surfaced, not buried',
+    ],
+  },
+  {
+    key: 'board',
+    tab: 'Team board',
+    url: 'app.eventor.lk/tasks',
+    image: '/assets/features/board.png',
+    heading: 'See what everyone is working on',
+    body: 'Every job arrives with its checklist already made — cull, grade, proof, design, deliver. Drag a card to move the work along, and the job advances with it.',
+    points: [
+      'To do, in progress, blocked and done, at a glance',
+      'Deadlines and progress on every card',
+      'One board the whole studio shares',
+    ],
+  },
+  {
+    key: 'payments',
+    tab: 'Payments',
+    url: 'app.eventor.lk/jobs',
+    image: '/assets/features/payments.png',
+    heading: 'Get paid without chasing',
+    body: 'Advance, balance and total sit on the job itself, so the number you quote and the number you are owed never drift apart.',
+    points: [
+      'Advance and balance tracked per booking',
+      'Receipts your client can open from their portal',
+      'Outstanding balances roll up to the dashboard',
+    ],
+  },
+];
+
 export const FAQ = [
   {
     q: 'Who is Eventor for?',

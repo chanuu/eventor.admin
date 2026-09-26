@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import FeatureShowcase from '@/components/FeatureShowcase';
 import {
   ACCENT, IMG, GAL_COVERS, THUMBS, NAV_LINKS, STRIP, ALBUM_POINTS, GALLERY_DEFS,
   CRM_POINTS, PIPELINE, PROOF_POINTS, PAYMENT_ROWS, SCHEDULE_ROWS, PLANS, FOOTER_COLS,
@@ -91,6 +92,8 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      <FeatureShowcase />
 
       {/* ── VIRTUAL ALBUM ── */}
       <div id="album" style={{ background: '#FAFAFB', padding: '96px 32px' }}>
