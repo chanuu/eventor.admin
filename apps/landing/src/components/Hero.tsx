@@ -43,7 +43,7 @@ export default function Hero({ signInHref }: { signInHref: string }) {
             }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: T.brand }} />
-            Sri Lanka&rsquo;s First Photography CRM
+            Sri Lanka&rsquo;s All-in-One Photography CRM
           </span>
 
           <h1
