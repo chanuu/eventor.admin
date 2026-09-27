@@ -1,9 +1,138 @@
 /**
- * Landing page content, ported from the Eventor Landing design.
- * Copy, ordering and imagery match the reference exactly.
+ * Landing page content and theme.
+ *
+ * The look follows the Affooh design language — magenta running into coral,
+ * pure-grey neutrals, generous corners — matching the admin app so the two
+ * read as one product. The words stay Eventor's own: this sells a photography
+ * studio platform, not a general-purpose company OS.
  */
 
-export const ACCENT = '#0F5344';
+/** One place for every colour on the page; the sections only reference these. */
+export const T = {
+  brand: '#E91E78',
+  brandDark: '#C8155F',
+  coral: '#FB5B3C',
+  gradient: 'linear-gradient(90deg, #E91E78 0%, #FB5B3C 100%)',
+  tint: '#FDE9F2',
+
+  ink: '#111827',
+  body: '#374151',
+  mid: '#6B7280',
+  muted: '#9CA3AF',
+
+  line: '#ECECEF',
+  lineSoft: '#F3F4F6',
+  canvas: '#F7F7F9',
+  panel: '#FAFAFB',
+  white: '#FFFFFF',
+  dark: '#111827',
+} as const;
+
+/** Kept for anything still reaching for the old name. */
+export const ACCENT = T.brand;
+
+/** The scrolling strip under the hero. */
+export const MARQUEE = [
+  'One studio, one system',
+  'Albums clients actually open',
+  'Proofing without the message threads',
+  'Deposits chased automatically',
+  'Crew scheduling',
+  'Signed agreements, stored',
+];
+
+export const SOCIAL_PROOF = [
+  'Amaya Studios',
+  'Silver Lens',
+  'Kandy Weddings',
+  'Frame & Co.',
+  'Ocean Light',
+];
+
+export const STATS = [
+  { figure: '1,200+', label: 'Events managed' },
+  { figure: '60%', label: 'Less admin per booking' },
+  { figure: '4 hrs', label: 'Saved per event' },
+];
+
+/**
+ * The tabbed feature showcase: a browser mock holding a real screen from the
+ * app, with what it does beside it.
+ *
+ * These are actual screenshots rather than illustrations, which is the point —
+ * a studio deciding whether to switch wants to see the thing itself. Add a tab
+ * by adding an entry and dropping its PNG in public/assets/features.
+ */
+export type Feature = {
+  key: string;
+  tab: string;
+  url: string;
+  image: string;
+  heading: string;
+  body: string;
+  points: string[];
+};
+
+export const FEATURES: Feature[] = [
+  {
+    key: 'dashboard',
+    tab: 'Dashboard',
+    url: 'app.eventor.lk/dashboard',
+    image: '/assets/features/dashboard.png',
+    heading: 'Know exactly where the studio stands',
+    body: 'Open it in the morning and the whole business is on one screen — what is booked, what has been paid, and what needs attention before it becomes a problem.',
+    points: [
+      'Revenue and enquiry sources at a glance',
+      'A funnel showing how far jobs get, and where they stall',
+      'Upcoming shoots and unpaid balances surfaced, not buried',
+    ],
+  },
+  {
+    key: 'board',
+    tab: 'Team board',
+    url: 'app.eventor.lk/tasks',
+    image: '/assets/features/board.png',
+    heading: 'See what everyone is working on',
+    body: 'Every job arrives with its checklist already made — cull, grade, proof, design, deliver. Drag a card to move the work along, and the job advances with it.',
+    points: [
+      'To do, in progress, blocked and done, at a glance',
+      'Deadlines and progress on every card',
+      'One board the whole studio shares',
+    ],
+  },
+  {
+    key: 'payments',
+    tab: 'Payments',
+    url: 'app.eventor.lk/jobs',
+    image: '/assets/features/payments.png',
+    heading: 'Get paid without chasing',
+    body: 'Advance, balance and total sit on the job itself, so the number you quote and the number you are owed never drift apart.',
+    points: [
+      'Advance and balance tracked per booking',
+      'Receipts your client can open from their portal',
+      'Outstanding balances roll up to the dashboard',
+    ],
+  },
+];
+
+export const FAQ = [
+  {
+    q: 'Who is Eventor for?',
+    a: 'Photography and videography studios in Sri Lanka — from a single photographer keeping track of bookings, to a multi-branch studio running a crew and a full calendar.',
+  },
+  {
+    q: 'Can my clients use it without an account?',
+    a: 'Yes. Galleries and albums open from a link in any browser, and agreements can be read and signed without signing up. Clients only get a portal login if you invite them.',
+  },
+  {
+    q: 'What happens to my photos?',
+    a: 'Originals stay yours. Proofing galleries are stored at web resolution for the client to choose from; you keep the masters and deliver them however you already do.',
+  },
+  {
+    q: 'Can I change plan later?',
+    a: 'Any time, up or down. Nothing is deleted when you move to a smaller plan — anything outside it simply becomes read-only until you upgrade again.',
+  },
+];
 
 export const IMG = (id: string, w = 600) =>
   `https://images.unsplash.com/${id}?w=${w}&q=80&auto=format&fit=crop`;
@@ -20,51 +149,40 @@ export const THUMBS = [
   'photo-1478146896981-b80fe463b330', 'photo-1509927083803-4bd519298ac4',
 ];
 
+/**
+ * The hero's rotating images.
+ *
+ * Real studio work rather than stock: these are the photographs a
+ * photographer would judge the product by. Each carries its own focal point,
+ * because the frame crops to fill and the subjects sit at different heights.
+ */
 export type HeroSlide = {
-  key: string; label: string; kicker: string;
-  titleA: string; titleAccent: string; titleB: string;
-  body: string;
-  chips?: string[];
-  koko?: boolean;
-  cta: string; ctaHref: string; alt: string; altHref: string;
-  url?: string; image?: string; pos: string; color?: boolean;
+  key: string;
+  /** Described for anyone who cannot see it. */
+  alt: string;
+  url: string;
+  /** background-position — keeps the subject in frame as the crop changes. */
+  pos: string;
 };
 
 export const HERO_SLIDES: HeroSlide[] = [
   {
-    key: 'album', label: 'Virtual album',
-    kicker: 'First photography CRM in Sri Lanka',
-    titleA: 'Create', titleAccent: 'Modern', titleB: 'Client Virtual Album',
-    body: 'One platform for your studio, your clients and your bookings — albums, proofing, agreements, payments and schedules in a single place.',
-    cta: 'Subscribe Now', ctaHref: '#pricing', alt: 'See a live album', altHref: '#album',
-    url: '/assets/hero-ceremony.jpg', pos: 'center 30%', color: true,
+    key: 'reading-water',
+    alt: 'A couple seated in shallow water, each reading a book',
+    url: '/assets/hero/reading-water.jpg',
+    pos: 'center 42%',
   },
   {
-    key: 'features', label: 'Everything included',
-    kicker: 'One subscription',
-    titleA: 'Everything Your', titleAccent: 'Studio', titleB: 'Runs On',
-    body: 'Stop stitching together spreadsheets, chat threads and drives. Eventor covers the whole job from first enquiry to delivered album.',
-    chips: ['Studio CRM', 'Photo proofing', 'Virtual album', 'Payments', 'Crew scheduling', 'Cloud storage'],
-    cta: 'Explore features', ctaHref: '#crm', alt: 'See pricing', altHref: '#pricing',
-    image: 'photo-1519741497674-611481863552', pos: 'center 35%',
+    key: 'silhouette-dusk',
+    alt: 'A couple in silhouette against a backlit sheet at dusk',
+    url: '/assets/hero/silhouette-dusk.jpg',
+    pos: 'center 62%',
   },
   {
-    key: 'agreement', label: 'Agreement management',
-    kicker: 'Agreement management',
-    titleA: 'Send, Sign And', titleAccent: 'Store', titleB: 'Every Agreement',
-    body: 'Build the contract once, send it as a link, and let clients read the package, payment terms and cancellation policy before tapping accept. Signed copies stay in their portal.',
-    chips: ['Reusable templates', 'Tap-to-sign', 'Sinhala & English', 'Auto PDF copy'],
-    cta: 'View an agreement', ctaHref: '#portal', alt: 'See the portal', altHref: '#portal',
-    image: 'photo-1450101499163-c8848c66ca85', pos: 'center',
-  },
-  {
-    key: 'koko', label: 'Pay later with Koko',
-    kicker: 'Flexible client payments',
-    titleA: 'Book Now,', titleAccent: 'Pay Later', titleB: 'With Koko',
-    body: 'Let couples split any package into three interest-free instalments at checkout. You get paid up front by Koko — the client pays over time.',
-    koko: true,
-    cta: 'Enable Koko', ctaHref: '#payments', alt: 'Payment options', altHref: '#payments',
-    image: 'photo-1522673607200-164d1b6ce486', pos: 'center 30%',
+    key: 'lanterns-forest',
+    alt: 'A couple carrying lanterns through a dark forest',
+    url: '/assets/hero/lanterns-forest.jpg',
+    pos: 'center 62%',
   },
 ];
 
@@ -104,7 +222,7 @@ export const PIPELINE = [
   { name: 'Randula & Sanduni', meta: 'Wedding · 12 May', stage: 'Signed', bg: '#EAF3E2', fg: '#3f6b2b' },
   { name: 'Dinuka Fernando', meta: 'Corporate · 3 Jun', stage: 'Proposal', bg: '#FDF0E2', fg: '#a8631f' },
   { name: 'Kavindi & Sahan', meta: 'Engagement · 21 Jun', stage: 'Deposit due', bg: '#FDF0E2', fg: '#a8631f' },
-  { name: 'Methmi Silva', meta: 'Birthday · 2 Jul', stage: 'Enquiry', bg: '#EDEFEC', fg: '#5b6360' },
+  { name: 'Methmi Silva', meta: 'Birthday · 2 Jul', stage: 'Enquiry', bg: '#F3F4F6', fg: '#374151' },
   { name: 'Tharindu & Nadee', meta: 'Wedding · 19 Jul', stage: 'Signed', bg: '#EAF3E2', fg: '#3f6b2b' },
 ];
 
@@ -115,15 +233,15 @@ export const PROOF_POINTS = [
 ];
 
 export const PAYMENT_ROWS = [
-  { label: 'Booking deposit (30%)', meta: 'Paid 14 Mar · bank transfer', amount: 'Rs. 45,000', icon: '✓', bg: '#8BC53F', fg: '#0F3D2E', border: 'none' },
+  { label: 'Booking deposit (30%)', meta: 'Paid 14 Mar · bank transfer', amount: 'Rs. 45,000', icon: '✓', bg: '#FB5B3C', fg: '#0F3D2E', border: 'none' },
   { label: 'Balance payment (70%)', meta: 'Due 5 May · reminder scheduled', amount: 'Rs. 105,000', icon: '!', bg: '#FDF0E2', fg: '#a8631f', border: '2px solid #F3D9BC' },
-  { label: 'Album add-on', meta: 'Requested by client', amount: 'Rs. 28,000', icon: '+', bg: '#ffffff', fg: '#8b938f', border: '2px solid #E4E7E5' },
+  { label: 'Album add-on', meta: 'Requested by client', amount: 'Rs. 28,000', icon: '+', bg: '#ffffff', fg: '#9CA3AF', border: '2px solid #E4E7E5' },
 ];
 
 export const SCHEDULE_ROWS = [
-  { date: '2 Apr', title: 'Pre-shoot session', meta: 'Diyatha Uyana · 4:00 PM', crew: '1 crew', bg: '#EDEFEC', fg: '#5b6360' },
+  { date: '2 Apr', title: 'Pre-shoot session', meta: 'Diyatha Uyana · 4:00 PM', crew: '1 crew', bg: '#F3F4F6', fg: '#374151' },
   { date: '12 May', title: 'Wedding day coverage', meta: 'Water’s Edge · 9:00 AM', crew: '3 crew', bg: '#EAF3E2', fg: '#3f6b2b' },
-  { date: '18 May', title: 'Editing deadline', meta: 'Gallery cull & retouch', crew: 'Studio', bg: '#EDEFEC', fg: '#5b6360' },
+  { date: '18 May', title: 'Editing deadline', meta: 'Gallery cull & retouch', crew: 'Studio', bg: '#F3F4F6', fg: '#374151' },
   { date: '3 Jun', title: 'Corporate shoot', meta: 'Cinnamon Grand · 10:00 AM', crew: '2 crew', bg: '#FDF0E2', fg: '#a8631f' },
 ];
 
