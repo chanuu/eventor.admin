@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Eventor — Photography Studio Platform for Sri Lanka',
+  title: 'Eventor - Photography Studio Platform for Sri Lanka',
   description:
     'One platform for your studio, your clients and your bookings — albums, proofing, agreements, payments and schedules in a single place.',
 };
