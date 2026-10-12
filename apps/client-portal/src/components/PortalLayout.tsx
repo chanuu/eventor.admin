@@ -210,7 +210,14 @@ export default function PortalLayout({ user }: { user: User }) {
             </div>
           )}
 
-          <div style={{ padding: isMobile ? '16px 16px 48px' : '28px 34px 60px', maxWidth: 1120 }}>
+          {/*
+            No width cap. It was 1120 with no `margin: 0 auto`, so on anything
+            wider than about 1400px the content stayed left and the remaining
+            third of the screen was empty — the cap read as a bug rather than a
+            reading measure. The admin's main region fills its space with
+            padding that scales, and this now matches it.
+          */}
+          <div style={{ padding: isMobile ? '16px 16px 48px' : '28px 34px 60px' }}>
             <Outlet />
           </div>
         </div>
