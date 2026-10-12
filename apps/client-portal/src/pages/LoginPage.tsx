@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { C, FONT } from '../lib/theme';
+import { C, FONT, BRAND_GRADIENT } from '../lib/theme';
 import { toE164, isValidLkMobile, prettyPhone } from '../lib/phone';
 
 const RESEND_SECONDS = 60;
@@ -163,16 +163,16 @@ const wrap: React.CSSProperties = {
 };
 
 const cardStyle: React.CSSProperties = {
-  width: 400, padding: 36, background: C.white, borderRadius: 16, border: `1px solid ${C.border}`,
-  boxShadow: '0 8px 24px rgba(15,61,46,0.06)',
+  width: 400, padding: 36, background: C.white, borderRadius: 14, border: `1px solid ${C.border}`,
+  boxShadow: '0 8px 24px rgba(17,24,39,0.06)',
 };
 
 const logoMark: React.CSSProperties = {
-  width: 40, height: 40, borderRadius: 11, background: C.lime, color: C.green,
-  fontWeight: 800, fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  width: 42, height: 42, borderRadius: 12, background: BRAND_GRADIENT, color: C.white,
+  fontWeight: 700, fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
-const title: React.CSSProperties = { fontSize: 19, fontWeight: 800, color: C.green, marginTop: 16 };
+const title: React.CSSProperties = { fontSize: 22, fontWeight: 700, color: C.textStrong, marginTop: 16, letterSpacing: '-0.01em' };
 const sub: React.CSSProperties = { fontSize: 13, color: C.textMid, marginTop: 6, lineHeight: 1.6 };
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 };
 const fieldLabel: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, color: C.textStrong };
@@ -201,11 +201,12 @@ const codeInput: React.CSSProperties = {
 
 function primaryBtn(enabled: boolean): React.CSSProperties {
   return {
-    height: 44, borderRadius: 9, border: 'none', fontWeight: 700, fontSize: 13,
+    height: 44, borderRadius: 10, border: 'none', fontWeight: 600, fontSize: 14,
     fontFamily: 'inherit', marginTop: 4,
     cursor: enabled ? 'pointer' : 'not-allowed',
-    background: enabled ? C.green : '#DDE3DE',
+    background: enabled ? BRAND_GRADIENT : C.borderSoft,
     color: enabled ? C.white : C.muted,
+    boxShadow: enabled ? '0 2px 8px rgba(233,30,120,0.22)' : 'none',
   };
 }
 

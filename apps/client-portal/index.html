@@ -3,11 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0F3D2E" />
+    <meta name="theme-color" content="#E91E78" />
     <title>Eventor Client Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet" />
+    <!--
+      Inter for the product chrome, matching the studio admin. Cormorant stays
+      for album pages, which are editorial rather than UI.
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet" />
     <style>
       /* Digital album page surfaces — StPageFlip positions these absolutely. */
       .album-page { background: #FBFAF7; overflow: hidden; }
@@ -17,9 +21,20 @@
     </style>
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #16241d; background: #F6F8F5; }
-      a { color: #0F3D2E; text-decoration: none; }
-      a:hover { color: #8BC53F; }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        color: #111827;
+        background: #F7F7F9;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: inherit; text-decoration: none; }
+      a:hover { color: #E91E78; }
+      /* Figures line up in money columns. */
+      .tabular { font-variant-numeric: tabular-nums; }
+      /* iOS zooms the page when focusing an input under 16px. */
+      @media (max-width: 640px) { input, select, textarea { font-size: 16px; } }
       @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
     </style>

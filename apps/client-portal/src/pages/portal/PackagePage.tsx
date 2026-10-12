@@ -32,7 +32,7 @@ export default function PackagePage() {
             Your booked package
           </div>
           <div style={{ fontSize: 24, fontWeight: 800, marginTop: 8 }}>{pkg.name}</div>
-          <div style={{ fontSize: 13, color: '#cfe4d8', marginTop: 6 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', marginTop: 6 }}>
             Booked {shortDate(job.created_at)} · <span style={{ textTransform: 'capitalize' }}>{job.status}</span>
           </div>
         </div>

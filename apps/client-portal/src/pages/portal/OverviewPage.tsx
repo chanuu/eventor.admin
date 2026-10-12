@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { C, card, solidBtn, ghostBtn, label, dot } from '../../lib/theme';
+import { C, card, solidBtn, ghostBtn, label, dot, BRAND_GRADIENT } from '../../lib/theme';
 import { money, shortDate, dateTime, relativeDays } from '../../lib/format';
 import {
   usePortal, balanceDue, totalPaid, nextShoot, eventDate, photoUrl,
@@ -43,7 +43,7 @@ export default function OverviewPage() {
             {job.event_type ?? 'Event'}{evDate ? ` · ${shortDate(evDate)}` : ''}
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8 }}>{job.title}</div>
-          <div style={{ fontSize: 13.5, color: '#cfe4d8', marginTop: 6 }}>
+          <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.72)', marginTop: 6 }}>
             {[venue, job.pkg?.name].filter(Boolean).join(' · ') || 'Your event with us'}
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function OverviewPage() {
           <div style={ctaIcon}>☑</div>
           <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{ fontSize: 15, fontWeight: 800 }}>Your album proofs are ready</div>
-            <div style={{ fontSize: 12.5, color: '#cfe4d8', marginTop: 4 }}>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.72)', marginTop: 4 }}>
               Pick your favourites from {proofPhotos.length} proof{proofPhotos.length === 1 ? '' : 's'} so we can start
               designing — {proofSelected} chosen so far.
             </div>
@@ -129,9 +129,9 @@ export default function OverviewPage() {
             {buildJourney(job).map((step, i, all) => (
               <div key={i} style={{ display: 'flex', gap: 14 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                  <span style={step.done ? dot(C.lime, C.green, 'none')
-                    : step.current ? dot(C.white, C.green, `3px solid ${C.lime}`)
-                    : dot(C.white, C.muted, '2px solid #E0E5E1')}>
+                  <span style={step.done ? dot(C.brand, C.white, 'none')
+                    : step.current ? dot(C.white, C.brand, `3px solid ${C.brand}`)
+                    : dot(C.white, C.muted, `2px solid ${C.border}`)}>
                     {step.done ? '✓' : ''}
                   </span>
                   {i < all.length - 1 && (
@@ -233,7 +233,7 @@ const hero: React.CSSProperties = {
 
 const heroScrim: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'linear-gradient(180deg,rgba(15,61,46,0.35),rgba(15,61,46,0.92))',
+  background: 'linear-gradient(180deg,rgba(17,24,39,0.35),rgba(17,24,39,0.92))',
 };
 
 const ctaBanner: React.CSSProperties = {
@@ -242,11 +242,11 @@ const ctaBanner: React.CSSProperties = {
 };
 
 const ctaIcon: React.CSSProperties = {
-  width: 44, height: 44, borderRadius: 12, background: C.lime, color: C.green,
+  width: 44, height: 44, borderRadius: 12, background: BRAND_GRADIENT, color: C.white,
   fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
 };
 
 const ctaBtn: React.CSSProperties = {
-  background: C.lime, color: C.green, border: 'none', borderRadius: 9, padding: '12px 22px',
+  background: BRAND_GRADIENT, color: C.white, border: 'none', borderRadius: 9, padding: '12px 22px',
   fontSize: 12.5, fontWeight: 700, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit',
 };
