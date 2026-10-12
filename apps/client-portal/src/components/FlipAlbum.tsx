@@ -12,11 +12,17 @@ export type AlbumPage =
    * One image. `isSpread` means it was designed across two facing pages, so it
    * is painted over a pair rather than fitted into one.
    */
-  | { kind: 'photo'; url: string; caption: string | null; isSpread?: boolean };
+  | { kind: 'photo'; url: string; caption: string | null; isSpread?: boolean }
+  /**
+   * Designed cover artwork — front or back. Replaces the generated text cover,
+   * and is still a hard leaf, because a cover is board whichever it is.
+   */
+  | { kind: 'coverImage'; url: string };
 
 /** What actually gets handed to StPageFlip, after spreads are laid out. */
 type RenderPage =
   | { kind: 'cover'; kicker: string; title: string; body: string }
+  | { kind: 'coverImage'; url: string }
   | { kind: 'photo'; url: string; caption: string | null; number: number }
   /** One side of a spread. The image is whole; this half shows its half. */
   | { kind: 'half'; url: string; caption: string | null; side: 'l' | 'r'; number: number }
@@ -39,7 +45,7 @@ function layOut(pages: AlbumPage[]): RenderPage[] {
   let number = 0;
 
   for (const p of pages) {
-    if (p.kind === 'cover') { out.push(p); continue; }
+    if (p.kind === 'cover' || p.kind === 'coverImage') { out.push(p); continue; }
 
     if (!p.isSpread) {
       out.push({ kind: 'photo', url: p.url, caption: p.caption, number: ++number });
@@ -274,7 +280,7 @@ export default function FlipAlbum({
       laidOut.forEach((p) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'album-page';
-        if (p.kind === 'cover') pageEl.setAttribute('data-density', 'hard');
+        if (p.kind === 'cover' || p.kind === 'coverImage') pageEl.setAttribute('data-density', 'hard');
         pageEl.innerHTML = pageHtml(p);
         holder.appendChild(pageEl);
       });
@@ -437,6 +443,30 @@ export default function FlipAlbum({
           <div style={{ fontFamily: SERIF, fontSize: 26, color: '#ffffff', marginTop: 4 }}>{title}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/*
+            Turning lives up here rather than either side of the book. Flanking
+            arrows cost roughly 120px of width that the album could be using,
+            and on a wide screen the pages are the whole point.
+          */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4 }}>
+            <button
+              onClick={() => manualTurn('flipPrev')}
+              disabled={page <= 0}
+              aria-label="Previous page"
+              style={arrowBtn(page > 0)}
+            >
+              ‹
+            </button>
+            <button
+              onClick={() => manualTurn('flipNext')}
+              disabled={page >= total - 1}
+              aria-label="Next page"
+              style={arrowBtn(page < total - 1)}
+            >
+              ›
+            </button>
+          </div>
+
           <button onClick={() => setPlaying((p) => !p)} style={ghostPill} aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}>
             {playing ? '❙❙ Pause' : '▶ Play'}
           </button>
@@ -462,9 +492,7 @@ export default function FlipAlbum({
 
       {/* Book */}
       <div style={bookRow}>
-        <button onClick={() => manualTurn('flipPrev')} style={arrowBtn(page > 0)}>‹</button>
         <div ref={bookRef} style={bookHost} />
-        <button onClick={() => manualTurn('flipNext')} style={arrowBtn(page < total - 1)}>›</button>
       </div>
 
       {/* Footer */}
@@ -501,6 +529,15 @@ function escapeHtml(value: string): string {
 function pageHtml(p: RenderPage): string {
   if (p.kind === 'blank') {
     return '<div class="page-inner" style="background:#FBFAF7"></div>';
+  }
+
+  if (p.kind === 'coverImage') {
+    // `contain` rather than `cover`: a cover is a designed piece and cropping
+    // it would cut the studio's own artwork. The letterboxing sits on the page
+    // colour, so a cover built to the page shape shows no border at all.
+    return '<div class="page-inner" style="background:#FBFAF7;'
+      + `background-image:url(${encodeURI(p.url)});`
+      + 'background-size:contain;background-position:center;background-repeat:no-repeat"></div>';
   }
 
   if (p.kind === 'cover') {
@@ -569,7 +606,7 @@ function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties 
 }
 
 const headerRow: React.CSSProperties = {
-  width: '100%', maxWidth: 1600, display: 'flex', alignItems: 'center',
+  width: '100%', display: 'flex', alignItems: 'center',
   justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', flexShrink: 0,
 };
 
@@ -578,23 +615,37 @@ const kicker: React.CSSProperties = {
 };
 
 const bookRow: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 1600,
+  display: 'flex', alignItems: 'center', width: '100%',
   justifyContent: 'center', flex: '1 1 auto', minHeight: 0,
 };
 
+/*
+ * The book is measured from this element and also injected into it, so its
+ * size must come from the layout alone — never from its contents. `flex-basis:
+ * auto` sized it to the book it contained, which fed the ResizeObserver, which
+ * rebuilt the book at a new size, which resized the host again: three identical
+ * loads produced three different page shapes, one of them 0x0.
+ *
+ * A zero basis breaks the loop — the row decides the width, the content cannot
+ * argue. The old `maxWidth: 1600` was damping this by accident, which is why it
+ * only surfaced when the album went full width.
+ */
 const bookHost: React.CSSProperties = {
-  flex: '1 1 auto', minWidth: 0, height: '100%', overflow: 'hidden',
+  flex: '1 1 0%', minWidth: 0, width: '100%', height: '100%', overflow: 'hidden',
+  position: 'relative',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
 const footerCol: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-  width: '100%', maxWidth: 1600, flexShrink: 0,
+  width: '100%', flexShrink: 0,
 };
 
+// 36px to sit level with the close button and the pills beside it; they were
+// 46 when they flanked the book, where nothing set their scale.
 function arrowBtn(enabled: boolean): React.CSSProperties {
   return {
-    width: 46, height: 46, borderRadius: '50%', flexShrink: 0, fontSize: 24, lineHeight: 1,
+    width: 36, height: 36, borderRadius: '50%', flexShrink: 0, fontSize: 20, lineHeight: 1,
     cursor: enabled ? 'pointer' : 'default', fontFamily: 'inherit',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     background: `rgba(255,255,255,${enabled ? 0.14 : 0.05})`,

@@ -51,6 +51,8 @@ export type Album = {
   music_enabled: boolean; music_url: string | null; music_name: string | null;
   autoplay: boolean; autoplay_seconds: number;
   page_aspect: number | null;
+  cover_image_url: string | null;
+  back_image_url: string | null;
   share_token: string | null; is_public: boolean;
   published_at: string | null;
   pages: AlbumPageRow[];
@@ -139,7 +141,8 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       albums(id, title, cover_kicker, cover_title, cover_body,
              closing_kicker, closing_title, closing_body,
              music_enabled, music_url, music_name,
-             autoplay, autoplay_seconds, page_aspect, share_token, is_public, published_at,
+             autoplay, autoplay_seconds, page_aspect, cover_image_url, back_image_url,
+             share_token, is_public, published_at,
              album_pages(id, image_url, caption, sort_order, is_spread, gallery_photos(storage_path)))
     `)
     .eq('id', jobId)
@@ -226,6 +229,8 @@ function albumFrom(raw: any): Album | null {
     autoplay: a.autoplay ?? false,
     autoplay_seconds: a.autoplay_seconds ?? 6,
     page_aspect: a.page_aspect ?? null,
+    cover_image_url: a.cover_image_url ?? null,
+    back_image_url: a.back_image_url ?? null,
     share_token: a.share_token ?? null,
     is_public: a.is_public ?? false,
     published_at: a.published_at,
