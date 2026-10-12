@@ -36,21 +36,27 @@ export default function AlbumPage() {
         .filter((p): p is { url: string; caption: string | null; isSpread: boolean } => !!p.url);
       if (built.length === 0) return [];
 
+      // Designed artwork replaces the generated text page, front and back
+      // independently — an album may have one, both or neither.
       return [
-        {
-          kind: 'cover',
-          kicker: album.cover_kicker || defaultKicker,
-          title: album.cover_title || album.title || job.title,
-          body: album.cover_body || `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
-        },
+        album.cover_image_url
+          ? { kind: 'coverImage' as const, url: album.cover_image_url }
+          : {
+            kind: 'cover' as const,
+            kicker: album.cover_kicker || defaultKicker,
+            title: album.cover_title || album.title || job.title,
+            body: album.cover_body || `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
+          },
         ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption, isSpread: p.isSpread })),
-        {
-          kind: 'cover',
-          kicker: album.closing_kicker || 'Thank you',
-          title: album.closing_title || `With love,\n${studio}`,
-          body: album.closing_body
-            || (photographer ? `Photographed by ${photographer}` : 'Thank you for letting us tell your story.'),
-        },
+        album.back_image_url
+          ? { kind: 'coverImage' as const, url: album.back_image_url }
+          : {
+            kind: 'cover' as const,
+            kicker: album.closing_kicker || 'Thank you',
+            title: album.closing_title || `With love,\n${studio}`,
+            body: album.closing_body
+              || (photographer ? `Photographed by ${photographer}` : 'Thank you for letting us tell your story.'),
+          },
       ];
     }
 
