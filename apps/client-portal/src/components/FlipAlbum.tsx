@@ -6,6 +6,32 @@ const SERIF = "'Cormorant Garamond',Georgia,serif";
 /** The original portrait page. Albums that predate `page_aspect` keep it. */
 const PAGE_RATIO = 520 / 640;
 
+/**
+ * Slides the book across when only one leaf is showing.
+ *
+ * With a cover, the book opens as a real one does: the front cover takes the
+ * right-hand slot and the left stands empty. Full screen, that reads as the
+ * album using half the window rather than as a closed book — so it moves half a
+ * page to sit in the middle, and moves back as soon as a true spread is
+ * showing. A back cover alone on the left gets the same treatment, the other
+ * way.
+ */
+function centreBook(
+  mount: HTMLDivElement | null,
+  pageW: number,
+  page: number,
+  pageCount: number,
+): void {
+  if (!mount || !pageW) return;
+
+  const half = pageW / 2;
+  const onlyCover = page === 0;
+  const onlyBack = page === pageCount - 1 && pageCount % 2 === 1;
+
+  const shift = onlyCover ? -half : onlyBack ? half : 0;
+  mount.style.transform = shift ? `translateX(${shift}px)` : '';
+}
+
 export type AlbumPage =
   | { kind: 'cover'; kicker: string; title: string; body: string }
   /**
@@ -98,6 +124,9 @@ export default function FlipAlbum({
 
   const [page, setPage] = useState(0);
   const [pageCount, setPageCount] = useState(pages.length);
+  /** The injected book, and the page width it was built at. */
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const pageWRef = useRef(0);
   /** Measured book area. Changing it rebuilds the book at the new size. */
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   const [audioOn, setAudioOn] = useState(false);
@@ -149,25 +178,35 @@ export default function FlipAlbum({
     if (ctx) setTimeout(() => ctx.close(), 900);
   }, []);
 
-  const startAudio = useCallback(() => {
+  /**
+   * Starts the soundtrack. Resolves false when the browser refuses.
+   *
+   * Refusal is normal, not an error: audio may not start without a gesture on
+   * the page. The caller needs to know, because showing "Music on" over silence
+   * is worse than leaving the button alone.
+   */
+  const startAudio = useCallback(async (): Promise<boolean> => {
     // An uploaded track replaces the generated loop entirely.
     if (musicUrl) {
       const el = elementRef.current;
-      if (!el) return;
+      if (!el) return false;
       el.loop = true;
       el.volume = 0;
-      el.play().then(() => {
-        // Ease in so it doesn't jump out at the reader.
-        const fade = setInterval(() => {
-          el.volume = Math.min(0.5, el.volume + 0.04);
-          if (el.volume >= 0.5) clearInterval(fade);
-        }, 90);
-      }).catch(() => { /* blocked by the browser; the toggle simply stays off */ });
-      return;
+      try {
+        await el.play();
+      } catch {
+        return false;
+      }
+      // Ease in so it doesn't jump out at the reader.
+      const fade = setInterval(() => {
+        el.volume = Math.min(0.5, el.volume + 0.04);
+        if (el.volume >= 0.5) clearInterval(fade);
+      }, 90);
+      return true;
     }
 
     const AC = window.AudioContext ?? (window as any).webkitAudioContext;
-    if (!AC) return;
+    if (!AC) return false;
 
     const ctx: AudioContext = new AC();
     ctxRef.current = ctx;
@@ -206,14 +245,27 @@ export default function FlipAlbum({
       });
     };
 
+    // A context created without a gesture starts suspended; resuming it is the
+    // same permission question the <audio> element asks.
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch { /* fall through to the state check */ }
+    }
+    if (ctx.state !== 'running') {
+      ctxRef.current = null;
+      void ctx.close().catch(() => {});
+      return false;
+    }
+
     playChord();
     audioTimerRef.current = setInterval(playChord, 5200);
+    return true;
   }, [musicUrl]);
 
   function toggleAudio() {
-    const next = !audioOn;
-    setAudioOn(next);
-    if (next) startAudio(); else stopAudio();
+    if (audioOn) { setAudioOn(false); stopAudio(); return; }
+    void startAudio().then((ok) => setAudioOn(ok));
   }
 
   // ── Measure the available book area ──────────────────────────────────────
@@ -278,7 +330,10 @@ export default function FlipAlbum({
       const availW = Math.max(260, box.w);
 
       const mount = document.createElement('div');
-      mount.style.cssText = 'width:100%;display:flex;align-items:center;justify-content:center';
+      mount.style.cssText =
+        'width:100%;display:flex;align-items:center;justify-content:center;'
+        + 'transition:transform 400ms ease';
+      mountRef.current = mount;
       el.appendChild(mount);
 
       const holder = document.createElement('div');
@@ -327,7 +382,12 @@ export default function FlipAlbum({
       flipRef.current = flip;
       readyAtRef.current = Date.now();
       setReady(true);
+      pageWRef.current = pageW;
       setPageCount(flip.getPageCount());
+      // Also here, not only in the effect below: a rebuild replaces this mount,
+      // and if the page and count are unchanged the effect has no reason to run
+      // again, leaving the new book uncentred.
+      centreBook(mount, pageW, pageRef.current, flip.getPageCount());
 
       // Keep the reader's place across a rebuild (resize / fullscreen).
       const restoreTo = pageRef.current;
@@ -367,6 +427,60 @@ export default function FlipAlbum({
       if (p.kind === 'photo') { const img = new Image(); img.src = p.url; }
     });
   }, [pages]);
+
+  /*
+   * Starts the soundtrack on its own.
+   *
+   * Browsers refuse audio until the page has been interacted with, so this
+   * tries once on open and, if refused, again on the reader's first touch —
+   * opening an album and clicking a page counts, so in practice the music comes
+   * in as they begin reading rather than never.
+   *
+   * The listeners are one-shot and removed as soon as it is playing, so nothing
+   * keeps retrying for a reader who deliberately turned the music off.
+   */
+  useEffect(() => {
+    if (!musicEnabled) return;
+
+    let done = false;
+    const stop = () => {
+      done = true;
+      for (const e of ['pointerdown', 'keydown', 'touchstart'] as const) {
+        window.removeEventListener(e, attempt);
+      }
+    };
+
+    async function attempt() {
+      if (done) return;
+      const ok = await startAudio();
+      if (ok) { setAudioOn(true); stop(); }
+    }
+
+    void attempt();
+    for (const e of ['pointerdown', 'keydown', 'touchstart'] as const) {
+      window.addEventListener(e, attempt, { once: false });
+    }
+
+    return stop;
+    // startAudio is stable for a given track; re-running on every render would
+    // restart the music mid-listen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicEnabled, musicUrl]);
+
+  /*
+   * Centres the book when only one leaf is showing.
+   *
+   * With a cover, the book opens like a real one: the front cover occupies the
+   * right-hand slot and the left is empty. Across a full screen that reads as
+   * the album using half the window rather than as a closed book, so the book
+   * slides half a page across to sit in the middle. It slides back the moment a
+   * true spread is showing, which is when both slots are genuinely in use.
+   *
+   * The same applies to a back cover alone on the left, in the other direction.
+   */
+  useEffect(() => {
+    centreBook(mountRef.current, pageWRef.current, page, pageCount);
+  }, [page, pageCount, box]);
 
   // ── Keyboard + fullscreen ────────────────────────────────────────────────
   useEffect(() => {
@@ -444,7 +558,7 @@ export default function FlipAlbum({
 
   return (
     <div ref={stageRef} style={stageStyle(immersive, !!onClose)}>
-      {musicUrl && <audio ref={elementRef} src={musicUrl} preload="none" loop />}
+      {musicUrl && <audio ref={elementRef} src={musicUrl} preload="auto" loop />}
 
       {/* Header */}
       <div style={headerRow}>
