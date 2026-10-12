@@ -19,6 +19,8 @@ type SharedAlbum = {
   autoplay: boolean;
   autoplay_seconds: number;
   page_aspect: number | null;
+  cover_image_url: string | null;
+  back_image_url: string | null;
   album_pages: AlbumPageRow[];
 };
 
@@ -41,6 +43,7 @@ export default function PublicAlbum() {
         id, title, cover_kicker, cover_title, cover_body,
         closing_kicker, closing_title, closing_body,
         music_enabled, music_url, autoplay, autoplay_seconds, page_aspect,
+        cover_image_url, back_image_url,
         album_pages(id, image_url, caption, sort_order, is_spread, gallery_photos(storage_path))
       `)
       .eq('share_token', token)
@@ -61,20 +64,26 @@ export default function PublicAlbum() {
 
     if (built.length === 0) return [];
 
+    // Designed artwork replaces the generated text page, front and back
+    // independently — an album may have one, both or neither.
     return [
-      {
-        kind: 'cover',
-        kicker: album.cover_kicker || 'Digital Album',
-        title: album.cover_title || album.title || 'Our album',
-        body: album.cover_body || '',
-      },
+      album.cover_image_url
+        ? { kind: 'coverImage' as const, url: album.cover_image_url }
+        : {
+          kind: 'cover' as const,
+          kicker: album.cover_kicker || 'Digital Album',
+          title: album.cover_title || album.title || 'Our album',
+          body: album.cover_body || '',
+        },
       ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption, isSpread: p.isSpread })),
-      {
-        kind: 'cover',
-        kicker: album.closing_kicker || 'Thank you',
-        title: album.closing_title || 'With love',
-        body: album.closing_body || '',
-      },
+      album.back_image_url
+        ? { kind: 'coverImage' as const, url: album.back_image_url }
+        : {
+          kind: 'cover' as const,
+          kicker: album.closing_kicker || 'Thank you',
+          title: album.closing_title || 'With love',
+          body: album.closing_body || '',
+        },
     ];
   }, [album]);
 

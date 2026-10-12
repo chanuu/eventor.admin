@@ -6,17 +6,49 @@ const SERIF = "'Cormorant Garamond',Georgia,serif";
 /** The original portrait page. Albums that predate `page_aspect` keep it. */
 const PAGE_RATIO = 520 / 640;
 
+/**
+ * Slides the book across when only one leaf is showing.
+ *
+ * With a cover, the book opens as a real one does: the front cover takes the
+ * right-hand slot and the left stands empty. Full screen, that reads as the
+ * album using half the window rather than as a closed book — so it moves half a
+ * page to sit in the middle, and moves back as soon as a true spread is
+ * showing. A back cover alone on the left gets the same treatment, the other
+ * way.
+ */
+function centreBook(
+  mount: HTMLDivElement | null,
+  pageW: number,
+  page: number,
+  pageCount: number,
+): void {
+  if (!mount || !pageW) return;
+
+  const half = pageW / 2;
+  const onlyCover = page === 0;
+  const onlyBack = page === pageCount - 1 && pageCount % 2 === 1;
+
+  const shift = onlyCover ? -half : onlyBack ? half : 0;
+  mount.style.transform = shift ? `translateX(${shift}px)` : '';
+}
+
 export type AlbumPage =
   | { kind: 'cover'; kicker: string; title: string; body: string }
   /**
    * One image. `isSpread` means it was designed across two facing pages, so it
    * is painted over a pair rather than fitted into one.
    */
-  | { kind: 'photo'; url: string; caption: string | null; isSpread?: boolean };
+  | { kind: 'photo'; url: string; caption: string | null; isSpread?: boolean }
+  /**
+   * Designed cover artwork — front or back. Replaces the generated text cover,
+   * and is still a hard leaf, because a cover is board whichever it is.
+   */
+  | { kind: 'coverImage'; url: string };
 
 /** What actually gets handed to StPageFlip, after spreads are laid out. */
 type RenderPage =
   | { kind: 'cover'; kicker: string; title: string; body: string }
+  | { kind: 'coverImage'; url: string }
   | { kind: 'photo'; url: string; caption: string | null; number: number }
   /** One side of a spread. The image is whole; this half shows its half. */
   | { kind: 'half'; url: string; caption: string | null; side: 'l' | 'r'; number: number }
@@ -39,7 +71,7 @@ function layOut(pages: AlbumPage[]): RenderPage[] {
   let number = 0;
 
   for (const p of pages) {
-    if (p.kind === 'cover') { out.push(p); continue; }
+    if (p.kind === 'cover' || p.kind === 'coverImage') { out.push(p); continue; }
 
     if (!p.isSpread) {
       out.push({ kind: 'photo', url: p.url, caption: p.caption, number: ++number });
@@ -92,11 +124,24 @@ export default function FlipAlbum({
 
   const [page, setPage] = useState(0);
   const [pageCount, setPageCount] = useState(pages.length);
+  /** The injected book, and the page width it was built at. */
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const pageWRef = useRef(0);
   /** Measured book area. Changing it rebuilds the book at the new size. */
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   const [audioOn, setAudioOn] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [immersive, setImmersive] = useState(false);
+  /**
+   * Opens full screen.
+   *
+   * This is the CSS kind — a fixed overlay over the whole viewport — not the
+   * Fullscreen API, which browsers only grant in response to a click and would
+   * throw if requested on load. The visible result is the same: the album fills
+   * the screen the moment it opens, which is what an album is for. The
+   * "Full screen" button still escalates to the real API, where the browser
+   * chrome goes too.
+   */
+  const [immersive, setImmersive] = useState(true);
   const [playing, setPlaying] = useState(autoplay);
   const [ready, setReady] = useState(false);
 
@@ -133,25 +178,35 @@ export default function FlipAlbum({
     if (ctx) setTimeout(() => ctx.close(), 900);
   }, []);
 
-  const startAudio = useCallback(() => {
+  /**
+   * Starts the soundtrack. Resolves false when the browser refuses.
+   *
+   * Refusal is normal, not an error: audio may not start without a gesture on
+   * the page. The caller needs to know, because showing "Music on" over silence
+   * is worse than leaving the button alone.
+   */
+  const startAudio = useCallback(async (): Promise<boolean> => {
     // An uploaded track replaces the generated loop entirely.
     if (musicUrl) {
       const el = elementRef.current;
-      if (!el) return;
+      if (!el) return false;
       el.loop = true;
       el.volume = 0;
-      el.play().then(() => {
-        // Ease in so it doesn't jump out at the reader.
-        const fade = setInterval(() => {
-          el.volume = Math.min(0.5, el.volume + 0.04);
-          if (el.volume >= 0.5) clearInterval(fade);
-        }, 90);
-      }).catch(() => { /* blocked by the browser; the toggle simply stays off */ });
-      return;
+      try {
+        await el.play();
+      } catch {
+        return false;
+      }
+      // Ease in so it doesn't jump out at the reader.
+      const fade = setInterval(() => {
+        el.volume = Math.min(0.5, el.volume + 0.04);
+        if (el.volume >= 0.5) clearInterval(fade);
+      }, 90);
+      return true;
     }
 
     const AC = window.AudioContext ?? (window as any).webkitAudioContext;
-    if (!AC) return;
+    if (!AC) return false;
 
     const ctx: AudioContext = new AC();
     ctxRef.current = ctx;
@@ -190,14 +245,27 @@ export default function FlipAlbum({
       });
     };
 
+    // A context created without a gesture starts suspended; resuming it is the
+    // same permission question the <audio> element asks.
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch { /* fall through to the state check */ }
+    }
+    if (ctx.state !== 'running') {
+      ctxRef.current = null;
+      void ctx.close().catch(() => {});
+      return false;
+    }
+
     playChord();
     audioTimerRef.current = setInterval(playChord, 5200);
+    return true;
   }, [musicUrl]);
 
   function toggleAudio() {
-    const next = !audioOn;
-    setAudioOn(next);
-    if (next) startAudio(); else stopAudio();
+    if (audioOn) { setAudioOn(false); stopAudio(); return; }
+    void startAudio().then((ok) => setAudioOn(ok));
   }
 
   // ── Measure the available book area ──────────────────────────────────────
@@ -262,7 +330,10 @@ export default function FlipAlbum({
       const availW = Math.max(260, box.w);
 
       const mount = document.createElement('div');
-      mount.style.cssText = 'width:100%;display:flex;align-items:center;justify-content:center';
+      mount.style.cssText =
+        'width:100%;display:flex;align-items:center;justify-content:center;'
+        + 'transition:transform 400ms ease';
+      mountRef.current = mount;
       el.appendChild(mount);
 
       const holder = document.createElement('div');
@@ -274,7 +345,7 @@ export default function FlipAlbum({
       laidOut.forEach((p) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'album-page';
-        if (p.kind === 'cover') pageEl.setAttribute('data-density', 'hard');
+        if (p.kind === 'cover' || p.kind === 'coverImage') pageEl.setAttribute('data-density', 'hard');
         pageEl.innerHTML = pageHtml(p);
         holder.appendChild(pageEl);
       });
@@ -311,7 +382,12 @@ export default function FlipAlbum({
       flipRef.current = flip;
       readyAtRef.current = Date.now();
       setReady(true);
+      pageWRef.current = pageW;
       setPageCount(flip.getPageCount());
+      // Also here, not only in the effect below: a rebuild replaces this mount,
+      // and if the page and count are unchanged the effect has no reason to run
+      // again, leaving the new book uncentred.
+      centreBook(mount, pageW, pageRef.current, flip.getPageCount());
 
       // Keep the reader's place across a rebuild (resize / fullscreen).
       const restoreTo = pageRef.current;
@@ -352,14 +428,70 @@ export default function FlipAlbum({
     });
   }, [pages]);
 
+  /*
+   * Starts the soundtrack on its own.
+   *
+   * Browsers refuse audio until the page has been interacted with, so this
+   * tries once on open and, if refused, again on the reader's first touch —
+   * opening an album and clicking a page counts, so in practice the music comes
+   * in as they begin reading rather than never.
+   *
+   * The listeners are one-shot and removed as soon as it is playing, so nothing
+   * keeps retrying for a reader who deliberately turned the music off.
+   */
+  useEffect(() => {
+    if (!musicEnabled) return;
+
+    let done = false;
+    const stop = () => {
+      done = true;
+      for (const e of ['pointerdown', 'keydown', 'touchstart'] as const) {
+        window.removeEventListener(e, attempt);
+      }
+    };
+
+    async function attempt() {
+      if (done) return;
+      const ok = await startAudio();
+      if (ok) { setAudioOn(true); stop(); }
+    }
+
+    void attempt();
+    for (const e of ['pointerdown', 'keydown', 'touchstart'] as const) {
+      window.addEventListener(e, attempt, { once: false });
+    }
+
+    return stop;
+    // startAudio is stable for a given track; re-running on every render would
+    // restart the music mid-listen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicEnabled, musicUrl]);
+
+  /*
+   * Centres the book when only one leaf is showing.
+   *
+   * With a cover, the book opens like a real one: the front cover occupies the
+   * right-hand slot and the left is empty. Across a full screen that reads as
+   * the album using half the window rather than as a closed book, so the book
+   * slides half a page across to sit in the middle. It slides back the moment a
+   * true spread is showing, which is when both slots are genuinely in use.
+   *
+   * The same applies to a back cover alone on the left, in the other direction.
+   */
+  useEffect(() => {
+    centreBook(mountRef.current, pageWRef.current, page, pageCount);
+  }, [page, pageCount, box]);
+
   // ── Keyboard + fullscreen ────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') flipRef.current?.flipNext();
       if (e.key === 'ArrowLeft') flipRef.current?.flipPrev();
       if (e.key === 'Escape') {
-        if (immersive) setImmersive(false);
-        else if (!document.fullscreenElement) onClose?.();
+        // The browser leaves its own full screen on Escape without being told.
+        // Anything beyond that means closing the album, not shrinking it into a
+        // window — there is nothing useful to look at between the two.
+        if (!document.fullscreenElement) onClose?.();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -404,19 +536,25 @@ export default function FlipAlbum({
 
   useEffect(() => stopAudio, [stopAudio]);
 
+  /**
+   * Goes to, or leaves, true browser full screen.
+   *
+   * The album already fills the viewport, so this button exists to take the
+   * browser's own chrome away too. It used to drop the overlay first when the
+   * album was immersive, which — once immersive became the default — meant the
+   * first click made the album *smaller* and a second was needed to get full
+   * screen. The overlay is now left alone; this only ever asks the browser.
+   */
   function toggleFullscreen() {
-    if (document.fullscreenElement) { document.exitFullscreen(); return; }
-    if (immersive) { setImmersive(false); return; }
+    if (document.fullscreenElement) { void document.exitFullscreen().catch(() => {}); return; }
 
     const stage = stageRef.current;
-    if (!document.fullscreenEnabled || !stage?.requestFullscreen) {
-      setImmersive(true); return;
-    }
+    // Nothing to fall back to: the album is already filling the viewport.
+    if (!document.fullscreenEnabled || !stage?.requestFullscreen) return;
+
     try {
-      stage.requestFullscreen()?.catch(() => setImmersive(true));
-    } catch {
-      setImmersive(true);
-    }
+      stage.requestFullscreen()?.catch(() => {});
+    } catch { /* stays as it is, which is already full-viewport */ }
   }
 
   // ── Spread dots: page 0 is the cover, then pairs ─────────────────────────
@@ -428,7 +566,7 @@ export default function FlipAlbum({
 
   return (
     <div ref={stageRef} style={stageStyle(immersive, !!onClose)}>
-      {musicUrl && <audio ref={elementRef} src={musicUrl} preload="none" loop />}
+      {musicUrl && <audio ref={elementRef} src={musicUrl} preload="auto" loop />}
 
       {/* Header */}
       <div style={headerRow}>
@@ -437,6 +575,30 @@ export default function FlipAlbum({
           <div style={{ fontFamily: SERIF, fontSize: 26, color: '#ffffff', marginTop: 4 }}>{title}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/*
+            Turning lives up here rather than either side of the book. Flanking
+            arrows cost roughly 120px of width that the album could be using,
+            and on a wide screen the pages are the whole point.
+          */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4 }}>
+            <button
+              onClick={() => manualTurn('flipPrev')}
+              disabled={page <= 0}
+              aria-label="Previous page"
+              style={arrowBtn(page > 0)}
+            >
+              ‹
+            </button>
+            <button
+              onClick={() => manualTurn('flipNext')}
+              disabled={page >= total - 1}
+              aria-label="Next page"
+              style={arrowBtn(page < total - 1)}
+            >
+              ›
+            </button>
+          </div>
+
           <button onClick={() => setPlaying((p) => !p)} style={ghostPill} aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}>
             {playing ? '❙❙ Pause' : '▶ Play'}
           </button>
@@ -452,7 +614,7 @@ export default function FlipAlbum({
             </button>
           )}
           <button onClick={toggleFullscreen} style={ghostPill}>
-            {fullscreen || immersive ? 'Exit full screen' : 'Full screen'}
+            {fullscreen ? 'Exit full screen' : 'Full screen'}
           </button>
           {onClose && (
             <button onClick={onClose} title="Close album" style={closeBtn}>✕</button>
@@ -462,9 +624,7 @@ export default function FlipAlbum({
 
       {/* Book */}
       <div style={bookRow}>
-        <button onClick={() => manualTurn('flipPrev')} style={arrowBtn(page > 0)}>‹</button>
         <div ref={bookRef} style={bookHost} />
-        <button onClick={() => manualTurn('flipNext')} style={arrowBtn(page < total - 1)}>›</button>
       </div>
 
       {/* Footer */}
@@ -501,6 +661,15 @@ function escapeHtml(value: string): string {
 function pageHtml(p: RenderPage): string {
   if (p.kind === 'blank') {
     return '<div class="page-inner" style="background:#FBFAF7"></div>';
+  }
+
+  if (p.kind === 'coverImage') {
+    // `contain` rather than `cover`: a cover is a designed piece and cropping
+    // it would cut the studio's own artwork. The letterboxing sits on the page
+    // colour, so a cover built to the page shape shows no border at all.
+    return '<div class="page-inner" style="background:#FBFAF7;'
+      + `background-image:url(${encodeURI(p.url)});`
+      + 'background-size:contain;background-position:center;background-repeat:no-repeat"></div>';
   }
 
   if (p.kind === 'cover') {
@@ -569,7 +738,7 @@ function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties 
 }
 
 const headerRow: React.CSSProperties = {
-  width: '100%', maxWidth: 1600, display: 'flex', alignItems: 'center',
+  width: '100%', display: 'flex', alignItems: 'center',
   justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', flexShrink: 0,
 };
 
@@ -578,23 +747,37 @@ const kicker: React.CSSProperties = {
 };
 
 const bookRow: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 1600,
+  display: 'flex', alignItems: 'center', width: '100%',
   justifyContent: 'center', flex: '1 1 auto', minHeight: 0,
 };
 
+/*
+ * The book is measured from this element and also injected into it, so its
+ * size must come from the layout alone — never from its contents. `flex-basis:
+ * auto` sized it to the book it contained, which fed the ResizeObserver, which
+ * rebuilt the book at a new size, which resized the host again: three identical
+ * loads produced three different page shapes, one of them 0x0.
+ *
+ * A zero basis breaks the loop — the row decides the width, the content cannot
+ * argue. The old `maxWidth: 1600` was damping this by accident, which is why it
+ * only surfaced when the album went full width.
+ */
 const bookHost: React.CSSProperties = {
-  flex: '1 1 auto', minWidth: 0, height: '100%', overflow: 'hidden',
+  flex: '1 1 0%', minWidth: 0, width: '100%', height: '100%', overflow: 'hidden',
+  position: 'relative',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
 const footerCol: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-  width: '100%', maxWidth: 1600, flexShrink: 0,
+  width: '100%', flexShrink: 0,
 };
 
+// 36px to sit level with the close button and the pills beside it; they were
+// 46 when they flanked the book, where nothing set their scale.
 function arrowBtn(enabled: boolean): React.CSSProperties {
   return {
-    width: 46, height: 46, borderRadius: '50%', flexShrink: 0, fontSize: 24, lineHeight: 1,
+    width: 36, height: 36, borderRadius: '50%', flexShrink: 0, fontSize: 20, lineHeight: 1,
     cursor: enabled ? 'pointer' : 'default', fontFamily: 'inherit',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     background: `rgba(255,255,255,${enabled ? 0.14 : 0.05})`,
