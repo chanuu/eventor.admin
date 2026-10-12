@@ -102,7 +102,17 @@ export default function FlipAlbum({
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   const [audioOn, setAudioOn] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [immersive, setImmersive] = useState(false);
+  /**
+   * Opens full screen.
+   *
+   * This is the CSS kind — a fixed overlay over the whole viewport — not the
+   * Fullscreen API, which browsers only grant in response to a click and would
+   * throw if requested on load. The visible result is the same: the album fills
+   * the screen the moment it opens, which is what an album is for. The
+   * "Full screen" button still escalates to the real API, where the browser
+   * chrome goes too.
+   */
+  const [immersive, setImmersive] = useState(true);
   const [playing, setPlaying] = useState(autoplay);
   const [ready, setReady] = useState(false);
 
