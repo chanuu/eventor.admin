@@ -488,8 +488,10 @@ export default function FlipAlbum({
       if (e.key === 'ArrowRight') flipRef.current?.flipNext();
       if (e.key === 'ArrowLeft') flipRef.current?.flipPrev();
       if (e.key === 'Escape') {
-        if (immersive) setImmersive(false);
-        else if (!document.fullscreenElement) onClose?.();
+        // The browser leaves its own full screen on Escape without being told.
+        // Anything beyond that means closing the album, not shrinking it into a
+        // window — there is nothing useful to look at between the two.
+        if (!document.fullscreenElement) onClose?.();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -534,19 +536,25 @@ export default function FlipAlbum({
 
   useEffect(() => stopAudio, [stopAudio]);
 
+  /**
+   * Goes to, or leaves, true browser full screen.
+   *
+   * The album already fills the viewport, so this button exists to take the
+   * browser's own chrome away too. It used to drop the overlay first when the
+   * album was immersive, which — once immersive became the default — meant the
+   * first click made the album *smaller* and a second was needed to get full
+   * screen. The overlay is now left alone; this only ever asks the browser.
+   */
   function toggleFullscreen() {
-    if (document.fullscreenElement) { document.exitFullscreen(); return; }
-    if (immersive) { setImmersive(false); return; }
+    if (document.fullscreenElement) { void document.exitFullscreen().catch(() => {}); return; }
 
     const stage = stageRef.current;
-    if (!document.fullscreenEnabled || !stage?.requestFullscreen) {
-      setImmersive(true); return;
-    }
+    // Nothing to fall back to: the album is already filling the viewport.
+    if (!document.fullscreenEnabled || !stage?.requestFullscreen) return;
+
     try {
-      stage.requestFullscreen()?.catch(() => setImmersive(true));
-    } catch {
-      setImmersive(true);
-    }
+      stage.requestFullscreen()?.catch(() => {});
+    } catch { /* stays as it is, which is already full-viewport */ }
   }
 
   // ── Spread dots: page 0 is the cover, then pairs ─────────────────────────
@@ -606,7 +614,7 @@ export default function FlipAlbum({
             </button>
           )}
           <button onClick={toggleFullscreen} style={ghostPill}>
-            {fullscreen || immersive ? 'Exit full screen' : 'Full screen'}
+            {fullscreen ? 'Exit full screen' : 'Full screen'}
           </button>
           {onClose && (
             <button onClick={onClose} title="Close album" style={closeBtn}>✕</button>
