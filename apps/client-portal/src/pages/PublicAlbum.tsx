@@ -18,6 +18,7 @@ type SharedAlbum = {
   music_url: string | null;
   autoplay: boolean;
   autoplay_seconds: number;
+  page_aspect: number | null;
   album_pages: AlbumPageRow[];
 };
 
@@ -39,8 +40,8 @@ export default function PublicAlbum() {
       .select(`
         id, title, cover_kicker, cover_title, cover_body,
         closing_kicker, closing_title, closing_body,
-        music_enabled, music_url, autoplay, autoplay_seconds,
-        album_pages(id, image_url, caption, sort_order, gallery_photos(storage_path))
+        music_enabled, music_url, autoplay, autoplay_seconds, page_aspect,
+        album_pages(id, image_url, caption, sort_order, is_spread, gallery_photos(storage_path))
       `)
       .eq('share_token', token)
       .maybeSingle()
@@ -55,8 +56,8 @@ export default function PublicAlbum() {
 
     const built = [...(album.album_pages ?? [])]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map((p) => ({ url: albumPageUrl(p), caption: p.caption }))
-      .filter((p): p is { url: string; caption: string | null } => !!p.url);
+      .map((p) => ({ url: albumPageUrl(p), caption: p.caption, isSpread: !!p.is_spread }))
+      .filter((p): p is { url: string; caption: string | null; isSpread: boolean } => !!p.url);
 
     if (built.length === 0) return [];
 
@@ -67,7 +68,7 @@ export default function PublicAlbum() {
         title: album.cover_title || album.title || 'Our album',
         body: album.cover_body || '',
       },
-      ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption })),
+      ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption, isSpread: p.isSpread })),
       {
         kind: 'cover',
         kicker: album.closing_kicker || 'Thank you',
@@ -100,6 +101,7 @@ export default function PublicAlbum() {
       musicUrl={album.music_url}
       autoplay={album.autoplay}
       autoplaySeconds={album.autoplay_seconds}
+      pageAspect={album.page_aspect ?? undefined}
     />
   );
 }

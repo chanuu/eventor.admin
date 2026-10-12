@@ -32,8 +32,8 @@ export default function AlbumPage() {
     // Studio-built album: use its configured text and ordered pages.
     if (album) {
       const built = album.pages
-        .map((p) => ({ url: albumPageUrl(p), caption: p.caption }))
-        .filter((p): p is { url: string; caption: string | null } => !!p.url);
+        .map((p) => ({ url: albumPageUrl(p), caption: p.caption, isSpread: !!p.is_spread }))
+        .filter((p): p is { url: string; caption: string | null; isSpread: boolean } => !!p.url);
       if (built.length === 0) return [];
 
       return [
@@ -43,7 +43,7 @@ export default function AlbumPage() {
           title: album.cover_title || album.title || job.title,
           body: album.cover_body || `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
         },
-        ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption })),
+        ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption, isSpread: p.isSpread })),
         {
           kind: 'cover',
           kicker: album.closing_kicker || 'Thank you',
@@ -103,6 +103,7 @@ export default function AlbumPage() {
         musicUrl={album?.music_url ?? null}
         autoplay={album?.autoplay ?? false}
         autoplaySeconds={album?.autoplay_seconds ?? 6}
+        pageAspect={album?.page_aspect ?? undefined}
         onClose={() => setOpen(false)}
       />
     );
