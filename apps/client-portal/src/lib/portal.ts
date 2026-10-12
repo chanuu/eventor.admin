@@ -40,6 +40,8 @@ export type Flipbook = {
 /** The flip-through digital album the studio builds page by page in admin. */
 export type AlbumPageRow = {
   id: string; image_url: string | null; caption: string | null; sort_order: number;
+  /** Designed across two facing pages. Absent on rows read before spreads. */
+  is_spread?: boolean | null;
   gallery_photos: { storage_path: string } | null;
 };
 export type Album = {
@@ -48,6 +50,7 @@ export type Album = {
   closing_kicker: string | null; closing_title: string | null; closing_body: string | null;
   music_enabled: boolean; music_url: string | null; music_name: string | null;
   autoplay: boolean; autoplay_seconds: number;
+  page_aspect: number | null;
   share_token: string | null; is_public: boolean;
   published_at: string | null;
   pages: AlbumPageRow[];
@@ -136,8 +139,8 @@ export async function fetchPortalJob(jobId: string): Promise<PortalJob | null> {
       albums(id, title, cover_kicker, cover_title, cover_body,
              closing_kicker, closing_title, closing_body,
              music_enabled, music_url, music_name,
-             autoplay, autoplay_seconds, share_token, is_public, published_at,
-             album_pages(id, image_url, caption, sort_order, gallery_photos(storage_path)))
+             autoplay, autoplay_seconds, page_aspect, share_token, is_public, published_at,
+             album_pages(id, image_url, caption, sort_order, is_spread, gallery_photos(storage_path)))
     `)
     .eq('id', jobId)
     .maybeSingle();
@@ -222,6 +225,7 @@ function albumFrom(raw: any): Album | null {
     music_name: a.music_name ?? null,
     autoplay: a.autoplay ?? false,
     autoplay_seconds: a.autoplay_seconds ?? 6,
+    page_aspect: a.page_aspect ?? null,
     share_token: a.share_token ?? null,
     is_public: a.is_public ?? false,
     published_at: a.published_at,

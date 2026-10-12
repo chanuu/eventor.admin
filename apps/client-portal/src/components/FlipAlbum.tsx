@@ -3,11 +3,59 @@ import { PageFlip } from 'page-flip/dist/js/page-flip.module.js';
 import { BRAND_GRADIENT } from '../lib/theme';
 
 const SERIF = "'Cormorant Garamond',Georgia,serif";
+/** The original portrait page. Albums that predate `page_aspect` keep it. */
 const PAGE_RATIO = 520 / 640;
 
 export type AlbumPage =
   | { kind: 'cover'; kicker: string; title: string; body: string }
-  | { kind: 'photo'; url: string; caption: string | null };
+  /**
+   * One image. `isSpread` means it was designed across two facing pages, so it
+   * is painted over a pair rather than fitted into one.
+   */
+  | { kind: 'photo'; url: string; caption: string | null; isSpread?: boolean };
+
+/** What actually gets handed to StPageFlip, after spreads are laid out. */
+type RenderPage =
+  | { kind: 'cover'; kicker: string; title: string; body: string }
+  | { kind: 'photo'; url: string; caption: string | null; number: number }
+  /** One side of a spread. The image is whole; this half shows its half. */
+  | { kind: 'half'; url: string; caption: string | null; side: 'l' | 'r'; number: number }
+  /** Inserted only to push a spread onto the correct side of the fold. */
+  | { kind: 'blank' };
+
+/**
+ * Places pages so that both halves of a spread end up facing each other.
+ *
+ * StPageFlip pairs pages as (1,2), (3,4)… after the cover, so a spread has to
+ * begin at an odd index. Landing on an even one would put its left half on the
+ * right of one turn and its right half on the left of the next — the design
+ * split across a fold rather than running over it, which is precisely backwards.
+ *
+ * When a spread would fall wrong, a blank page is inserted to shift it. That is
+ * a real blank leaf in the book, exactly as a printed album would carry.
+ */
+function layOut(pages: AlbumPage[]): RenderPage[] {
+  const out: RenderPage[] = [];
+  let number = 0;
+
+  for (const p of pages) {
+    if (p.kind === 'cover') { out.push(p); continue; }
+
+    if (!p.isSpread) {
+      out.push({ kind: 'photo', url: p.url, caption: p.caption, number: ++number });
+      continue;
+    }
+
+    // out.length is the index this page would take. Odd means a left-hand page.
+    if (out.length % 2 === 0) out.push({ kind: 'blank' });
+
+    number += 1;
+    out.push({ kind: 'half', url: p.url, caption: p.caption, side: 'l', number });
+    out.push({ kind: 'half', url: p.url, caption: p.caption, side: 'r', number });
+  }
+
+  return out;
+}
 
 /**
  * Page-turning album built on StPageFlip, with generated ambient audio.
@@ -18,7 +66,7 @@ export type AlbumPage =
  */
 export default function FlipAlbum({
   pages, title, onClose, musicEnabled = true, musicUrl = null,
-  autoplay = false, autoplaySeconds = 6,
+  autoplay = false, autoplaySeconds = 6, pageAspect = PAGE_RATIO,
 }: {
   pages: AlbumPage[];
   title: string;
@@ -30,6 +78,11 @@ export default function FlipAlbum({
   /** Start turning pages on its own. */
   autoplay?: boolean;
   autoplaySeconds?: number;
+  /**
+   * Width / height of a single page. Defaults to the original portrait, so an
+   * album that never set a shape renders exactly as it always has.
+   */
+  pageAspect?: number;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const bookRef = useRef<HTMLDivElement | null>(null);
@@ -216,11 +269,13 @@ export default function FlipAlbum({
       holder.style.cssText =
         `position:absolute;left:-99999px;top:0;width:${Math.max(300, availW)}px;height:${Math.max(300, availH)}px`;
 
-      pages.forEach((p, i) => {
+      const laidOut = layOut(pages);
+
+      laidOut.forEach((p) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'album-page';
         if (p.kind === 'cover') pageEl.setAttribute('data-density', 'hard');
-        pageEl.innerHTML = pageHtml(p, i);
+        pageEl.innerHTML = pageHtml(p);
         holder.appendChild(pageEl);
       });
       mount.appendChild(holder);
@@ -229,11 +284,11 @@ export default function FlipAlbum({
       // would be wider than the space available (two pages up, one on narrow).
       const spreadPages = availW > 760 ? 2 : 1;
       let pageH = availH;
-      let pageW = Math.round(pageH * PAGE_RATIO);
+      let pageW = Math.round(pageH * pageAspect);
       const maxPageW = Math.floor(availW / spreadPages);
       if (pageW > maxPageW) {
         pageW = maxPageW;
-        pageH = Math.round(pageW / PAGE_RATIO);
+        pageH = Math.round(pageW / pageAspect);
       }
 
       const flip = new PageFlip(mount, {
@@ -443,7 +498,11 @@ function escapeHtml(value: string): string {
   ));
 }
 
-function pageHtml(p: AlbumPage, index: number): string {
+function pageHtml(p: RenderPage): string {
+  if (p.kind === 'blank') {
+    return '<div class="page-inner" style="background:#FBFAF7"></div>';
+  }
+
   if (p.kind === 'cover') {
     return '<div class="page-inner" style="background:#FBFAF7;display:flex;flex-direction:column;align-items:center;'
       + 'justify-content:center;text-align:center;padding:12%;box-sizing:border-box">'
@@ -454,17 +513,45 @@ function pageHtml(p: AlbumPage, index: number): string {
       + '</div>';
   }
 
-  const caption = p.caption
+  // On a spread the caption belongs to the whole design, so it is printed once,
+  // on the left half. Repeating it either side of the fold reads as two
+  // captions for two pictures, which is the opposite of what a spread is.
+  const captionText = p.kind === 'half' && p.side === 'r' ? null : p.caption;
+  const caption = captionText
     ? '<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px;'
-      + 'background:linear-gradient(transparent,rgba(9,32,24,0.78));color:#ffffff;'
-      + `font-family:${SERIF};font-size:15px;letter-spacing:0.5px">${escapeHtml(p.caption)}</div>`
+      + 'background:linear-gradient(transparent,rgba(17,24,39,0.78));color:#ffffff;'
+      + `font-family:${SERIF};font-size:15px;letter-spacing:0.5px">${escapeHtml(captionText)}</div>`
     : '';
 
-  return `<div class="page-inner" style="background-image:url(${encodeURI(p.url)});background-size:cover;background-position:center">`
+  /*
+   * A spread is one image shown over two pages.
+   *
+   * `background-size: 200% 100%` makes the image exactly two pages wide, and
+   * each half then offsets to its own side, so the seam falls precisely on the
+   * fold with no gap and no repeated strip down the middle. The alternative,
+   * `auto 100%`, never distorts but shows part of the centre twice when the
+   * export is not quite 2:1 — duplicated faces across the fold are far more
+   * noticeable than a percent of stretch, so exactness wins here.
+   *
+   * It does assume the spread was exported at twice the page shape, which is
+   * what a designed spread is. The admin checks that on upload and warns.
+   */
+  const fill = p.kind === 'half'
+    ? `background-size:200% 100%;background-position:${p.side === 'l' ? 'left' : 'right'} center`
+    : 'background-size:cover;background-position:center';
+
+  // One number per spread, on its left half — a spread is one design, so
+  // numbering both halves would imply two.
+  const number = p.kind === 'half' && p.side === 'r'
+    ? ''
+    : '<div style="position:absolute;top:14px;right:18px;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.7)">'
+      + String(p.number).padStart(2, '0')
+      + '</div>';
+
+  return `<div class="page-inner" style="background-image:url(${encodeURI(p.url)});${fill}">`
     + caption
-    + '<div style="position:absolute;top:14px;right:18px;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.7)">'
-    + String(index).padStart(2, '0')
-    + '</div></div>';
+    + number
+    + '</div>';
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
