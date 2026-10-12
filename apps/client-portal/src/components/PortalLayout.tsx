@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Outlet, NavLink, useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { C, FONT } from '../lib/theme';
+import { C, FONT, BRAND_GRADIENT } from '../lib/theme';
 import { daysUntil } from '../lib/format';
 import { prettyPhone } from '../lib/phone';
 import {
@@ -233,9 +233,15 @@ const pageBase: React.CSSProperties = {
   fontFamily: FONT, background: C.bg, color: C.text, minHeight: '100vh', display: 'flex',
 };
 
+/**
+ * A white rail, matching the admin. The dark panel this replaces competed with
+ * the content for attention; here the only colour is on the item you are on.
+ */
 function sidebar(isMobile: boolean, open: boolean): React.CSSProperties {
   const base: React.CSSProperties = {
-    width: SIDEBAR_WIDTH, flexShrink: 0, background: C.green, color: C.white,
+    width: SIDEBAR_WIDTH, flexShrink: 0,
+    background: C.white, color: C.textBody,
+    borderRight: `1px solid ${C.border}`,
     display: 'flex', flexDirection: 'column', padding: '22px 0',
   };
   if (!isMobile) {
@@ -258,46 +264,50 @@ function sidebar(isMobile: boolean, open: boolean): React.CSSProperties {
 const SIDEBAR_WIDTH = 246;
 
 const scrim: React.CSSProperties = {
-  position: 'fixed', inset: 0, background: 'rgba(11,42,32,0.5)', zIndex: 55,
+  position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.5)', zIndex: 55,
 };
 
 const logoMark: React.CSSProperties = {
-  width: 32, height: 32, borderRadius: 9, background: C.lime, color: C.green,
-  fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+  width: 34, height: 34, borderRadius: 12, background: BRAND_GRADIENT, color: C.white,
+  fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
 };
 
+/** Active items are filled brand-pink; the rest are plain grey text. */
 function navItem(active: boolean): React.CSSProperties {
   return {
     display: 'flex', alignItems: 'center', gap: 11, width: '100%', border: 'none', cursor: 'pointer',
-    textAlign: 'left', fontSize: 13, fontWeight: 600, padding: '11px 12px', borderRadius: 10,
+    textAlign: 'left', fontSize: 15, fontWeight: 600, padding: '11px 12px', borderRadius: 10,
     fontFamily: 'inherit', textDecoration: 'none', transition: 'background 0.15s ease',
-    background: active ? C.white : 'transparent',
-    color: active ? C.green : C.sidebarText,
+    background: active ? C.brandSoft : 'transparent',
+    color: active ? C.brand : C.textBody,
   };
 }
 
 const navBadge: React.CSSProperties = {
-  background: C.lime, color: C.green, fontSize: 10, fontWeight: 800, borderRadius: 20, padding: '2px 7px',
+  background: C.brandSoft, color: C.brand, fontSize: 12, fontWeight: 600, borderRadius: 8, padding: '2px 8px',
 };
 
 const sidebarLabel: React.CSSProperties = {
   fontSize: 11, color: C.sidebarMuted, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700,
 };
 
+// These three were translucent white, which only worked against the dark rail.
+// On a white sidebar they need real surfaces and borders of their own.
 const eventSelect: React.CSSProperties = {
-  marginTop: 8, width: '100%', background: 'rgba(255,255,255,0.10)', color: C.white,
-  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 8, padding: '8px 9px',
-  fontSize: 12, fontFamily: 'inherit', fontWeight: 600,
+  marginTop: 8, width: '100%', background: C.white, color: C.textStrong,
+  border: `1px solid ${C.borderBtn}`, borderRadius: 8, padding: '9px 10px',
+  fontSize: 14, fontFamily: 'inherit', fontWeight: 600,
 };
 
 const studioAvatar: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: '50%', background: C.lime, color: C.green,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0,
+  width: 34, height: 34, borderRadius: '50%', background: BRAND_GRADIENT, color: C.white,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0,
 };
 
 const signOutBtn: React.CSSProperties = {
-  display: 'block', marginTop: 12, width: '100%', background: 'rgba(255,255,255,0.10)', color: C.white,
-  border: 'none', fontSize: 12, fontWeight: 600, padding: 9, borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+  display: 'block', marginTop: 12, width: '100%', background: C.panel, color: C.textBody,
+  border: `1px solid ${C.border}`, fontSize: 14, fontWeight: 600, padding: 9, borderRadius: 8,
+  cursor: 'pointer', fontFamily: 'inherit',
 };
 
 const topBar: React.CSSProperties = {
@@ -308,29 +318,31 @@ const topBar: React.CSSProperties = {
 
 const hamburger: React.CSSProperties = {
   width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-  background: C.limeSoft, border: `1px solid ${C.limeSoftBorder}`, cursor: 'pointer',
+  background: C.white, border: `1px solid ${C.borderBtn}`, cursor: 'pointer',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
 };
 
 const burgerBar: React.CSSProperties = {
-  display: 'block', width: 16, height: 2, borderRadius: 2, background: C.green,
+  display: 'block', width: 16, height: 2, borderRadius: 2, background: C.textBody,
 };
 
+// The countdown is the one place the accent earns a tint in the top bar: it is
+// the thing a client opens the portal to check.
 const countdownChip: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 7, background: C.limeSoft,
-  border: `1px solid ${C.limeSoftBorder}`, borderRadius: 20, padding: '6px 13px',
+  display: 'flex', alignItems: 'center', gap: 7, background: C.brandSoft,
+  border: `1px solid ${C.brandSoftStrong}`, borderRadius: 20, padding: '6px 13px',
 };
 
 const pulseDot: React.CSSProperties = {
-  width: 7, height: 7, borderRadius: '50%', background: C.lime,
+  width: 7, height: 7, borderRadius: '50%', background: C.brand,
   animation: 'pulseDot 2s ease-in-out infinite',
 };
 
 const clientAvatar: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: '50%', background: C.limeSoft, color: C.green,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0,
+  width: 34, height: 34, borderRadius: '50%', background: C.brandSoft, color: C.brand,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0,
 };
 
 const linkBtn: React.CSSProperties = {
-  background: 'none', border: 'none', color: C.green, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+  background: 'none', border: 'none', color: C.brand, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
 };

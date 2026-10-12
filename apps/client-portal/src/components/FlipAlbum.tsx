@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageFlip } from 'page-flip/dist/js/page-flip.module.js';
+import { BRAND_GRADIENT } from '../lib/theme';
 
 const SERIF = "'Cormorant Garamond',Georgia,serif";
 const PAGE_RATIO = 520 / 640;
@@ -446,10 +447,10 @@ function pageHtml(p: AlbumPage, index: number): string {
   if (p.kind === 'cover') {
     return '<div class="page-inner" style="background:#FBFAF7;display:flex;flex-direction:column;align-items:center;'
       + 'justify-content:center;text-align:center;padding:12%;box-sizing:border-box">'
-      + `<div style="font-family:${SERIF};font-size:14px;letter-spacing:5px;text-transform:uppercase;color:#8BC53F">${escapeHtml(p.kicker)}</div>`
-      + `<div style="font-family:${SERIF};font-size:34px;color:#123528;margin-top:14px;line-height:1.25">${escapeHtml(p.title)}</div>`
-      + '<div style="width:46px;height:1px;background:#C8D6BC;margin:18px 0"></div>'
-      + `<div style="font-size:12.5px;color:#5b6660;line-height:1.7;max-width:280px">${escapeHtml(p.body)}</div>`
+      + `<div style="font-family:${SERIF};font-size:14px;letter-spacing:5px;text-transform:uppercase;color:#FB5B3C">${escapeHtml(p.kicker)}</div>`
+      + `<div style="font-family:${SERIF};font-size:34px;color:#111827;margin-top:14px;line-height:1.25">${escapeHtml(p.title)}</div>`
+      + '<div style="width:46px;height:1px;background:#D1D5DB;margin:18px 0"></div>'
+      + `<div style="font-size:12.5px;color:#6B7280;line-height:1.7;max-width:280px">${escapeHtml(p.body)}</div>`
       + '</div>';
   }
 
@@ -471,7 +472,7 @@ function pageHtml(p: AlbumPage, index: number): string {
 function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties {
   const base: React.CSSProperties = {
     fontFamily: "'Helvetica Neue',Helvetica,Arial,sans-serif",
-    background: 'radial-gradient(circle at 50% 0%,#17513C,#0B2A20 70%)',
+    background: 'radial-gradient(circle at 50% 0%,#1F2937,#0B0B0F 70%)',
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
     gap: 10, padding: '12px 16px 10px', boxSizing: 'border-box', overflow: 'hidden',
   };
@@ -486,7 +487,7 @@ const headerRow: React.CSSProperties = {
 };
 
 const kicker: React.CSSProperties = {
-  fontSize: 10.5, letterSpacing: 3, textTransform: 'uppercase', color: '#8BC53F', fontWeight: 700,
+  fontSize: 10.5, letterSpacing: 3, textTransform: 'uppercase', color: '#FB5B3C', fontWeight: 700,
 };
 
 const bookRow: React.CSSProperties = {
@@ -520,14 +521,14 @@ function audioBtn(on: boolean): React.CSSProperties {
     display: 'flex', alignItems: 'center', gap: 8, borderRadius: 22, padding: '9px 18px',
     fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
     ...(on
-      ? { background: '#8BC53F', color: '#0F3D2E', border: 'none' }
+      ? { background: BRAND_GRADIENT, color: '#ffffff', border: 'none' }
       : { background: 'rgba(255,255,255,0.12)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.22)' }),
   };
 }
 
 function eqBar(delay: number): React.CSSProperties {
   return {
-    width: 2, height: '100%', background: '#0F3D2E',
+    width: 2, height: '100%', background: '#111827',
     animation: `eqBar 0.9s ease-in-out ${delay}s infinite`,
   };
 }
@@ -547,6 +548,6 @@ function dotStyle(active: boolean): React.CSSProperties {
   return {
     width: active ? 22 : 8, height: 8, borderRadius: 6, border: 'none', cursor: 'pointer', padding: 0,
     transition: 'width 0.3s ease, background 0.3s ease',
-    background: active ? '#8BC53F' : 'rgba(255,255,255,0.28)',
+    background: active ? '#E91E78' : 'rgba(255,255,255,0.28)',
   };
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { C, solidBtn, ghostBtn, label } from '../../lib/theme';
+import { C, solidBtn, ghostBtn, label, BRAND_GRADIENT } from '../../lib/theme';
 import { money, shortDate } from '../../lib/format';
 import { usePortal, totalPaid } from '../../lib/portal';
 import { Screen, Card, CardTitle, Empty, Toast } from '../../components/ui';
@@ -131,7 +131,7 @@ export default function AgreementPage() {
             />
             <button type="submit" disabled={signing || !signature.trim()} style={{
               ...solidBtn, padding: '11px 22px',
-              ...(signature.trim() ? {} : { background: '#DDE3DE', color: C.muted, cursor: 'not-allowed' }),
+              ...(signature.trim() ? {} : { background: C.borderSoft, color: C.muted, cursor: 'not-allowed' }),
             }}>
               {signing ? 'Signing…' : 'Sign agreement'}
             </button>
@@ -186,6 +186,6 @@ const signedBanner: React.CSSProperties = {
 };
 
 const signedTick: React.CSSProperties = {
-  width: 26, height: 26, borderRadius: '50%', background: C.lime, color: C.green,
+  width: 26, height: 26, borderRadius: '50%', background: BRAND_GRADIENT, color: C.white,
   fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
 };

@@ -106,6 +106,6 @@ export default function PublicAlbum() {
 
 const message: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'radial-gradient(circle at 50% 0%,#17513C,#0B2A20 70%)',
+  background: 'radial-gradient(circle at 50% 0%,#1F2937,#0B0B0F 70%)',
   color: 'rgba(255,255,255,0.75)', fontFamily: FONT, fontSize: 14, padding: 24,
 };

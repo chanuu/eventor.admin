@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { C, card, sectionTitle, label } from '../lib/theme';
+import { C, card, sectionTitle, label, BRAND_GRADIENT } from '../lib/theme';
 
 /** Every screen fades up on mount, as the design does. */
 export function Screen({ children }: { children: ReactNode }) {
@@ -55,11 +55,26 @@ export function Toast({ message }: { message: string }) {
   );
 }
 
-/** Thin progress bar used by payments and proofing. */
-export function Bar({ percent, color = C.lime, height = 10 }: { percent: number; color?: string; height?: number }) {
+/**
+ * Thin progress bar used by payments and proofing.
+ *
+ * The fill is the button gradient rather than a flat accent, so a bar reads as
+ * a sibling of the primary action instead of a stray block of colour. The
+ * gradient is sized to the track, not the fill, so a bar at 20% shows the
+ * magenta end rather than a compressed copy of the whole sweep.
+ */
+export function Bar({ percent, color, height = 10 }: { percent: number; color?: string; height?: number }) {
+  const pct = Math.max(0, Math.min(100, percent));
   return (
-    <div style={{ height, borderRadius: 6, background: C.track, overflow: 'hidden' }}>
-      <div style={{ width: `${Math.max(0, Math.min(100, percent))}%`, height: '100%', background: color }} />
+    <div style={{ height, borderRadius: 999, background: C.track, overflow: 'hidden' }}>
+      <div
+        style={{
+          width: `${pct}%`, height: '100%', borderRadius: 999,
+          background: color ?? BRAND_GRADIENT,
+          backgroundSize: pct > 0 ? `${(100 / pct) * 100}% 100%` : '100% 100%',
+          transition: 'width 0.4s ease',
+        }}
+      />
     </div>
   );
 }
