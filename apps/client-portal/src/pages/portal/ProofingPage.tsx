@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { C, solidBtn, ghostBtn, statusBadge } from '../../lib/theme';
+import { C, solidBtn, ghostBtn, statusBadge, BRAND_GRADIENT } from '../../lib/theme';
 import { shortDate } from '../../lib/format';
 import { usePortal, photoUrl, galleriesVisible } from '../../lib/portal';
 import { Screen, Card, Bar, Empty, Toast } from '../../components/ui';
@@ -162,7 +162,7 @@ export default function ProofingPage() {
                   <div style={{ width: 150, marginTop: 6 }}>
                     <Bar
                       percent={c.photos.length ? (chosen / c.photos.length) * 100 : 0}
-                      color={proofing ? C.lime : '#C8D6BC'}
+                      color={proofing ? C.lime : C.track}
                       height={8}
                     />
                   </div>
@@ -356,7 +356,7 @@ function check(on: boolean, enabled: boolean): React.CSSProperties {
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit',
     opacity: enabled || on ? 1 : 0.5,
     ...(on
-      ? { background: C.lime, color: C.green, border: 'none' }
+      ? { background: BRAND_GRADIENT, color: C.white, border: 'none' }
       : { background: 'rgba(255,255,255,0.92)', color: C.textMid, border: `1px solid ${C.borderBtn}` }),
   };
 }
@@ -365,7 +365,7 @@ function submitBtn(enabled: boolean): React.CSSProperties {
   return {
     border: 'none', borderRadius: 9, padding: '11px 22px', fontSize: 12.5, fontWeight: 700,
     cursor: enabled ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-    ...(enabled ? { background: C.green, color: C.white } : { background: '#DDE3DE', color: C.muted }),
+    ...(enabled ? { background: C.green, color: C.white } : { background: C.borderSoft, color: C.muted }),
   };
 }
 
@@ -375,7 +375,7 @@ const footer: React.CSSProperties = {
 };
 
 const lightboxWrap: React.CSSProperties = {
-  position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(11,42,32,0.92)',
+  position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(17,24,39,0.92)',
   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
 };
 
@@ -386,7 +386,7 @@ const lightboxInner: React.CSSProperties = {
 
 const lightboxImg: React.CSSProperties = {
   width: '100%', flex: 1, minHeight: 0, objectFit: 'contain',
-  borderRadius: 12, background: '#0B2A20',
+  borderRadius: 12, background: '#0B0B0F',
 };
 
 const lightboxBar: React.CSSProperties = {
@@ -439,7 +439,7 @@ const submittedBanner: React.CSSProperties = {
 };
 
 const submittedTick: React.CSSProperties = {
-  width: 26, height: 26, borderRadius: '50%', background: C.lime, color: C.green,
+  width: 26, height: 26, borderRadius: '50%', background: BRAND_GRADIENT, color: C.white,
   fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
 };
 

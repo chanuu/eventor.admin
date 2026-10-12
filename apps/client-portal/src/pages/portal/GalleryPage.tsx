@@ -90,7 +90,7 @@ const thumbBtn: React.CSSProperties = {
 const thumb: React.CSSProperties = { width: '100%', height: 120, objectFit: 'cover', display: 'block', borderRadius: 12 };
 
 const lightboxWrap: React.CSSProperties = {
-  position: 'fixed', inset: 0, background: 'rgba(15,61,46,0.88)', zIndex: 80,
+  position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.88)', zIndex: 80,
   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32, cursor: 'zoom-out',
 };
 

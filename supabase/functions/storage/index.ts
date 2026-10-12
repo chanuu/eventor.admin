@@ -1,13 +1,19 @@
-// Presigned S3 URLs for the browser.
+// Presigned upload URLs for the browser.
 //
-// The React admin has no server, so nothing there can hold the S3 keys. This
-// function is the only thing that does: it checks who is asking, confirms they
-// own the thing they are uploading to, and hands back a short-lived PUT URL.
-// File bytes never pass through here — the browser talks to S3 directly, which
-// is what lets a 1000-photo set upload without touching our infrastructure.
+// The React admin has no server, so nothing there can hold the storage keys.
+// This function is the only thing that does: it checks who is asking, confirms
+// they own the thing they are uploading to, and hands back a short-lived PUT
+// URL. File bytes never pass through here — the browser talks to the bucket
+// directly, which is what lets a 1000-photo set upload without touching our
+// infrastructure.
+//
+// Media lives in Backblaze B2, addressed through its S3-compatible API, which is
+// why this still signs as `s3`. Setting no S3_ENDPOINT falls back to AWS, so
+// objects written before the move keep resolving.
 //
 // Deploy:  supabase functions deploy storage
-// Secrets: supabase secrets set S3_REGION=... S3_BUCKET=... \
+// Secrets: supabase secrets set S3_ENDPOINT=https://s3.eu-central-003.backblazeb2.com \
+//            S3_REGION=eu-central-003 S3_BUCKET=eventor-media \
 //            S3_ACCESS_KEY_ID=... S3_SECRET_ACCESS_KEY=...
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -18,6 +24,8 @@ const BUCKET = Deno.env.get('S3_BUCKET') ?? '';
 const ACCESS_KEY = Deno.env.get('S3_ACCESS_KEY_ID') ?? '';
 const SECRET_KEY = Deno.env.get('S3_SECRET_ACCESS_KEY') ?? '';
 const PUBLIC_BASE = (Deno.env.get('S3_PUBLIC_URL') ?? '').replace(/\/$/, '');
+/** S3-compatible API origin, e.g. https://s3.eu-central-003.backblazeb2.com. Empty means AWS. */
+const ENDPOINT = (Deno.env.get('S3_ENDPOINT') ?? '').replace(/\/$/, '');
 
 /** Photos per request. Matches the admin app's MAX_BATCH. */
 const MAX_ITEMS = 200;
@@ -30,17 +38,21 @@ const CORS = {
 };
 
 /**
- * A bucket name containing a dot breaks the wildcard TLS certificate on
- * virtual-hosted-style URLs, so those are addressed by path instead. The public
- * URL and the signed URL must agree, or the object uploads somewhere the app
- * cannot read it back from.
+ * Address the bucket as `<origin>/<bucket>/<key>` rather than `<bucket>.<origin>/<key>`.
+ *
+ * Forced for any non-AWS endpoint, because a provider's wildcard certificate is
+ * not guaranteed to cover a bucket-name subdomain, and forced for dotted bucket
+ * names, where `*.s3.<region>.amazonaws.com` matches a single label and the TLS
+ * handshake fails. The public URL and the signed URL must agree, or the object
+ * uploads somewhere the app cannot read it back from.
  */
-const pathStyle = BUCKET.includes('.');
+const pathStyle = Boolean(ENDPOINT) || BUCKET.includes('.');
 
 function objectUrl(key: string): string {
   const encoded = key.split('/').map(encodeURIComponent).join('/');
+  const origin = ENDPOINT || `https://s3.${REGION}.amazonaws.com`;
   const base = pathStyle
-    ? `https://s3.${REGION}.amazonaws.com/${BUCKET}`
+    ? `${origin}/${BUCKET}`
     : `https://${BUCKET}.s3.${REGION}.amazonaws.com`;
   return `${base}/${encoded}`;
 }

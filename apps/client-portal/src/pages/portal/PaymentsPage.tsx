@@ -86,7 +86,7 @@ function meta(p: Payment): string {
 
 function iconFor(p: Payment): React.CSSProperties {
   return p.status === 'paid'
-    ? dot(C.lime, C.green, 'none')
+    ? dot(C.brand, C.white, 'none')
     : dot(C.amberSoft, C.amberText, `2px solid ${C.amberBorder}`);
 }
 

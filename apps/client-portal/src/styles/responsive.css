@@ -63,6 +63,18 @@
   .grid-photos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
+/* Now that the content region is not capped, a wide screen should gain columns
+   rather than stretch four thumbnails to the size of postcards. Card and split
+   grids deliberately stay at three: those are reading layouts, not contact
+   sheets. */
+@media (min-width: 1400px) {
+  .grid-photos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1800px) {
+  .grid-photos { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
 /* Long values (URLs, emails) must never widen the page. */
 .truncate-1 {
   overflow: hidden;

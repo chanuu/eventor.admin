@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
+import { C } from './lib/theme';
 import LoginPage from './pages/LoginPage';
 import PublicAlbum from './pages/PublicAlbum';
 import PortalLayout from './components/PortalLayout';
@@ -35,7 +36,7 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div style={{ padding: 32, color: '#8b968f' }}>Loading…</div>;
+  if (loading) return <div style={{ padding: 32, color: C.muted }}>Loading…</div>;
 
   return (
     <BrowserRouter>

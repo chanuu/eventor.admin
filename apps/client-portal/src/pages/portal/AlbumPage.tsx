@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { C, solidBtn, ghostBtn, label } from '../../lib/theme';
+import { C, solidBtn, ghostBtn, label, BRAND_GRADIENT } from '../../lib/theme';
 import { shortDate } from '../../lib/format';
 import {
   usePortal, photoUrl, albumPhotos, albumPageUrl, albumShareUrl, albumFileUrl, eventDate,
@@ -32,8 +32,8 @@ export default function AlbumPage() {
     // Studio-built album: use its configured text and ordered pages.
     if (album) {
       const built = album.pages
-        .map((p) => ({ url: albumPageUrl(p), caption: p.caption }))
-        .filter((p): p is { url: string; caption: string | null } => !!p.url);
+        .map((p) => ({ url: albumPageUrl(p), caption: p.caption, isSpread: !!p.is_spread }))
+        .filter((p): p is { url: string; caption: string | null; isSpread: boolean } => !!p.url);
       if (built.length === 0) return [];
 
       return [
@@ -43,7 +43,7 @@ export default function AlbumPage() {
           title: album.cover_title || album.title || job.title,
           body: album.cover_body || `A ${(job.event_type ?? 'photo').toLowerCase()} album by ${studio}`,
         },
-        ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption })),
+        ...built.map((p) => ({ kind: 'photo' as const, url: p.url, caption: p.caption, isSpread: p.isSpread })),
         {
           kind: 'cover',
           kicker: album.closing_kicker || 'Thank you',
@@ -103,6 +103,7 @@ export default function AlbumPage() {
         musicUrl={album?.music_url ?? null}
         autoplay={album?.autoplay ?? false}
         autoplaySeconds={album?.autoplay_seconds ?? 6}
+        pageAspect={album?.page_aspect ?? undefined}
         onClose={() => setOpen(false)}
       />
     );
@@ -141,7 +142,7 @@ export default function AlbumPage() {
                 {album?.cover_title || album?.title || job.title}
               </div>
               <div style={{ width: 46, height: 1, background: 'rgba(255,255,255,0.4)', margin: '18px auto' }} />
-              <div style={{ fontSize: 13, color: '#cfe4d8' }}>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)' }}>
                 {pages.length} page{pages.length === 1 ? '' : 's'}
                 {evDate ? ` · ${shortDate(evDate)}` : ''}
               </div>
@@ -245,11 +246,11 @@ const hero: React.CSSProperties = {
 
 const heroScrim: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'linear-gradient(180deg,rgba(15,61,46,0.55),rgba(11,42,32,0.92))',
+  background: 'linear-gradient(180deg,rgba(17,24,39,0.55),rgba(17,24,39,0.92))',
 };
 
 const openBtn: React.CSSProperties = {
-  marginTop: 22, background: C.lime, color: C.green, border: 'none', borderRadius: 22,
+  marginTop: 22, background: BRAND_GRADIENT, color: C.white, border: 'none', borderRadius: 22,
   padding: '12px 28px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
 };
 
