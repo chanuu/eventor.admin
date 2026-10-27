@@ -149,7 +149,14 @@ key in this site — it would ship to every visitor.
 
 ### Landing (`apps/landing`)
 
-No variables required today.
+Set in `apps/landing/netlify.toml` (they are public and inlined at build time):
+
+```
+NEXT_PUBLIC_ADMIN_URL   https://app.eventorcrm.com      ← Sign up / Sign in
+NEXT_PUBLIC_PORTAL_URL  https://portal.eventorcrm.com   ← live demo link
+```
+
+Locally, `.env.local` (from `.env.example`) points them at localhost.
 
 ---
 

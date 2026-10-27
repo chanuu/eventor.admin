@@ -7,8 +7,8 @@ import {
 } from '@/lib/content';
 
 export default function LandingPage() {
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? '#pricing';
-  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#pricing';
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://app.eventorcrm.com';
+  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? 'https://portal.eventorcrm.com';
 
   return (
     <div style={{ background: '#F7F7F9', color: '#111827', overflowX: 'hidden' }}>

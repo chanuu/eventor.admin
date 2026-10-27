@@ -10,3 +10,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Inlined into the client bundle at build time. Set here rather than in the
+  # Netlify UI so the deployed "Sign up" / "Sign in" links can never fall back
+  # to a localhost URL. (netlify.toml values override UI values.)
+  NEXT_PUBLIC_ADMIN_URL = "https://app.eventorcrm.com"
+  NEXT_PUBLIC_PORTAL_URL = "https://portal.eventorcrm.com"
