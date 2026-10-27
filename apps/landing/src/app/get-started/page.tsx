@@ -13,7 +13,7 @@ export default function GetStartedPage({
 }: {
   searchParams: { plan?: string };
 }) {
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001';
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://app.eventorcrm.com';
   const selected = PLANS.find((p) => p.name.toLowerCase() === (searchParams.plan ?? '').toLowerCase())
     ?? PLANS[1];
 
