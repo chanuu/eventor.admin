@@ -5,6 +5,7 @@ import {
   usePortal, photoUrl, albumPhotos, albumPageUrl, albumShareUrl, albumFileUrl, eventDate,
 } from '../../lib/portal';
 import { Screen, Card, CardTitle, Empty, Toast } from '../../components/ui';
+import AlbumComments from '../../components/AlbumComments';
 import FlipAlbum, { type AlbumPage as FlipPage } from '../../components/FlipAlbum';
 
 export default function AlbumPage() {
@@ -194,6 +195,8 @@ export default function AlbumPage() {
               </div>
             </Card>
           )}
+
+          {album && <AlbumComments albumId={album.id} pages={album.pages} />}
 
           <Card style={{ marginTop: 16 }}>
             <CardTitle>About your album</CardTitle>
