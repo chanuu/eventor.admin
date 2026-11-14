@@ -357,9 +357,9 @@ export default function FlipAlbum({
       // Leave room around the book for its shadow and for the lean of the
       // closed covers. Two pages up, or one on a narrow screen.
       const solo = availW <= 760;
-      let pageH = Math.round(availH * 0.86);
+      let pageH = Math.round(availH * 0.94);
       let pageW = Math.round(pageH * pageAspect);
-      const maxPageW = Math.floor(availW * (solo ? 0.9 : 0.46));
+      const maxPageW = Math.floor(availW * (solo ? 0.96 : 0.485));
       if (pageW > maxPageW) {
         pageW = maxPageW;
         pageH = Math.round(pageW / pageAspect);
@@ -827,7 +827,7 @@ const kicker: React.CSSProperties = {
 
 const bookRow: React.CSSProperties = {
   display: 'flex', alignItems: 'center', width: '100%',
-  justifyContent: 'center', flex: '1 1 auto', minHeight: 0, padding: '10px 16px 0',
+  justifyContent: 'center', flex: '1 1 auto', minHeight: 0, padding: '6px 8px 0',
 };
 
 /*
@@ -849,7 +849,7 @@ const bookHost: React.CSSProperties = {
 
 const footerCol: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-  width: '100%', flexShrink: 0, padding: '8px 16px 12px',
+  width: '100%', flexShrink: 0, padding: '4px 16px 10px',
 };
 
 // 36px to sit level with the close button and the pills beside it; they were
