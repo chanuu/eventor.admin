@@ -1,0 +1,70 @@
+/*
+ * The digital album as a book on a table — the same look as the album
+ * designer's preview, so what the studio sees there is what the client gets.
+ *
+ * Closed, the book leans towards the reader with its thickness and a shadow
+ * under it. It lies flat the moment a page starts to turn, because the paper
+ * follows the pointer and has to be where the pointer thinks it is.
+ *
+ * `.solo` is the one-page book of a narrow screen: the same parts, sized to a
+ * single page instead of a spread.
+ */
+
+.fa-stage { --mx: 0; --my: 0; perspective: 2600px; }
+
+.fa-book { position: relative; flex: none; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.3, 0.1, 0.2, 1); }
+.fa-book.at-front { transform: translateX(-25%) scale(0.8) rotateX(calc(34deg - var(--my) * 5deg)) rotateY(calc(-20deg + var(--mx) * 7deg)) rotateZ(5deg); }
+.fa-book.at-back { transform: translateX(25%) scale(0.8) rotateX(calc(34deg - var(--my) * 5deg)) rotateY(calc(20deg + var(--mx) * 7deg)) rotateZ(-5deg); }
+.fa-book.solo.at-front { transform: scale(0.8) rotateX(calc(34deg - var(--my) * 5deg)) rotateY(calc(-20deg + var(--mx) * 7deg)) rotateZ(5deg); }
+.fa-book.solo.at-back { transform: scale(0.8) rotateX(calc(34deg - var(--my) * 5deg)) rotateY(calc(20deg + var(--mx) * 7deg)) rotateZ(-5deg); }
+
+.fa-shadow { position: absolute; top: 0; width: 50%; height: 100%; background: rgb(20 16 10 / 62%); filter: blur(20px); transform: translateZ(-2px) translate(2%, 5%); opacity: 0; transition: opacity 0.7s; pointer-events: none; }
+.fa-shadow.on { opacity: 1; }
+.fa-shadow-right { left: 50%; }
+.fa-shadow-left { left: 0; }
+.fa-book.solo .fa-shadow { left: 0; width: 100%; }
+/*
+ * Lying flat on a narrow screen, any blurred shadow shows a faint box of the
+ * background around the page, so the open single page goes without one.
+ */
+.fa-book.solo.open .fa-shadow { display: none; }
+
+/* The page block's edges, with a strip of board at the cover's edge. */
+.fa-edge, .fa-spine { position: absolute; transition: width 0.5s cubic-bezier(0.35, 0.05, 0.25, 1), height 0.5s cubic-bezier(0.35, 0.05, 0.25, 1); pointer-events: none; }
+.fa-edge { background: linear-gradient(var(--along), var(--board) 0 3px, transparent 3px), linear-gradient(var(--against), var(--board) 0 3px, transparent 3px), repeating-linear-gradient(var(--along), #f6f2e9 0 1px, #d2ccbe 1px 2px); }
+.fa-fore-right { --along: to right; --against: to left; left: 100%; top: 0; height: 100%; transform-origin: left center; transform: rotateY(-90deg); filter: brightness(0.9); }
+.fa-fore-left { --along: to left; --against: to right; right: 100%; top: 0; height: 100%; transform-origin: right center; transform: rotateY(90deg); filter: brightness(0.9); }
+.fa-foot-right, .fa-foot-left { --along: to bottom; --against: to top; top: 100%; width: 50%; transform-origin: center top; transform: rotateX(90deg); filter: brightness(0.74); }
+.fa-head-right, .fa-head-left { --along: to top; --against: to bottom; bottom: 100%; width: 50%; transform-origin: center bottom; transform: rotateX(-90deg); }
+.fa-foot-right, .fa-head-right { left: 50%; }
+.fa-foot-left, .fa-head-left { left: 0; }
+.fa-book.solo .fa-foot-right, .fa-book.solo .fa-head-right,
+.fa-book.solo .fa-foot-left, .fa-book.solo .fa-head-left { left: 0; width: 100%; }
+
+/* The board seen side-on along the fold, in the cover's own material. */
+.fa-spine { --fill: var(--board); top: 0; height: 100%; background: linear-gradient(to bottom, rgb(255 255 255 / 10%), rgb(0 0 0 / 22%)), var(--fill); filter: brightness(0.7); }
+.fa-spine-front { right: 50%; transform-origin: right center; transform: rotateY(90deg); }
+.fa-spine-back { left: 50%; transform-origin: left center; transform: rotateY(-90deg); }
+.fa-book.solo .fa-spine-front { right: 100%; }
+.fa-book.solo .fa-spine-back { left: 100%; }
+
+/* The paper, lifted onto the top of the page block while the book is closed. */
+.fa-pages { position: absolute; inset: 0; transition: transform 0.6s cubic-bezier(0.3, 0.1, 0.2, 1); }
+.fa-book.at-front .fa-pages, .fa-book.at-back .fa-pages { transform: translateZ(var(--deep)); }
+
+.fa-pages .album-page { cursor: grab; user-select: none; }
+/* Paper curves down into the fold; board does not. */
+.fa-pages .album-page::after { content: ""; position: absolute; inset: 0; z-index: 9; pointer-events: none; }
+.fa-pages .album-page.--left::after { background: linear-gradient(to left, rgb(0 0 0 / 22%), rgb(0 0 0 / 5%) 4%, rgb(0 0 0 / 0%) 12%); }
+.fa-pages .album-page.--right::after { background: linear-gradient(to right, rgb(0 0 0 / 22%), rgb(0 0 0 / 5%) 4%, rgb(0 0 0 / 0%) 12%); }
+.fa-pages .album-page[data-density="hard"]::after { display: none; }
+
+/* Light moving over the cover as the book leans. */
+.fa-sheen { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(112deg, rgb(255 255 255 / 0%) 34%, rgb(255 255 255 / 9%) 50%, rgb(255 255 255 / 0%) 66%); background-size: 220% 100%; background-position: calc(50% - var(--mx, 0) * 40%) 0; }
+
+/* StPageFlip's own layout rules; its module build does not bring them. */
+.fa-pages .stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); touch-action: pan-y; margin: 0; }
+.fa-pages .stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.fa-pages .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2000px; }
+.fa-pages .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
+.fa-pages .stf__outerShadow, .fa-pages .stf__innerShadow, .fa-pages .stf__hardShadow, .fa-pages .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
