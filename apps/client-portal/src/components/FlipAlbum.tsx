@@ -1,35 +1,50 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageFlip } from 'page-flip/dist/js/page-flip.module.js';
 import { BRAND_GRADIENT } from '../lib/theme';
+import '../styles/flip-album.css';
 
 const SERIF = "'Cormorant Garamond',Georgia,serif";
 /** The original portrait page. Albums that predate `page_aspect` keep it. */
 const PAGE_RATIO = 520 / 640;
+/** Board colour of the generated text cover, and the guess when a cover image cannot be read. */
+const PLAIN_BOARD = '#e9e4da';
+const DARK_BOARD = '#3a352f';
+
+/** A url for use inside CSS `url("…")`. */
+function cssUrl(url: string): string {
+  return `url("${encodeURI(url).replace(/"/g, '%22')}")`;
+}
 
 /**
- * Slides the book across when only one leaf is showing.
+ * The average colour of a cover, for the strip of board along the page edges.
  *
- * With a cover, the book opens as a real one does: the front cover takes the
- * right-hand slot and the left stands empty. Full screen, that reads as the
- * album using half the window rather than as a closed book — so it moves half a
- * page to sit in the middle, and moves back as soon as a true spread is
- * showing. A back cover alone on the left gets the same treatment, the other
- * way.
+ * Reading pixels needs the image served with CORS. When it is not, this
+ * resolves null and a dark board is assumed, which suits most covers.
  */
-function centreBook(
-  mount: HTMLDivElement | null,
-  pageW: number,
-  page: number,
-  pageCount: number,
-): void {
-  if (!mount || !pageW) return;
-
-  const half = pageW / 2;
-  const onlyCover = page === 0;
-  const onlyBack = page === pageCount - 1 && pageCount % 2 === 1;
-
-  const shift = onlyCover ? -half : onlyBack ? half : 0;
-  mount.style.transform = shift ? `translateX(${shift}px)` : '';
+function boardColour(url: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8;
+        canvas.height = 8;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(null); return; }
+        ctx.drawImage(img, 0, 0, 8, 8);
+        const px = ctx.getImageData(0, 0, 8, 8).data;
+        let r = 0; let g = 0; let b = 0;
+        for (let i = 0; i < px.length; i += 4) { r += px[i]; g += px[i + 1]; b += px[i + 2]; }
+        const n = px.length / 4;
+        resolve(`rgb(${Math.round(r / n)} ${Math.round(g / n)} ${Math.round(b / n)})`);
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
 }
 
 export type AlbumPage =
@@ -70,12 +85,18 @@ function layOut(pages: AlbumPage[]): RenderPage[] {
   const out: RenderPage[] = [];
   let number = 0;
 
-  for (const p of pages) {
-    if (p.kind === 'cover' || p.kind === 'coverImage') { out.push(p); continue; }
+  pages.forEach((p, i) => {
+    if (p.kind === 'cover' || p.kind === 'coverImage') {
+      // A back cover closes the book, so it must stand alone on the left
+      // rather than face the last page — which takes an odd index.
+      if (i > 0 && i === pages.length - 1 && out.length % 2 === 0) out.push({ kind: 'blank' });
+      out.push(p);
+      return;
+    }
 
     if (!p.isSpread) {
       out.push({ kind: 'photo', url: p.url, caption: p.caption, number: ++number });
-      continue;
+      return;
     }
 
     // out.length is the index this page would take. Odd means a left-hand page.
@@ -84,7 +105,7 @@ function layOut(pages: AlbumPage[]): RenderPage[] {
     number += 1;
     out.push({ kind: 'half', url: p.url, caption: p.caption, side: 'l', number });
     out.push({ kind: 'half', url: p.url, caption: p.caption, side: 'r', number });
-  }
+  });
 
   return out;
 }
@@ -124,11 +145,15 @@ export default function FlipAlbum({
 
   const [page, setPage] = useState(0);
   const [pageCount, setPageCount] = useState(pages.length);
-  /** The injected book, and the page width it was built at. */
-  const mountRef = useRef<HTMLDivElement | null>(null);
-  const pageWRef = useRef(0);
+  /** Where StPageFlip's book is injected; React leaves its contents alone. */
+  const pagesRef = useRef<HTMLDivElement | null>(null);
   /** Measured book area. Changing it rebuilds the book at the new size. */
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+  /** The page size the book was built at, and whether it shows one page at a time. */
+  const [size, setSize] = useState<{ w: number; h: number; solo: boolean } | null>(null);
+  /** A page is being turned or dragged; the book lies flat while it is. */
+  const [turning, setTurning] = useState(false);
+  const [board, setBoard] = useState<string | null>(null);
   const [audioOn, setAudioOn] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   /**
@@ -310,13 +335,13 @@ export default function FlipAlbum({
 
   // ── Build the book ───────────────────────────────────────────────────────
   useEffect(() => {
-    const host = bookRef.current;
+    const host = pagesRef.current;
     if (!host || pages.length === 0 || !box) return;
 
     let cancelled = false;
 
     const build = () => {
-      const el = bookRef.current;
+      const el = pagesRef.current;
       if (cancelled || !el) return;
 
       // Rebuilding at a new size — clear whatever the previous build left.
@@ -329,11 +354,20 @@ export default function FlipAlbum({
       const availH = Math.max(260, box.h);
       const availW = Math.max(260, box.w);
 
+      // Leave room around the book for its shadow and for the lean of the
+      // closed covers. Two pages up, or one on a narrow screen.
+      const solo = availW <= 760;
+      let pageH = Math.round(availH * 0.86);
+      let pageW = Math.round(pageH * pageAspect);
+      const maxPageW = Math.floor(availW * (solo ? 0.9 : 0.46));
+      if (pageW > maxPageW) {
+        pageW = maxPageW;
+        pageH = Math.round(pageW / pageAspect);
+      }
+
+      // Exactly the book's size, so the paper sits on the book drawn around it.
       const mount = document.createElement('div');
-      mount.style.cssText =
-        'width:100%;display:flex;align-items:center;justify-content:center;'
-        + 'transition:transform 400ms ease';
-      mountRef.current = mount;
+      mount.style.cssText = `width:${solo ? pageW : pageW * 2}px;height:${pageH}px`;
       el.appendChild(mount);
 
       const holder = document.createElement('div');
@@ -351,17 +385,6 @@ export default function FlipAlbum({
       });
       mount.appendChild(holder);
 
-      // Fill the area: start from full height, then shrink only if the spread
-      // would be wider than the space available (two pages up, one on narrow).
-      const spreadPages = availW > 760 ? 2 : 1;
-      let pageH = availH;
-      let pageW = Math.round(pageH * pageAspect);
-      const maxPageW = Math.floor(availW / spreadPages);
-      if (pageW > maxPageW) {
-        pageW = maxPageW;
-        pageH = Math.round(pageW / pageAspect);
-      }
-
       const flip = new PageFlip(mount, {
         width: pageW,
         height: pageH,
@@ -378,16 +401,14 @@ export default function FlipAlbum({
 
       flip.loadFromHTML(holder.querySelectorAll('.album-page'));
       flip.on('flip', (e: { data: unknown }) => setPage(Number(e.data)));
+      flip.on('changeState', (e: { data: unknown }) => setTurning(e.data === 'flipping' || e.data === 'user_fold'));
 
       flipRef.current = flip;
       readyAtRef.current = Date.now();
       setReady(true);
-      pageWRef.current = pageW;
+      setTurning(false);
+      setSize({ w: pageW, h: pageH, solo });
       setPageCount(flip.getPageCount());
-      // Also here, not only in the effect below: a rebuild replaces this mount,
-      // and if the page and count are unchanged the effect has no reason to run
-      // again, leaving the new book uncentred.
-      centreBook(mount, pageW, pageRef.current, flip.getPageCount());
 
       // Keep the reader's place across a rebuild (resize / fullscreen).
       const restoreTo = pageRef.current;
@@ -428,6 +449,16 @@ export default function FlipAlbum({
     });
   }, [pages]);
 
+  // The board colour for the page edges, taken from the front cover.
+  const frontCover = pages[0]?.kind === 'coverImage' ? pages[0].url : null;
+  useEffect(() => {
+    setBoard(null);
+    if (!frontCover) return;
+    let live = true;
+    void boardColour(frontCover).then((c) => { if (live) setBoard(c); });
+    return () => { live = false; };
+  }, [frontCover]);
+
   /*
    * Starts the soundtrack on its own.
    *
@@ -466,21 +497,6 @@ export default function FlipAlbum({
     // restart the music mid-listen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [musicEnabled, musicUrl]);
-
-  /*
-   * Centres the book when only one leaf is showing.
-   *
-   * With a cover, the book opens like a real one: the front cover occupies the
-   * right-hand slot and the left is empty. Across a full screen that reads as
-   * the album using half the window rather than as a closed book, so the book
-   * slides half a page across to sit in the middle. It slides back the moment a
-   * true spread is showing, which is when both slots are genuinely in use.
-   *
-   * The same applies to a back cover alone on the left, in the other direction.
-   */
-  useEffect(() => {
-    centreBook(mountRef.current, pageWRef.current, page, pageCount);
-  }, [page, pageCount, box]);
 
   // ── Keyboard + fullscreen ────────────────────────────────────────────────
   useEffect(() => {
@@ -564,6 +580,36 @@ export default function FlipAlbum({
   let activeSpread = 0;
   starts.forEach((start, i) => { if (page >= start) activeSpread = i; });
 
+  // ── The book around the paper ────────────────────────────────────────────
+  // Closed is the front cover, or the back cover standing alone; any turn lays
+  // the book flat.
+  const first = pages[0];
+  const last = pages[pages.length - 1];
+  const solo = !!size?.solo;
+  const closedFront = !turning && page === 0 && !!first && first.kind !== 'photo';
+  const closedBack = !turning && pages.length > 1 && !!last && last.kind !== 'photo'
+    && page === total - 1 && (solo || total % 2 === 0);
+  const bookState = closedFront ? 'at-front' : closedBack ? 'at-back' : 'open';
+  const depth = Math.min(46, 22 + (total / 2) * 1.6);
+  const front = closedFront ? depth : 0;
+  const back = closedBack ? depth : 0;
+  const boardTone = first?.kind === 'coverImage' ? (board ?? DARK_BOARD) : PLAIN_BOARD;
+  // The spine shows the cover's own material where there is a picture of it.
+  const spineFill = (p: AlbumPage | undefined, side: 'left' | 'right') => (
+    p?.kind === 'coverImage'
+      ? { '--fill': `${cssUrl(p.url)} ${side} center / auto 100% no-repeat, ${boardTone}` } as React.CSSProperties
+      : {}
+  );
+
+  // The closed book leans a little towards the pointer, which also moves the light on the cover.
+  function lean(e: React.PointerEvent<HTMLDivElement>) {
+    const el = bookRef.current;
+    if (!el || e.pointerType !== 'mouse') return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', String(((e.clientX - r.left) / r.width) * 2 - 1));
+    el.style.setProperty('--my', String(((e.clientY - r.top) / r.height) * 2 - 1));
+  }
+
   return (
     <div ref={stageRef} style={stageStyle(immersive, !!onClose)}>
       {musicUrl && <audio ref={elementRef} src={musicUrl} preload="auto" loop />}
@@ -624,12 +670,42 @@ export default function FlipAlbum({
 
       {/* Book */}
       <div style={bookRow}>
-        <div ref={bookRef} style={bookHost} />
+        <div ref={bookRef} style={bookHost} className="fa-stage" onPointerMove={lean}>
+          <div
+            className={`fa-book ${solo ? 'solo' : ''} ${bookState}`}
+            style={{
+              width: size ? (solo ? size.w : size.w * 2) : 0,
+              height: size?.h ?? 0,
+              '--board': boardTone,
+              '--deep': `${depth}px`,
+            } as React.CSSProperties}
+          >
+            {solo ? (
+              <span className="fa-shadow on" />
+            ) : (
+              <>
+                <span className={`fa-shadow fa-shadow-right ${closedBack ? '' : 'on'}`} />
+                <span className={`fa-shadow fa-shadow-left ${page > 0 && !closedFront ? 'on' : ''}`} />
+              </>
+            )}
+
+            <span className="fa-edge fa-fore-right" style={{ width: front }} />
+            <span className="fa-edge fa-foot-right" style={{ height: front }} />
+            <span className="fa-edge fa-head-right" style={{ height: front }} />
+            <span className="fa-edge fa-fore-left" style={{ width: back }} />
+            <span className="fa-edge fa-foot-left" style={{ height: back }} />
+            <span className="fa-edge fa-head-left" style={{ height: back }} />
+            <span className="fa-spine fa-spine-front" style={{ width: front, ...spineFill(first, 'left') }} />
+            <span className="fa-spine fa-spine-back" style={{ width: back, ...spineFill(last, 'right') }} />
+
+            <div ref={pagesRef} className="fa-pages" />
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
       <div style={footerCol}>
-        <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.65)', letterSpacing: 1 }}>
+        <span style={{ fontSize: 11.5, color: '#4a4741', letterSpacing: 1, fontWeight: 600 }}>
           Page {page + 1} of {total}
         </span>
         <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -642,7 +718,7 @@ export default function FlipAlbum({
             />
           ))}
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)', letterSpacing: 0.5 }}>
+        <div style={{ fontSize: 11, color: 'rgba(40,36,30,0.5)', letterSpacing: 0.5 }}>
           Drag a page corner to turn it, or use the arrows and ← → keys
         </div>
       </div>
@@ -669,7 +745,8 @@ function pageHtml(p: RenderPage): string {
     // colour, so a cover built to the page shape shows no border at all.
     return '<div class="page-inner" style="background:#FBFAF7;'
       + `background-image:url(${encodeURI(p.url)});`
-      + 'background-size:contain;background-position:center;background-repeat:no-repeat"></div>';
+      + 'background-size:contain;background-position:center;background-repeat:no-repeat">'
+      + '<div class="fa-sheen"></div></div>';
   }
 
   if (p.kind === 'cover') {
@@ -728,9 +805,10 @@ function pageHtml(p: RenderPage): string {
 function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties {
   const base: React.CSSProperties = {
     fontFamily: "'Helvetica Neue',Helvetica,Arial,sans-serif",
-    background: 'radial-gradient(circle at 50% 0%,#1F2937,#0B0B0F 70%)',
+    // A warm table under a soft light, as in the album designer's preview.
+    background: 'radial-gradient(ellipse at 50% 36%,#f4f2ee 0%,#dcd9d3 52%,#b4b0a8 100%)',
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    gap: 10, padding: '12px 16px 10px', boxSizing: 'border-box', overflow: 'hidden',
+    gap: 0, padding: 0, boxSizing: 'border-box', overflow: 'hidden',
   };
   if (immersive) return { ...base, position: 'fixed', inset: 0, zIndex: 9999, height: '100vh', width: '100vw' };
   if (hasClose) return { ...base, position: 'fixed', inset: 0, zIndex: 90 };
@@ -740,6 +818,7 @@ function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties 
 const headerRow: React.CSSProperties = {
   width: '100%', display: 'flex', alignItems: 'center',
   justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', flexShrink: 0,
+  padding: '10px 16px', background: '#1e1f24', borderBottom: '1px solid #2f3138',
 };
 
 const kicker: React.CSSProperties = {
@@ -748,7 +827,7 @@ const kicker: React.CSSProperties = {
 
 const bookRow: React.CSSProperties = {
   display: 'flex', alignItems: 'center', width: '100%',
-  justifyContent: 'center', flex: '1 1 auto', minHeight: 0,
+  justifyContent: 'center', flex: '1 1 auto', minHeight: 0, padding: '10px 16px 0',
 };
 
 /*
@@ -770,7 +849,7 @@ const bookHost: React.CSSProperties = {
 
 const footerCol: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-  width: '100%', flexShrink: 0,
+  width: '100%', flexShrink: 0, padding: '8px 16px 12px',
 };
 
 // 36px to sit level with the close button and the pills beside it; they were
@@ -818,6 +897,6 @@ function dotStyle(active: boolean): React.CSSProperties {
   return {
     width: active ? 22 : 8, height: 8, borderRadius: 6, border: 'none', cursor: 'pointer', padding: 0,
     transition: 'width 0.3s ease, background 0.3s ease',
-    background: active ? '#E91E78' : 'rgba(255,255,255,0.28)',
+    background: active ? '#E91E78' : 'rgba(40,36,30,0.22)',
   };
 }
