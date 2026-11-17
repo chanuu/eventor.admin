@@ -590,6 +590,20 @@ export default function FlipAlbum({
   const closedBack = !turning && pages.length > 1 && !!last && last.kind !== 'photo'
     && page === total - 1 && (solo || total % 2 === 0);
   const bookState = closedFront ? 'at-front' : closedBack ? 'at-back' : 'open';
+  // Spreads are what a reader turns, so they are what gets counted. The
+  // front cover is spread 0, and a back cover standing alone is not counted.
+  const backAlone = !!last && last.kind !== 'photo' && starts[starts.length - 1] === total - 1;
+  const spreadCount = Math.max(1, starts.length - 1 - (backAlone ? 1 : 0));
+  // A narrow screen shows one page at a time, so there it counts pages.
+  const backCover = !!last && last.kind !== 'photo';
+  const innerPages = Math.max(1, total - 1 - (backCover ? 1 : 0));
+  const where = page === 0
+    ? 'Cover'
+    : solo
+      ? (backCover && page === total - 1 ? 'Back cover' : `Page ${Math.min(page, innerPages)} of ${innerPages}`)
+      : backAlone && activeSpread === starts.length - 1
+        ? 'Back cover'
+        : `Spread ${Math.min(activeSpread, spreadCount)} of ${spreadCount}`;
   const depth = Math.min(46, 22 + (total / 2) * 1.6);
   const front = closedFront ? depth : 0;
   const back = closedBack ? depth : 0;
@@ -614,59 +628,15 @@ export default function FlipAlbum({
     <div ref={stageRef} style={stageStyle(immersive, !!onClose)}>
       {musicUrl && <audio ref={elementRef} src={musicUrl} preload="auto" loop />}
 
-      {/* Header */}
-      <div style={headerRow}>
-        <div>
-          <div style={kicker}>Digital Album</div>
-          <div style={{ fontFamily: SERIF, fontSize: 26, color: '#ffffff', marginTop: 4 }}>{title}</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/*
-            Turning lives up here rather than either side of the book. Flanking
-            arrows cost roughly 120px of width that the album could be using,
-            and on a wide screen the pages are the whole point.
-          */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4 }}>
-            <button
-              onClick={() => manualTurn('flipPrev')}
-              disabled={page <= 0}
-              aria-label="Previous page"
-              style={arrowBtn(page > 0)}
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => manualTurn('flipNext')}
-              disabled={page >= total - 1}
-              aria-label="Next page"
-              style={arrowBtn(page < total - 1)}
-            >
-              ›
-            </button>
-          </div>
-
-          <button onClick={() => setPlaying((p) => !p)} style={ghostPill} aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}>
-            {playing ? '❙❙ Pause' : '▶ Play'}
-          </button>
-
-          {musicEnabled && (
-            <button onClick={toggleAudio} style={audioBtn(audioOn)}>
-              {audioOn && (
-                <span style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 12 }}>
-                  <span style={eqBar(0)} /><span style={eqBar(0.2)} /><span style={eqBar(0.4)} />
-                </span>
-              )}
-              <span>{audioOn ? 'Music on' : 'Play music'}</span>
-            </button>
-          )}
-          <button onClick={toggleFullscreen} style={ghostPill}>
-            {fullscreen ? 'Exit full screen' : 'Full screen'}
-          </button>
-          {onClose && (
-            <button onClick={onClose} title="Close album" style={closeBtn}>✕</button>
-          )}
-        </div>
-      </div>
+      {/*
+        No title bar: the album is the whole screen, and the cover already
+        carries the couple's names. Closing is a small button in the corner.
+      */}
+      {onClose && (
+        <button type="button" onClick={onClose} className="fa-close" title="Close album" aria-label="Close album">
+          <Icon d={ICONS.close} />
+        </button>
+      )}
 
       {/* Book */}
       <div style={bookRow}>
@@ -703,26 +673,80 @@ export default function FlipAlbum({
         </div>
       </div>
 
-      {/* Footer */}
-      <div style={footerCol}>
-        <span style={{ fontSize: 11.5, color: '#4a4741', letterSpacing: 1, fontWeight: 600 }}>
-          Page {page + 1} of {total}
-        </span>
-        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {starts.map((start, i) => (
+      {/* One small control bar under the book; everything else is album. */}
+      <div style={footerRow}>
+        <div className="fa-controls" role="toolbar" aria-label={`${title} controls`}>
+          <button type="button" onClick={() => manualTurn('flipPrev')} disabled={page <= 0} aria-label="Previous page" title="Previous">
+            <Icon d={ICONS.prev} />
+          </button>
+          <span className="fa-where" aria-live="polite">{where}</span>
+          <button type="button" onClick={() => manualTurn('flipNext')} disabled={page >= total - 1} aria-label="Next page" title="Next">
+            <Icon d={ICONS.next} />
+          </button>
+          <span className="fa-divider" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
+            title={playing ? 'Pause' : 'Play slideshow'}
+          >
+            <Icon d={playing ? ICONS.pause : ICONS.play} filled />
+          </button>
+          {musicEnabled && (
             <button
-              key={start}
-              onClick={() => { setPlaying(false); try { flipRef.current?.turnToPage(start); } catch { /* ignore */ } }}
-              style={dotStyle(i === activeSpread)}
-              aria-label={`Go to page ${start + 1}`}
-            />
-          ))}
-        </div>
-        <div style={{ fontSize: 11, color: 'rgba(40,36,30,0.5)', letterSpacing: 0.5 }}>
-          Drag a page corner to turn it, or use the arrows and ← → keys
+              type="button"
+              onClick={toggleAudio}
+              className={audioOn ? 'on' : ''}
+              aria-label={audioOn ? 'Turn music off' : 'Turn music on'}
+              aria-pressed={audioOn}
+              title={audioOn ? 'Music on' : 'Music off'}
+            >
+              <Icon d={audioOn ? ICONS.soundOn : ICONS.soundOff} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
+            title={fullscreen ? 'Exit full screen' : 'Full screen'}
+          >
+            <Icon d={fullscreen ? ICONS.shrink : ICONS.expand} />
+          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Control icons ───────────────────────────────────────────────────────────
+
+const ICONS = {
+  prev: 'M15 18l-6-6 6-6',
+  next: 'M9 18l6-6-6-6',
+  play: 'M8 5.5v13l11-6.5z',
+  pause: 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z',
+  soundOn: 'M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13',
+  soundOff: 'M11 5L6 9H3v6h3l5 4zM16 9.5l5 5M21 9.5l-5 5',
+  expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
+  shrink: 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5',
+  close: 'M6 6l12 12M18 6L6 18',
+};
+
+function Icon({ d, filled = false }: { d: string; filled?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={d} />
+    </svg>
   );
 }
 
@@ -815,19 +839,9 @@ function stageStyle(immersive: boolean, hasClose: boolean): React.CSSProperties 
   return { ...base, height: '100vh', maxHeight: '100vh' };
 }
 
-const headerRow: React.CSSProperties = {
-  width: '100%', display: 'flex', alignItems: 'center',
-  justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', flexShrink: 0,
-  padding: '10px 16px', background: '#1e1f24', borderBottom: '1px solid #2f3138',
-};
-
-const kicker: React.CSSProperties = {
-  fontSize: 10.5, letterSpacing: 3, textTransform: 'uppercase', color: '#FB5B3C', fontWeight: 700,
-};
-
 const bookRow: React.CSSProperties = {
   display: 'flex', alignItems: 'center', width: '100%',
-  justifyContent: 'center', flex: '1 1 auto', minHeight: 0, padding: '6px 8px 0',
+  justifyContent: 'center', flex: '1 1 auto', minHeight: 0, padding: '12px 12px 0',
 };
 
 /*
@@ -847,56 +861,7 @@ const bookHost: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 
-const footerCol: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-  width: '100%', flexShrink: 0, padding: '4px 16px 10px',
+const footerRow: React.CSSProperties = {
+  display: 'flex', justifyContent: 'center', width: '100%', flexShrink: 0,
+  padding: '10px 16px max(14px, env(safe-area-inset-bottom))',
 };
-
-// 36px to sit level with the close button and the pills beside it; they were
-// 46 when they flanked the book, where nothing set their scale.
-function arrowBtn(enabled: boolean): React.CSSProperties {
-  return {
-    width: 36, height: 36, borderRadius: '50%', flexShrink: 0, fontSize: 20, lineHeight: 1,
-    cursor: enabled ? 'pointer' : 'default', fontFamily: 'inherit',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: `rgba(255,255,255,${enabled ? 0.14 : 0.05})`,
-    color: `rgba(255,255,255,${enabled ? 0.92 : 0.28})`,
-    border: `1px solid rgba(255,255,255,${enabled ? 0.24 : 0.1})`,
-  };
-}
-
-function audioBtn(on: boolean): React.CSSProperties {
-  return {
-    display: 'flex', alignItems: 'center', gap: 8, borderRadius: 22, padding: '9px 18px',
-    fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-    ...(on
-      ? { background: BRAND_GRADIENT, color: '#ffffff', border: 'none' }
-      : { background: 'rgba(255,255,255,0.12)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.22)' }),
-  };
-}
-
-function eqBar(delay: number): React.CSSProperties {
-  return {
-    width: 2, height: '100%', background: '#111827',
-    animation: `eqBar 0.9s ease-in-out ${delay}s infinite`,
-  };
-}
-
-const ghostPill: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.12)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.22)',
-  borderRadius: 22, padding: '9px 18px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-};
-
-const closeBtn: React.CSSProperties = {
-  width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', color: '#ffffff',
-  border: '1px solid rgba(255,255,255,0.22)', fontSize: 15, cursor: 'pointer', fontFamily: 'inherit',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-};
-
-function dotStyle(active: boolean): React.CSSProperties {
-  return {
-    width: active ? 22 : 8, height: 8, borderRadius: 6, border: 'none', cursor: 'pointer', padding: 0,
-    transition: 'width 0.3s ease, background 0.3s ease',
-    background: active ? '#E91E78' : 'rgba(40,36,30,0.22)',
-  };
-}
