@@ -229,28 +229,25 @@ export default function StudioManagerPage() {
 
       {/* ── DIGITAL ALBUM ── */}
       <section id="digital-album" className="sm-section sm-tint">
-        <div className="sm-split sm-album-split">
-          <div>
-            <span className="sm-kicker">Eventor digital albums</span>
-            <h2>Keep your memories close.</h2>
-            <p>
-              Every album you design can also live online. Your couple turns real pages on a phone,
-              tablet or computer, with their cover and their song, and shares it with the people who
-              could not be there.
-            </p>
-            <ul className="sm-album-points">
-              <li><strong>Turns like a real album</strong><span>Pages curl as they turn, on any screen.</span></li>
-              <li><strong>Their cover and their song</strong><span>The cover you designed, with music playing as they read.</span></li>
-              <li><strong>Shared with one link</strong><span>Send it to family abroad. Nothing to install, no account.</span></li>
-              <li><strong>Published from Studio Manager</strong><span>One click when the album is done.</span></li>
-            </ul>
-            <div className="sm-actions">
-              <a href={ALBUM} target="_blank" rel="noopener" className="sm-secondary">Open full screen ↗</a>
-            </div>
-          </div>
-          <div>
-            <AlbumEmbed src={ALBUM} title="A sample Eventor digital album. Turn the pages to look through it." />
-            <p className="sm-album-note">A real Eventor album. Turn the pages to look through it.</p>
+        <div className="sm-center">
+          <span className="sm-kicker">Eventor digital albums</span>
+          <h2>Keep your memories close.</h2>
+          <p>
+            Every album you design can also live online. Your couple turns real pages on a phone,
+            tablet or computer, with their cover and their song, and shares it with the people who
+            could not be there. Try it: turn the pages below.
+          </p>
+        </div>
+        <div className="sm-album-wide">
+          <AlbumEmbed src={ALBUM} title="A sample Eventor digital album. Turn the pages to look through it." />
+          <ul className="sm-album-points">
+            <li><strong>Turns like a real album</strong><span>Pages curl as they turn, on any screen.</span></li>
+            <li><strong>Their cover and their song</strong><span>The cover you designed, with music playing as they read.</span></li>
+            <li><strong>Shared with one link</strong><span>Send it to family abroad. Nothing to install, no account.</span></li>
+            <li><strong>Published from Studio Manager</strong><span>One click when the album is done.</span></li>
+          </ul>
+          <div className="sm-actions sm-album-actions">
+            <a href={ALBUM} target="_blank" rel="noopener" className="sm-secondary">Open full screen ↗</a>
           </div>
         </div>
       </section>

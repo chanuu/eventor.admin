@@ -338,3 +338,9 @@ nav::-webkit-scrollbar { display: none; }
 .sm-album-points li { display: grid; gap: 2px; padding-left: 16px; border-left: 2px solid #E91E78; }
 .sm-album-points strong { font-size: 15.5px; color: #fff; }
 .sm-album-points span { font-size: 14.5px; color: #A9ADB8; }
+/* The album takes the width of the page, so the pages are big enough to enjoy. */
+.sm-album-wide { max-width: 1320px; margin: 0 auto; }
+.sm-album-wide .sm-album { aspect-ratio: 16 / 8.5; max-height: 82vh; width: 100%; }
+@media (max-width: 640px) { .sm-album-wide .sm-album { aspect-ratio: 4 / 5; max-height: none; } }
+.sm-album-wide .sm-album-points { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 32px; }
+.sm-album-actions { justify-content: center; }
