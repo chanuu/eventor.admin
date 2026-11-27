@@ -4,7 +4,7 @@ import OnboardingForm from '@/components/OnboardingForm';
 import { PLANS } from '@/lib/content';
 
 export const metadata = {
-  title: 'Get started — Eventor',
+  title: 'Get started with Eventor',
   description: 'Create your studio on Eventor and send your first client portal today.',
 };
 
@@ -42,7 +42,7 @@ export default function GetStartedPage({
           </div>
           <div style={{ fontSize: 14.5, color: '#5b6360', lineHeight: 1.75, marginTop: 18 }}>
             You get your own studio workspace, a branded client portal and 14 days free. No card needed to
-            start — add billing when you are ready.
+            start, and add billing when you are ready.
           </div>
 
           <div style={{ background: '#ffffff', padding: 24, marginTop: 30 }}>
@@ -60,14 +60,14 @@ export default function GetStartedPage({
                 </div>
               ))}
             </div>
-            <Link href="/#pricing" style={{ display: 'inline-block', marginTop: 18, fontSize: 12.5, fontWeight: 700, color: '#0F5344' }}>
+            <Link href="/crm#pricing" style={{ display: 'inline-block', marginTop: 18, fontSize: 12.5, fontWeight: 700, color: '#0F5344' }}>
               Compare plans →
             </Link>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
             {[
-              'Your studio, staff and roles — set up automatically',
+              'Your studio, staff and roles, set up automatically',
               'Client portal ready to send on day one',
               'Cancel any time; export your data whenever you like',
             ].map((t) => (

@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Eventor - Photography Studio Platform for Sri Lanka',
+  title: 'Eventor - Studio Manager and CRM for photography studios',
   description:
-    'One platform for your studio, your clients and your bookings — albums, proofing, agreements, payments and schedules in a single place.',
+    'Eventor Studio Manager designs albums and retouches photos on your computer. Eventor CRM runs bookings, proofing and payments online.',
 };
 
 export const viewport: Viewport = {

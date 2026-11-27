@@ -81,7 +81,7 @@ export default function OnboardingForm({ adminUrl, plan }: { adminUrl: string; p
             marginTop: 4,
           }}
         >
-          Continue — {plan} plan
+          Continue with the {plan} plan
         </button>
 
         <p style={{ fontSize: 11.5, color: '#8b938f', lineHeight: 1.6, margin: 0 }}>

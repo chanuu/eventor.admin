@@ -23,7 +23,7 @@ export default function FeatureShowcase() {
       <div style={{ maxWidth: 1160, margin: '0 auto' }}>
         <h2
           style={{
-            fontSize: 'clamp(30px, 4vw, 46px)', fontWeight: 800, letterSpacing: '-0.03em',
+            fontSize: 'clamp(26px, 3.2vw, 38px)', fontWeight: 800, letterSpacing: '-0.03em',
             lineHeight: 1.12, color: T.ink, textAlign: 'center', margin: 0,
           }}
         >
@@ -123,7 +123,7 @@ export default function FeatureShowcase() {
                 <img
                   key={f.key}
                   src={f.image}
-                  alt={`Eventor — ${f.heading}`}
+                  alt={`Eventor: ${f.heading}`}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   style={{
