@@ -1,4 +1,4 @@
-import Film from '@/components/Film';
+import PromoVideo from '@/components/PromoVideo';
 import SiteFooter from '@/components/SiteFooter';
 import SiteNav from '@/components/SiteNav';
 
@@ -18,6 +18,11 @@ export default function HomePage() {
           run the business and look after your clients.
         </p>
       </header>
+
+      {/* The main promo: the first thing to see, and the first thing to press. */}
+      <section className="home-promo" aria-label="The Eventor film">
+        <PromoVideo src="/studio/eventor-film.mp4" thumb="/studio/eventor-film-thumb" title="Meet Eventor" length="1:17" />
+      </section>
 
       <section className="home-products" aria-label="Products">
         <a href="/studio-manager" className="home-product dark">
@@ -62,7 +67,6 @@ export default function HomePage() {
         <div className="home-together-copy">
           <h2>Better together</h2>
           <p>Each works on its own. Used together, an album goes from the shoot to your client without a single file sent by hand.</p>
-          <Film src="/studio/eventor-film.mp4" poster="/studio/eventor-film-poster.webp" label="Watch the film" className="home-film" />
         </div>
         <ol className="home-steps">
           <li><strong>Your client chooses</strong><span>They pick their favourite photos in the client portal.</span><em>CRM</em></li>
