@@ -60,7 +60,7 @@ export default function GetStartedPage({
                 </div>
               ))}
             </div>
-            <Link href="/#pricing" style={{ display: 'inline-block', marginTop: 18, fontSize: 12.5, fontWeight: 700, color: '#0F5344' }}>
+            <Link href="/crm#pricing" style={{ display: 'inline-block', marginTop: 18, fontSize: 12.5, fontWeight: 700, color: '#0F5344' }}>
               Compare plans →
             </Link>
           </div>
