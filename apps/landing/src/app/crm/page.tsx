@@ -95,7 +95,7 @@ export default function CrmPage() {
               </div>
               <div style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.8, marginTop: 18 }}>
                 Every layout is handcrafted, so thousands of professionally-designed spreads are at your fingertips.
-                Clients flip through the real thing — page curl, background music, full screen — from any device.
+                Clients flip through the real thing on any device, with page curl, background music and full screen.
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 }}>
                 {ALBUM_POINTS.map((p) => (
@@ -247,7 +247,7 @@ export default function CrmPage() {
               <div style={h3}>Let clients pick the album photos themselves</div>
               <div style={{ ...body, color: '#b9c0bc' }}>
                 Upload a proof collection, set how many selections you need and a deadline. Clients tap their favourites,
-                leave retouch notes per photo and submit — you start designing with an approved list, not a WhatsApp thread.
+                leave retouch notes per photo and submit. You start designing with an approved list, not a WhatsApp thread.
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 }}>
                 {PROOF_POINTS.map((p) => (
@@ -322,7 +322,7 @@ export default function CrmPage() {
             <div style={kicker}>Client portal</div>
             <div style={h3}>One link your client will actually use</div>
             <div style={body}>
-              Agreements, payment status, shoot schedule, proofing and the digital album — all behind a single private
+              Agreements, payment status, shoot schedule, proofing and the digital album, all behind a single private
               link, branded as your studio. No app to install.
             </div>
             <div style={{ display: 'flex', gap: 14, marginTop: 28, flexWrap: 'wrap' }}>
@@ -416,7 +416,7 @@ export default function CrmPage() {
         <div style={{ maxWidth: 780, margin: '0 auto' }}>
           <div style={{ ...h2, textAlign: 'center' }}>Common questions</div>
           <div style={{ ...sub, textAlign: 'center', marginBottom: 40 }}>
-            Anything else, just ask — we answer in a day.
+            Anything else, just ask. We answer in a day.
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -455,7 +455,7 @@ export default function CrmPage() {
             padding: '64px 40px', textAlign: 'center', color: T.white,
           }}
         >
-          <div style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+          <div style={{ fontSize: 'clamp(26px, 3.2vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
             Your next booking could start here
           </div>
           <p style={{ fontSize: 16.5, lineHeight: 1.7, margin: '16px auto 0', maxWidth: 560, opacity: 0.92 }}>
@@ -486,8 +486,8 @@ export default function CrmPage() {
 
 // ─── Shared type scale from the design ───────────────────────────────────────
 
-const h2: React.CSSProperties = { fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: T.ink, lineHeight: 1.12 };
-const h3: React.CSSProperties = { fontSize: 'clamp(26px, 3.2vw, 38px)', fontWeight: 800, lineHeight: 1.18, marginTop: 14, letterSpacing: '-0.025em', color: T.ink };
+const h2: React.CSSProperties = { fontSize: 'clamp(26px, 3.2vw, 38px)', fontWeight: 800, letterSpacing: '-0.025em', color: T.ink, lineHeight: 1.12 };
+const h3: React.CSSProperties = { fontSize: 'clamp(24px, 2.8vw, 32px)', fontWeight: 800, lineHeight: 1.18, marginTop: 14, letterSpacing: '-0.025em', color: T.ink };
 const sub: React.CSSProperties = { fontSize: 16.5, color: T.mid, marginTop: 14, lineHeight: 1.65 };
 const kicker: React.CSSProperties = { display: 'inline-block', fontSize: 12.5, fontWeight: 700, letterSpacing: 0.4, color: T.brand, background: T.tint, borderRadius: 999, padding: '6px 13px' };
 const body: React.CSSProperties = { fontSize: 15.5, color: T.mid, lineHeight: 1.78, marginTop: 18 };

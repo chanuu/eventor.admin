@@ -48,7 +48,7 @@ export default function Hero({ signInHref }: { signInHref: string }) {
 
           <h1
             style={{
-              fontSize: 'clamp(38px, 5vw, 60px)', fontWeight: 800, lineHeight: 1.08,
+              fontSize: 'clamp(32px, 4.2vw, 50px)', fontWeight: 800, lineHeight: 1.08,
               letterSpacing: '-0.03em', color: T.ink, margin: '22px 0 0',
             }}
           >
@@ -63,7 +63,7 @@ export default function Hero({ signInHref }: { signInHref: string }) {
             }}
           >
             Bookings, agreements, proofing galleries, flip-through albums, payments and the crew
-            calendar — together, so nothing lives in a WhatsApp thread or a spreadsheet.
+            calendar, together, so nothing lives in a WhatsApp thread or a spreadsheet.
           </p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 30 }}>

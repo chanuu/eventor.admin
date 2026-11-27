@@ -268,8 +268,8 @@ export default function StudioManagerPage() {
             <span className="sm-kicker">Made for photographers</span>
             <h2>Spend the evening with the photos, not the software.</h2>
             <p>
-              Studio Manager does the slow parts — the first layout, the skin, the cards, the checks
-              before print — so the hours go into the choices only you can make.
+              Studio Manager does the slow parts: the first layout, the skin, the cards and the checks
+              before print. The hours go into the choices only you can make.
             </p>
             <p>
               It is built with studios in Sri Lanka, and it keeps getting better: when a new version

@@ -80,7 +80,7 @@ export const FEATURES: Feature[] = [
     url: 'app.eventor.lk/dashboard',
     image: '/assets/features/dashboard.png',
     heading: 'Know exactly where the studio stands',
-    body: 'Open it in the morning and the whole business is on one screen — what is booked, what has been paid, and what needs attention before it becomes a problem.',
+    body: 'Open it in the morning and the whole business is on one screen: what is booked, what has been paid, and what needs attention before it becomes a problem.',
     points: [
       'Revenue and enquiry sources at a glance',
       'A funnel showing how far jobs get, and where they stall',
@@ -93,7 +93,7 @@ export const FEATURES: Feature[] = [
     url: 'app.eventor.lk/tasks',
     image: '/assets/features/board.png',
     heading: 'See what everyone is working on',
-    body: 'Every job arrives with its checklist already made — cull, grade, proof, design, deliver. Drag a card to move the work along, and the job advances with it.',
+    body: 'Every job arrives with its checklist already made: cull, grade, proof, design, deliver. Drag a card to move the work along, and the job advances with it.',
     points: [
       'To do, in progress, blocked and done, at a glance',
       'Deadlines and progress on every card',
@@ -118,7 +118,7 @@ export const FEATURES: Feature[] = [
 export const FAQ = [
   {
     q: 'Who is Eventor for?',
-    a: 'Photography and videography studios in Sri Lanka — from a single photographer keeping track of bookings, to a multi-branch studio running a crew and a full calendar.',
+    a: 'Photography and videography studios in Sri Lanka, from a single photographer keeping track of bookings, to a multi-branch studio running a crew and a full calendar.',
   },
   {
     q: 'Can my clients use it without an account?',
@@ -130,7 +130,7 @@ export const FAQ = [
   },
   {
     q: 'Can I change plan later?',
-    a: 'Any time, up or down. Nothing is deleted when you move to a smaller plan — anything outside it simply becomes read-only until you upgrade again.',
+    a: 'Any time, up or down. Nothing is deleted when you move to a smaller plan. Anything outside it simply becomes read-only until you upgrade again.',
   },
 ];
 
@@ -202,7 +202,7 @@ export const STRIP = [
 export const ALBUM_POINTS = [
   'Real page-curl flipbook on desktop, tablet and phone',
   'Background music and full-screen presentation mode',
-  'Private link per client — no downloads required',
+  'Private link per client, with no downloads required',
 ];
 
 export const GALLERY_DEFS = [
